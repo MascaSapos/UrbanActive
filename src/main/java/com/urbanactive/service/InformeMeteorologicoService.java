@@ -33,8 +33,9 @@ public class InformeMeteorologicoService {
         InformeMeteorologico existente = obtenerPorId(id);
         existente.setTemperatura(cambios.getTemperatura());
         existente.setCalidadAire(cambios.getCalidadAire());
-        existente.setFechaDatos(cambios.getFechaDatos());
-        existente.setId_ubicacion(cambios.getId_ubicacion());
+        existente.setId_actividad(cambios.getId_actividad());
+        existente.setProbabilidadLluvia(cambios.getProbabilidadLluvia());
+        existente.setUltimaActualizacion(cambios.getUltimaActualizacion());
         return informeMeteorologicoRepository.save(existente);
     }
 

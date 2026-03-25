@@ -22,22 +22,26 @@ public class InformeMeteorologico {
     @Column(name = "calidadAire", nullable = false)
     private Integer calidadAire;
 
-    @Column(name = "fechaDatos", nullable = false)
-    private LocalDateTime fechaDatos;
+    @Column(name = "id_actividad", length = 10, nullable = false, unique = true)
+    private String id_actividad;
 
-    @Column(name = "id_ubicacion", length = 25, nullable = false)
-    private String id_ubicacion;
+    @Column(name = "probabilidadLluvia", nullable = false)
+    private Integer probabilidadLluvia;
+
+    @Column(name = "ultimaActualizacion", nullable = false)
+    private LocalDateTime ultimaActualizacion;
 
     public InformeMeteorologico() {
     }
 
-    public InformeMeteorologico(String Id, BigDecimal temperatura, Integer calidadAire, LocalDateTime fechaDatos,
-            String id_ubicacion) {
+    public InformeMeteorologico(String Id, BigDecimal temperatura, Integer calidadAire, String id_actividad,
+            Integer probabilidadLluvia, LocalDateTime ultimaActualizacion) {
         this.Id = Id;
         this.temperatura = temperatura;
         this.calidadAire = calidadAire;
-        this.fechaDatos = fechaDatos;
-        this.id_ubicacion = id_ubicacion;
+        this.id_actividad = id_actividad;
+        this.probabilidadLluvia = probabilidadLluvia;
+        this.ultimaActualizacion = ultimaActualizacion;
     }
 
     public String getId() {
@@ -64,19 +68,27 @@ public class InformeMeteorologico {
         this.calidadAire = calidadAire;
     }
 
-    public LocalDateTime getFechaDatos() {
-        return fechaDatos;
+    public String getId_actividad() {
+        return id_actividad;
     }
 
-    public void setFechaDatos(LocalDateTime fechaDatos) {
-        this.fechaDatos = fechaDatos;
+    public void setId_actividad(String id_actividad) {
+        this.id_actividad = id_actividad;
     }
 
-    public String getId_ubicacion() {
-        return id_ubicacion;
+    public Integer getProbabilidadLluvia() {
+        return probabilidadLluvia;
     }
 
-    public void setId_ubicacion(String id_ubicacion) {
-        this.id_ubicacion = id_ubicacion;
+    public void setProbabilidadLluvia(Integer probabilidadLluvia) {
+        this.probabilidadLluvia = probabilidadLluvia;
+    }
+
+    public LocalDateTime getUltimaActualizacion() {
+        return ultimaActualizacion;
+    }
+
+    public void setUltimaActualizacion(LocalDateTime ultimaActualizacion) {
+        this.ultimaActualizacion = ultimaActualizacion;
     }
 }
