@@ -86,8 +86,33 @@
     setWeather(activities[1]);
   }
 
+  function initFilters() {
+    document.querySelectorAll('[data-filter]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var active = btn.classList.contains('pill--active');
+        btn.classList.toggle('pill--active', !active);
+        btn.classList.toggle('pill--idle', active);
+      });
+    });
+
+    var otrosBtn = document.getElementById('filter-otros');
+    var otrosDD  = document.getElementById('otros-dropdown');
+    if (otrosBtn && otrosDD) {
+      otrosBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = otrosDD.classList.toggle('is-open');
+        otrosBtn.setAttribute('aria-expanded', open);
+      });
+      document.addEventListener('click', function () {
+        otrosDD.classList.remove('is-open');
+        otrosBtn.setAttribute('aria-expanded', 'false');
+      });
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initMap();
+    initFilters();
   });
-}());
 
+}());
