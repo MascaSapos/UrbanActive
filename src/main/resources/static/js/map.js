@@ -1,6 +1,6 @@
 (function () {
 
-  var activities = [
+  var fallbackActivities = [
     {
       id: 'baloncesto',
       lat: 40.4230, lng: -3.7100,
@@ -46,7 +46,22 @@
     return '<div class="map-marker map-marker--' + a.id + '">' + (labels[a.id] || '📍') + '</div>';
   }
 
-  function initMap() {
+  function fetchActivities() {
+    return fetch('/api/actividades/map')
+      .then(function (response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(function (data) {
+        if (!Array.isArray(data) || data.length === 0) return fallbackActivities;
+        return data;
+      })
+      .catch(function () {
+        return fallbackActivities;
+      });
+  }
+
+  function initMap(activities) {
     var map = L.map('map', {
       zoomControl: false,
       attributionControl: true
@@ -83,7 +98,9 @@
       marker.on('click', function () { setWeather(a); });
     });
 
-    setWeather(activities[1]);
+    if (activities.length > 0) {
+      setWeather(activities[0]);
+    }
   }
 
   function initFilters() {
@@ -111,7 +128,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    initMap();
+    fetchActivities().then(function (activities) {
+      initMap(activities);
+    });
     initFilters();
   });
 
