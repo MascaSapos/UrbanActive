@@ -343,3 +343,170 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
 }
 .others-dropdown__item:hover { background: var(--surface-2); color: var(--text); }
 
+/* ── MAP ─────────────────────────────────────────────────── */
+
+.map-section {
+  grid-area: map;
+  position: relative;
+  border-right: 1px solid var(--border);
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  min-height: 380px;
+  z-index: 1;
+  display: block;
+}
+
+.map-city-label {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 11px;
+  font-size: .7rem;
+  font-weight: 600;
+  color: var(--text-2);
+  z-index: 20;
+  pointer-events: none;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── FILTERS ROW (below map) ─────────────────────────────── */
+
+.filters-area {
+  grid-area: filters;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filters-area::-webkit-scrollbar { display: none; }
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+
+.sidebar {
+  grid-area: sidebar;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+/* ── WEATHER CARD ────────────────────────────────────────── */
+
+.weather-card {
+  flex: 1;
+  padding: 24px 22px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.weather-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.weather-card__dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  flex-shrink: 0;
+}
+.weather-card__title {
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.weather-card__activity {
+  font-size: .82rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 3px;
+  margin-bottom: 18px;
+  min-height: 1em;
+}
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.weather-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px 10px;
+  border: 1px solid var(--border);
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.weather-tile:hover {
+  border-color: rgba(37,99,235,.25);
+  box-shadow: 0 2px 8px rgba(37,99,235,.07);
+}
+.weather-tile__label {
+  font-size: .67rem;
+  color: var(--text-3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.weather-tile__icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.weather-tile__value {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ── ACTION BUTTONS (sidebar) ────────────────────────────── */
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 22px;
+}
+.action-buttons .btn-primary,
+.action-buttons .btn-secondary {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+
+@media (max-width: 700px) {
+  body { overflow: auto; }
+  .page-wrapper { height: auto; min-height: 100vh; overflow: visible; }
+  .main-content {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "search"
+      "map"
+      "filters"
+      "sidebar";
+    overflow: visible;
+  }
+  .map-section { border-right: none; }
+  .filters-area { border-right: none; }
+  #map { min-height: 260px; max-height: 320px; }
+  .sidebar { border-top: 1px solid var(--border); border-left: none; overflow: visible; }
+  .weather-grid { grid-template-columns: repeat(4, 1fr); }
+  .action-buttons { flex-direction: row; }
+  .action-buttons .btn-primary,
+  .action-buttons .btn-secondary { flex: 1; }
+}

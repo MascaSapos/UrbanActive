@@ -66,7 +66,59 @@
       <div id="map"></div>
       <div class="map-city-label">Madrid</div>
     </section>
+
+    <!-- SIDEBAR (right) -->
+    <aside class="sidebar">
+
+      <!-- Weather / Adequacy Card -->
+      <div class="weather-card">
+        <div class="weather-card__header">
+          <div class="weather-card__dot"></div>
+          <span class="weather-card__title">Adecuación</span>
+        </div>
+        <div class="weather-card__activity" id="w-activity-name">Selecciona un marcador</div>
+
+        <div class="weather-grid">
+          <div class="weather-tile">
+            <span class="weather-tile__label">Clima</span>
+            <span class="weather-tile__icon" id="w-clima-icon">☀️</span>
+            <span class="weather-tile__value" id="w-clima-val">Soleado</span>
+          </div>
+          <div class="weather-tile">
+            <span class="weather-tile__label">Temp.</span>
+            <span class="weather-tile__icon">🌡️</span>
+            <span class="weather-tile__value" id="w-temp-val">22°C</span>
+          </div>
+          <div class="weather-tile">
+            <span class="weather-tile__label">Lluvia</span>
+            <span class="weather-tile__icon">🌧️</span>
+            <span class="weather-tile__value" id="w-lluvia-val">10%</span>
+          </div>
+          <div class="weather-tile">
+            <span class="weather-tile__label">Aire</span>
+            <span class="weather-tile__icon">💨</span>
+            <span class="weather-tile__value" id="w-aire-val">Buena</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-buttons">
+        <button class="btn-primary" id="btn-reservar">Reservar plaza</button>
+        <button class="btn-secondary" id="btn-detalles">Ver detalles</button>
+      </div>
+
+    </aside>
+
+    <!-- FILTERS BAR (below map, left column only) -->
+    <div class="filters-area" aria-label="Filtros">
+      <span style="font-size:.75rem;color:var(--text-3);font-weight:500;flex-shrink:0">3 actividades cercanas</span>
+    </div>
+
   </main>
 </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script th:src="@{/js/map.js}" src="../static/js/map.js"></script>
 </body>
 </html>
