@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font: 'Inter', system-ui, sans-serif;
+  --t: 180ms ease;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body { font-family: var(--font); }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input { font-family: inherit; font-size: inherit; outline: none; border: none; }
+
+/* ── LOGIN PAGE ──────────────────────────────────────────── */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d0d0d;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(37,99,235,.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 20%, rgba(109,40,217,.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(37,99,235,.08) 0%, transparent 45%);
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255,255,255,.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 22px;
+  padding: 40px 34px 36px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── LOGO ──────────────────────────────────────────────── */
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.login-logo__wordmark {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -.5px;
+}
+
+.login-logo__sub {
+  font-size: .75rem;
+  color: rgba(255,255,255,.4);
+  margin-top: 3px;
+}
+
+/* ── ROLE TOGGLE ─────────────────────────────────────────── */
+
+.role-toggle {
+  display: flex;
+  background: rgba(255,255,255,.07);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 8px;
+  gap: 4px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.role-toggle__btn {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 7px;
+  font-size: .82rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.45);
+  transition: background 220ms ease, color 220ms ease, box-shadow 220ms ease;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+.role-toggle__btn.is-active {
+  background: #fff;
+  color: #111;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+
+/* ── ROLE HINT ───────────────────────────────────────────── */
+
+.role-hint {
+  font-size: .73rem;
+  color: rgba(255,255,255,.35);
+  text-align: center;
+  margin-bottom: 22px;
+  min-height: 1.2em;
+  transition: opacity var(--t);
+}
+
+/* ── FORM ────────────────────────────────────────────────── */
+
+.login-form, .register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-size: .76rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.55);
+}
+
+.form-group input {
+  background: rgba(255,255,255,.07);
+  border: 1.5px solid rgba(255,255,255,.12);
+  border-radius: 9px;
+  padding: 11px 14px;
+  color: #fff;
+  font-size: .88rem;
+  transition: border-color var(--t), background var(--t);
+}
+
+.form-group input::placeholder {
+  color: rgba(255,255,255,.22);
+}
+
+.form-group input:focus {
+  border-color: rgba(99,140,255,.7);
+  background: rgba(255,255,255,.10);
+}
+
+/* ── SUBMIT BUTTON ───────────────────────────────────────── */
+
+.login-submit, .register-submit {
+  margin-top: 6px;
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #fff;
+  font-size: .88rem;
+  font-weight: 700;
+  border-radius: 9px;
+  transition: opacity var(--t), transform 120ms ease, box-shadow var(--t);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 16px rgba(37,99,235,.35);
+  letter-spacing: .01em;
+}
+
+.login-submit:hover:not(:disabled),
+.register-submit:hover:not(:disabled) {
+  opacity: .92;
+  box-shadow: 0 6px 20px rgba(37,99,235,.45);
+}
+
+.login-submit:active:not(:disabled),
+.register-submit:active:not(:disabled) {
+  transform: scale(.98);
+}
+
+.login-submit:disabled,
+.register-submit:disabled {
+  background: rgba(255,255,255,.12);
+  color: rgba(255,255,255,.3);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── FOOTER / SWITCH LINK ────────────────────────────────── */
+
+.login-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: .75rem;
+  color: rgba(255,255,255,.35);
+}
+
+.login-footer a {
+  color: rgba(130,170,255,.85);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color var(--t);
+}
+
+.login-footer a:hover {
+  color: #fff;
+}
+
+/* ── PANELS (LOGIN / REGISTER) ───────────────────────────── */
+
+.panel {
+  display: none;
+}
+
+.panel.is-visible {
+  display: block;
+  animation: panelIn 260ms ease;
+}
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
