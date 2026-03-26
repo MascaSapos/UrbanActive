@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrbanActive – Buscar actividades</title>
+  <meta name="description" content="Encuentra y reserva actividades deportivas al aire libre en Madrid con UrbanActive.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" th:href="@{/css/map.css}" href="../static/css/map.css">
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="navbar__left">
+      <button class="icon-btn" aria-label="Menú">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <button class="icon-btn navbar__bell" aria-label="Notificaciones">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="navbar__bell-dot" aria-hidden="true"></span>
+      </button>
+      <span class="navbar__profile-label">Perfil</span>
+    </div>
+    <span class="navbar__wordmark">UrbanActive</span>
+  </header>
+
+  <!-- MAIN GRID -->
+  <main class="main-content">
+
+    <!-- ROW: Search + Filters (full width) -->
+    <div class="search-area">
+      <div class="search-bar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" id="main-search" placeholder="Buscar actividades, lugares..." aria-label="Buscar actividades o lugares">
+      </div>
+      <div class="filter-row" aria-label="Filtros rápidos">
+        <button class="pill pill--active" data-filter="deporte">Deporte</button>
+        <button class="pill pill--active" data-filter="fecha">Fecha</button>
+        <button class="pill pill--active" data-filter="hora">Hora</button>
+        <div class="filter-row__others">
+          <button class="pill pill--idle" id="filter-otros" aria-haspopup="true" aria-expanded="false">
+            Otros
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="others-dropdown" id="otros-dropdown" role="menu">
+            <button class="others-dropdown__item" role="menuitem">Nivel</button>
+            <button class="others-dropdown__item" role="menuitem">Plazas libres</button>
+            <button class="others-dropdown__item" role="menuitem">Duración</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAP (left, fills height) -->
+    <section class="map-section" aria-label="Mapa de actividades">
+      <div id="map"></div>
+      <div class="map-city-label">Madrid</div>
+    </section>
+  </main>
+</div>
+</body>
+</html>
