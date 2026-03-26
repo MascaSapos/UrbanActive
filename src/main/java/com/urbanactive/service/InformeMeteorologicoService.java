@@ -36,6 +36,8 @@ public class InformeMeteorologicoService {
         existente.setId_actividad(cambios.getId_actividad());
         existente.setProbabilidadLluvia(cambios.getProbabilidadLluvia());
         existente.setUltimaActualizacion(cambios.getUltimaActualizacion());
+        existente.setFechaDatos(cambios.getFechaDatos());
+        existente.setId_ubicacion(cambios.getId_ubicacion());
         return informeMeteorologicoRepository.save(existente);
     }
 

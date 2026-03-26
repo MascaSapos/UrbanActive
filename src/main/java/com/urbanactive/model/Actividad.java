@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -24,13 +26,14 @@ public class Actividad {
     @Column(name = "plazasTotal", nullable = false)
     private Integer plazasTotal;
 
-    @Column(name = "id_ubicacion", length = 50, nullable = false)
-    private String id_ubicacion;
+    @ManyToOne
+    @JoinColumn(name = "id_ubicacion", nullable = false)
+    private Ubicacion id_ubicacion;
 
     public Actividad() {
     }
 
-    public Actividad(String Id, String tipoDeporte, LocalDateTime fechaHora, Integer plazasTotal, String id_ubicacion) {
+    public Actividad(String Id, String tipoDeporte, LocalDateTime fechaHora, Integer plazasTotal, Ubicacion id_ubicacion) {
         this.Id = Id;
         this.tipoDeporte = tipoDeporte;
         this.fechaHora = fechaHora;
@@ -70,11 +73,11 @@ public class Actividad {
         this.plazasTotal = plazasTotal;
     }
 
-    public String getId_ubicacion() {
+    public Ubicacion getId_ubicacion() {
         return id_ubicacion;
     }
 
-    public void setId_ubicacion(String id_ubicacion) {
+    public void setId_ubicacion(Ubicacion id_ubicacion) {
         this.id_ubicacion = id_ubicacion;
     }
 }

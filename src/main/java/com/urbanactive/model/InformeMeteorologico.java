@@ -5,7 +5,9 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -31,17 +33,27 @@ public class InformeMeteorologico {
     @Column(name = "ultimaActualizacion", nullable = false)
     private LocalDateTime ultimaActualizacion;
 
+    @Column(name = "fechaDatos", nullable = false)
+    private LocalDateTime fechaDatos;
+
+    @ManyToOne
+    @JoinColumn(name = "id_ubicacion", nullable = false)
+    private Ubicacion id_ubicacion;
+
     public InformeMeteorologico() {
     }
 
     public InformeMeteorologico(String Id, BigDecimal temperatura, Integer calidadAire, String id_actividad,
-            Integer probabilidadLluvia, LocalDateTime ultimaActualizacion) {
+            Integer probabilidadLluvia, LocalDateTime ultimaActualizacion, LocalDateTime fechaDatos,
+            Ubicacion id_ubicacion) {
         this.Id = Id;
         this.temperatura = temperatura;
         this.calidadAire = calidadAire;
         this.id_actividad = id_actividad;
         this.probabilidadLluvia = probabilidadLluvia;
         this.ultimaActualizacion = ultimaActualizacion;
+        this.fechaDatos = fechaDatos;
+        this.id_ubicacion = id_ubicacion;
     }
 
     public String getId() {
@@ -90,5 +102,21 @@ public class InformeMeteorologico {
 
     public void setUltimaActualizacion(LocalDateTime ultimaActualizacion) {
         this.ultimaActualizacion = ultimaActualizacion;
+    }
+
+    public LocalDateTime getFechaDatos() {
+        return fechaDatos;
+    }
+
+    public void setFechaDatos(LocalDateTime fechaDatos) {
+        this.fechaDatos = fechaDatos;
+    }
+
+    public Ubicacion getId_ubicacion() {
+        return id_ubicacion;
+    }
+
+    public void setId_ubicacion(Ubicacion id_ubicacion) {
+        this.id_ubicacion = id_ubicacion;
     }
 }
