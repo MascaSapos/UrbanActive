@@ -230,3 +230,79 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── REGISTER PANEL ──────────────────────────────────────── */
+
+.register-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.register-header__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  color: rgba(255,255,255,.6);
+  transition: background var(--t), color var(--t);
+  cursor: pointer;
+  border: none;
+  background: rgba(255,255,255,.07);
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.register-header__back:hover {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+}
+
+.register-header__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.register-header__sub {
+  font-size: .73rem;
+  color: rgba(255,255,255,.4);
+}
+
+/* ── PASSWORD STRENGTH ───────────────────────────────────── */
+
+.pw-strength {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.pw-strength__bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.1);
+  transition: background 300ms ease;
+}
+
+.pw-strength__bar.active-weak   { background: #ef4444; }
+.pw-strength__bar.active-fair   { background: #f59e0b; }
+.pw-strength__bar.active-strong { background: #22c55e; }
+
+.pw-strength-label {
+  font-size: .68rem;
+  color: rgba(255,255,255,.35);
+  margin-top: 2px;
+  min-height: 1em;
+}
+
+/* ── FORM ERROR ──────────────────────────────────────────── */
+
+.form-error {
+  font-size: .72rem;
+  color: #f87171;
+  min-height: 1em;
+  margin-top: 2px;
+}
