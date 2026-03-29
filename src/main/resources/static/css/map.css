@@ -604,3 +604,27 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   .action-buttons .btn-primary,
   .action-buttons .btn-secondary { flex: 1; }
 }
+
+/* ── RESERVA BANNERS ─────────────────────────────────────── */
+
+.reserva-banner {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 9px;
+  font-size: .8rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+  animation: dropIn 200ms ease;
+}
+
+.reserva-banner--ok {
+  background: rgba(34, 197, 94, .1);
+  border: 1px solid rgba(34, 197, 94, .3);
+  color: #166534;
+}
+
+.reserva-banner--err {
+  background: rgba(239, 68, 68, .1);
+  border: 1px solid rgba(239, 68, 68, .3);
+  color: #991b1b;
+}

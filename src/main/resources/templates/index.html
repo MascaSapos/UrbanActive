@@ -137,8 +137,21 @@
 
       <!-- Action buttons -->
       <div class="action-buttons">
-        <button class="btn-primary" id="btn-reservar">Reservar plaza</button>
-        <button class="btn-secondary" id="btn-detalles">Ver detalles</button>
+        <!-- Flash: reserva exitosa -->
+        <div th:if="${reservaExito}" class="reserva-banner reserva-banner--ok" role="alert">
+          ✅ ¡Plaza reservada con éxito!
+        </div>
+        <!-- Flash: error al reservar -->
+        <div th:if="${reservaError}" class="reserva-banner reserva-banner--err"
+             th:text="${reservaError}" role="alert"></div>
+
+        <form th:action="@{/reservas}" method="post" id="form-reservar">
+          <input type="hidden" id="input-actividad-id" name="actividadId" value="">
+          <button type="submit" class="btn-primary" id="btn-reservar"
+                  th:disabled="true"
+                  style="width:100%;justify-content:center;">Reservar plaza</button>
+        </form>
+        <button class="btn-secondary" id="btn-detalles" style="width:100%;justify-content:center;">Ver detalles</button>
       </div>
 
     </aside>
@@ -155,5 +168,30 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script th:src="@{/js/map.js}" src="../static/js/map.js"></script>
+<script>
+  /**
+   * Marca la tarjeta de actividad como seleccionada,
+   * rellena el input oculto y habilita el botón de reserva.
+   * @param {HTMLElement} el - La tarjeta .activity-item clicada
+   */
+  function seleccionarActividad(el) {
+    // Quitar selección previa
+    document.querySelectorAll('.activity-item').forEach(function(item) {
+      item.classList.remove('is-selected');
+    });
+    // Marcar la nueva
+    el.classList.add('is-selected');
+
+    var actividadId = el.getAttribute('data-id');
+
+    // Actualizar el input oculto del formulario
+    var inputId = document.getElementById('input-actividad-id');
+    if (inputId) inputId.value = actividadId;
+
+    // Habilitar el botón de reserva
+    var btnReservar = document.getElementById('btn-reservar');
+    if (btnReservar) btnReservar.disabled = false;
+  }
+</script>
 </body>
 </html>
