@@ -487,6 +487,100 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   justify-content: center;
 }
 
+/* ── ACTIVITY LIST (sidebar) ─────────────────────────────── */
+
+.activity-list {
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0 4px;
+}
+
+.activity-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px 10px;
+}
+
+.activity-list__title {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.activity-list__count {
+  font-size: .72rem;
+  font-weight: 500;
+  color: var(--text-3);
+  background: var(--surface-2);
+  border-radius: 99px;
+  padding: 2px 9px;
+}
+
+.activity-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px 22px;
+  cursor: pointer;
+  transition: background var(--t), border-left-color var(--t);
+  border-left: 3px solid transparent;
+}
+
+.activity-item:hover {
+  background: var(--primary-soft);
+  border-left-color: var(--primary);
+}
+
+.activity-item.is-selected {
+  background: var(--primary-soft);
+  border-left-color: var(--primary);
+}
+
+.activity-item__sport {
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.activity-item__meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.activity-item__fecha {
+  font-size: .75rem;
+  color: var(--text-2);
+}
+
+.activity-item__lugar {
+  font-size: .75rem;
+  color: var(--text-3);
+}
+.activity-item__lugar::before {
+  content: '·';
+  margin-right: 8px;
+}
+
+.activity-item__plazas {
+  font-size: .72rem;
+  font-weight: 500;
+  color: var(--primary);
+  background: var(--primary-soft);
+  border-radius: 99px;
+  padding: 2px 9px;
+  width: fit-content;
+}
+
+.activity-empty {
+  padding: 14px 22px;
+  font-size: .82rem;
+  color: var(--text-3);
+  text-align: center;
+}
+
 /* ── RESPONSIVE ──────────────────────────────────────────── */
 
 @media (max-width: 700px) {

@@ -102,6 +102,39 @@
         </div>
       </div>
 
+      <!-- Lista de actividades (resultado de los filtros) -->
+      <div class="activity-list">
+        <div class="activity-list__header">
+          <span class="activity-list__title">Actividades</span>
+          <span class="activity-list__count"
+                th:text="${actividades != null ? actividades.size() : 0} + ' encontradas'">0 encontradas</span>
+        </div>
+
+        <!-- Sin resultados -->
+        <div th:if="${actividades == null or #lists.isEmpty(actividades)}"
+             class="activity-empty">
+          No hay actividades disponibles
+        </div>
+
+        <!-- Tarjeta por actividad -->
+        <div th:each="a : ${actividades}"
+             class="activity-item"
+             th:data-id="${a.id}"
+             th:id="'act-' + ${a.id}"
+             onclick="seleccionarActividad(this)">
+          <div class="activity-item__sport" th:text="${a.tipoDeporte}">Deporte</div>
+          <div class="activity-item__meta">
+            <span class="activity-item__fecha"
+                  th:text="${#temporals.format(a.fechaHora, 'dd MMM · HH:mm')}">Fecha</span>
+            <span class="activity-item__lugar"
+                  th:if="${a.id_ubicacion != null}"
+                  th:text="${a.id_ubicacion.nombre}">Lugar</span>
+          </div>
+          <div class="activity-item__plazas"
+               th:text="${a.plazasTotal} + ' plazas'">Plazas</div>
+        </div>
+      </div>
+
       <!-- Action buttons -->
       <div class="action-buttons">
         <button class="btn-primary" id="btn-reservar">Reservar plaza</button>
@@ -112,8 +145,10 @@
 
     <!-- FILTERS BAR (below map, left column only) -->
     <div class="filters-area" aria-label="Filtros">
-      <span style="font-size:.75rem;color:var(--text-3);font-weight:500;flex-shrink:0">3 actividades cercanas</span>
+      <span style="font-size:.75rem;color:var(--text-3);font-weight:500;flex-shrink:0"
+            th:text="${actividades != null ? actividades.size() : 0} + ' actividades cercanas'">3 actividades cercanas</span>
     </div>
+
 
   </main>
 </div>
