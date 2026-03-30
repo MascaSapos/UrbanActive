@@ -59,6 +59,7 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
 }
 .btn-primary:hover { opacity: .9; box-shadow: 0 5px 18px rgba(37,99,235,.38); }
 .btn-primary:active { transform: scale(.97); }
+.btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
 
 .btn-secondary {
   display: inline-flex;
@@ -82,13 +83,13 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 6px 16px;
+  gap: 6px;
+  padding: 8px 16px;
   border-radius: var(--radius-full);
-  font-size: .85rem;
+  font-size: .875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background var(--t), color var(--t), border-color var(--t), box-shadow var(--t);
+  transition: background var(--t), color var(--t), border-color var(--t);
   border: 1.5px solid transparent;
   white-space: nowrap;
 }
@@ -103,6 +104,59 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   border-color: var(--border);
 }
 .pill--idle:hover { border-color: var(--border-2); color: var(--text); }
+
+/* ── FILTER DROPDOWN ─────────────────────────────────────── */
+
+.filter-pill-wrap { position: relative; flex-shrink: 0; }
+
+.filter-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  z-index: 200;
+}
+.filter-dropdown.is-open {
+  display: block;
+  animation: dropIn 150ms ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.filter-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  font-size: .85rem;
+  color: var(--text-2);
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 9px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background var(--t), color var(--t);
+}
+.filter-dropdown__item:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.filter-dropdown__item.is-selected {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 600;
+}
 
 /* ── ICON BUTTON ─────────────────────────────────────────── */
 
@@ -157,27 +211,35 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
 /* ── MAP MARKER ──────────────────────────────────────────── */
 
 .map-marker {
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.55rem;
+  font-size: 1.45rem;
   line-height: 1;
   border: 3px solid rgba(255,255,255,.85);
   box-shadow: 0 3px 10px rgba(0,0,0,.22);
   transition: transform 140ms ease, box-shadow 140ms ease;
   cursor: pointer;
+  background: var(--primary);
 }
 .map-marker:hover {
   transform: scale(1.13);
   box-shadow: 0 5px 16px rgba(0,0,0,.28);
 }
+.map-marker.is-active {
+  transform: scale(1.18);
+  box-shadow: 0 0 0 4px rgba(37,99,235,.35), 0 5px 16px rgba(0,0,0,.28);
+}
 
 .map-marker--baloncesto { background: #f97316; }
 .map-marker--running    { background: #22c55e; }
 .map-marker--ciclismo   { background: #06b6d4; }
+.map-marker--futbol     { background: #16a34a; }
+.map-marker--natacion   { background: #0284c7; }
+.map-marker--yoga       { background: #a855f7; }
 
 /* ── PAGE WRAPPER ────────────────────────────────────────── */
 
@@ -234,33 +296,18 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   background-clip: text;
 }
 
-/* ── LAYOUT: two-column above 760px ─────────────────────── */
-
-.main-content {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  grid-template-rows: auto 1fr auto;
-  grid-template-areas:
-    "search  search"
-    "map     sidebar"
-    "filters sidebar";
-  gap: 0;
-  padding: 0;
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* ── SEARCH ──────────────────────────────────────────────── */
+/* ── SEARCH BAR (full width row) ─────────────────────────── */
 
 .search-area {
-  grid-area: search;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 28px 12px;
+  gap: 12px;
+  padding: 12px 24px;
   border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
   flex-wrap: wrap;
+  z-index: 150;
 }
 
 .search-bar {
@@ -273,13 +320,14 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   padding: 10px 20px;
   transition: border-color var(--t), box-shadow var(--t);
   flex: 1;
-  min-width: 200px;
+  min-width: 240px;
 }
 .search-bar:focus-within {
   border-color: rgba(37,99,235,.45);
   box-shadow: 0 0 0 3px rgba(37,99,235,.08);
   background: #fff;
 }
+.search-bar svg { flex-shrink: 0; color: var(--text-3); }
 .search-bar input {
   flex: 1;
   background: transparent;
@@ -291,59 +339,24 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
 .filter-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-bottom: 1px;
-}
-.filter-row::-webkit-scrollbar { display: none; }
-
-.filter-row__label {
-  font-size: .8rem;
-  color: var(--text-3);
-  font-weight: 500;
-  flex-shrink: 0;
+  gap: 8px;
+  flex-wrap: wrap;
+  overflow: visible;
 }
 
-.filter-row__others { position: relative; flex-shrink: 0; }
-.others-dropdown {
-  display: none;
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  min-width: 145px;
-  background: var(--surface);
-  border: 1px solid var(--border-2);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  padding: 5px;
-  z-index: 50;
-}
-.others-dropdown.is-open { display: block; animation: dropIn 150ms ease; }
+/* ── MAIN: 3 columnas ────────────────────────────────────── */
+/* Orden izquierda→derecha: MAPA | LISTA ACTIVIDADES | METEO+BOTONES */
 
-@keyframes dropIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to   { opacity: 1; transform: translateY(0); }
+.main-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 300px 290px;
+  grid-template-areas: "map activity-panel sidebar";
+  min-height: 0;
+  overflow: hidden;
 }
 
-.others-dropdown__item {
-  display: block;
-  width: 100%;
-  padding: 8px 12px;
-  font-size: .8rem;
-  color: var(--text-2);
-  text-align: left;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background var(--t), color var(--t);
-}
-.others-dropdown__item:hover { background: var(--surface-2); color: var(--text); }
-
-/* ── MAP ─────────────────────────────────────────────────── */
+/* ── MAPA ────────────────────────────────────────────────── */
 
 .map-section {
   grid-area: map;
@@ -377,137 +390,33 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   box-shadow: var(--shadow-sm);
 }
 
-/* ── FILTERS ROW (below map) ─────────────────────────────── */
+/* ── PANEL ACTIVIDADES (columna central) ─────────────────── */
 
-.filters-area {
-  grid-area: filters;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 20px;
-  border-top: 1px solid var(--border);
-  border-right: 1px solid var(--border);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.filters-area::-webkit-scrollbar { display: none; }
-
-/* ── SIDEBAR ─────────────────────────────────────────────── */
-
-.sidebar {
-  grid-area: sidebar;
+.activity-panel {
+  grid-area: activity-panel;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   background: var(--bg);
-  overflow-y: auto;
+  overflow: hidden;
 }
 
-/* ── WEATHER CARD ────────────────────────────────────────── */
-
-.weather-card {
-  flex: 1;
-  padding: 24px 22px 20px;
-  border-bottom: 1px solid var(--border);
-}
-.weather-card__header {
+.activity-panel__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.weather-card__dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-.weather-card__title {
-  font-size: .9rem;
-  font-weight: 600;
-  color: var(--text);
-}
-.weather-card__activity {
-  font-size: .82rem;
-  color: var(--primary);
-  font-weight: 600;
-  margin-top: 3px;
-  margin-bottom: 18px;
-  min-height: 1em;
-}
 
-.weather-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.weather-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-  background: var(--surface);
-  border-radius: 12px;
-  padding: 14px 10px;
-  border: 1px solid var(--border);
-  transition: border-color var(--t), box-shadow var(--t);
-}
-.weather-tile:hover {
-  border-color: rgba(37,99,235,.25);
-  box-shadow: 0 2px 8px rgba(37,99,235,.07);
-}
-.weather-tile__label {
-  font-size: .67rem;
-  color: var(--text-3);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-}
-.weather-tile__icon {
-  font-size: 1.4rem;
-  line-height: 1;
-}
-.weather-tile__value {
+.activity-panel__title {
   font-size: .9rem;
   font-weight: 700;
   color: var(--text);
 }
 
-/* ── ACTION BUTTONS (sidebar) ────────────────────────────── */
-
-.action-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 20px 22px;
-}
-.action-buttons .btn-primary,
-.action-buttons .btn-secondary {
-  width: 100%;
-  justify-content: center;
-}
-
-/* ── ACTIVITY LIST (sidebar) ─────────────────────────────── */
-
-.activity-list {
-  border-bottom: 1px solid var(--border);
-  padding: 16px 0 4px;
-}
-
-.activity-list__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 22px 10px;
-}
-
-.activity-list__title {
-  font-size: .85rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.activity-list__count {
+.activity-panel__count {
   font-size: .72rem;
   font-weight: 500;
   color: var(--text-3);
@@ -516,14 +425,25 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   padding: 2px 9px;
 }
 
+.activity-list-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-2) transparent;
+}
+.activity-list-scroll::-webkit-scrollbar { width: 5px; }
+.activity-list-scroll::-webkit-scrollbar-track { background: transparent; }
+.activity-list-scroll::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
+
 .activity-item {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 11px 22px;
+  padding: 12px 18px;
   cursor: pointer;
   transition: background var(--t), border-left-color var(--t);
   border-left: 3px solid transparent;
+  border-bottom: 1px solid var(--border);
 }
 
 .activity-item:hover {
@@ -538,7 +458,7 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
 
 .activity-item__sport {
   font-size: .88rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text);
   text-transform: capitalize;
 }
@@ -561,7 +481,7 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
 }
 .activity-item__lugar::before {
   content: '·';
-  margin-right: 8px;
+  margin-right: 6px;
 }
 
 .activity-item__plazas {
@@ -575,34 +495,105 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
 }
 
 .activity-empty {
-  padding: 14px 22px;
-  font-size: .82rem;
+  padding: 32px 18px;
+  font-size: .85rem;
   color: var(--text-3);
   text-align: center;
 }
 
-/* ── RESPONSIVE ──────────────────────────────────────────── */
+/* ── SIDEBAR DERECHO (Meteo + Botones) ───────────────────── */
 
-@media (max-width: 700px) {
-  body { overflow: auto; }
-  .page-wrapper { height: auto; min-height: 100vh; overflow: visible; }
-  .main-content {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "search"
-      "map"
-      "filters"
-      "sidebar";
-    overflow: visible;
-  }
-  .map-section { border-right: none; }
-  .filters-area { border-right: none; }
-  #map { min-height: 260px; max-height: 320px; }
-  .sidebar { border-top: 1px solid var(--border); border-left: none; overflow: visible; }
-  .weather-grid { grid-template-columns: repeat(4, 1fr); }
-  .action-buttons { flex-direction: row; }
-  .action-buttons .btn-primary,
-  .action-buttons .btn-secondary { flex: 1; }
+.sidebar {
+  grid-area: sidebar;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  overflow-y: auto;
+}
+
+/* ── WEATHER CARD ────────────────────────────────────────── */
+
+.weather-card {
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.weather-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.weather-card__dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  flex-shrink: 0;
+}
+.weather-card__title {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.weather-card__activity {
+  font-size: .8rem;
+  color: var(--primary);
+  font-weight: 600;
+  margin-top: 4px;
+  margin-bottom: 16px;
+  min-height: 1em;
+}
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.weather-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 12px 8px;
+  border: 1px solid var(--border);
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.weather-tile:hover {
+  border-color: rgba(37,99,235,.25);
+  box-shadow: 0 2px 8px rgba(37,99,235,.07);
+}
+.weather-tile__label {
+  font-size: .65rem;
+  color: var(--text-3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.weather-tile__icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.weather-tile__value {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ── ACTION BUTTONS ──────────────────────────────────────── */
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  flex-shrink: 0;
+}
+.action-buttons .btn-primary,
+.action-buttons .btn-secondary {
+  width: 100%;
+  justify-content: center;
 }
 
 /* ── RESERVA BANNERS ─────────────────────────────────────── */
@@ -613,7 +604,6 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   border-radius: 9px;
   font-size: .8rem;
   font-weight: 500;
-  margin-bottom: 6px;
   animation: dropIn 200ms ease;
 }
 
@@ -627,4 +617,27 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   background: rgba(239, 68, 68, .1);
   border: 1px solid rgba(239, 68, 68, .3);
   color: #991b1b;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  body { overflow: auto; }
+  .page-wrapper { height: auto; min-height: 100vh; overflow: visible; }
+  .main-content {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "map"
+      "activity-panel"
+      "sidebar";
+    overflow: visible;
+  }
+  #map { min-height: 280px; max-height: 380px; }
+  .map-section { border-right: none; }
+  .activity-panel { border-right: none; min-height: 300px; }
+  .sidebar { border-top: 1px solid var(--border); }
+  .weather-grid { grid-template-columns: repeat(4, 1fr); }
+  .action-buttons { flex-direction: row; }
+  .action-buttons .btn-primary,
+  .action-buttons .btn-secondary { flex: 1; }
 }
