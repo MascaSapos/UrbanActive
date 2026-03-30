@@ -2,19 +2,22 @@ package com.urbanactive.dto;
 
 public class ActividadMapDto {
 
+    private String id;
     private double lat;
     private double lng;
     private String icon;
     private String title;
+    private String tipoDeporte;
 
     public ActividadMapDto() {
     }
 
-    public ActividadMapDto(double lat, double lng, String icon, String title) {
-        this.lat = lat;
-        this.lng = lng;
-        this.icon = icon;
-        this.title = title;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public double getLat() {
@@ -47,5 +50,13 @@ public class ActividadMapDto {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getTipoDeporte() {
+        return tipoDeporte;
+    }
+
+    public void setTipoDeporte(String tipoDeporte) {
+        this.tipoDeporte = tipoDeporte;
     }
 }

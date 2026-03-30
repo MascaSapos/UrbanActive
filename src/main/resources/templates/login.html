@@ -28,6 +28,12 @@
       </div>
       <p class="role-hint" id="role-hint">Buscas y reservas actividades deportivas</p>
 
+      <!-- Mensaje de error de autenticación -->
+      <div th:if="${loginError}" class="login-error" role="alert">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Correo o contraseña incorrectos
+      </div>
+
       <form class="login-form" th:action="@{/login}" method="post" novalidate>
         <input type="hidden" name="rol" id="input-rol" value="deportista">
 

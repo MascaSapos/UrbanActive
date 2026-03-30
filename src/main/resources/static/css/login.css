@@ -306,3 +306,20 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   min-height: 1em;
   margin-top: 2px;
 }
+
+/* ── LOGIN ERROR BANNER ──────────────────────────────────── */
+
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, .12);
+  border: 1px solid rgba(239, 68, 68, .35);
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-size: .8rem;
+  font-weight: 500;
+  color: #fca5a5;
+  margin-bottom: 12px;
+  animation: panelIn 260ms ease;
+}
