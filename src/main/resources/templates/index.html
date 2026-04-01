@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,6 +30,13 @@
       <span class="navbar__profile-label">Perfil</span>
     </div>
     <span class="navbar__wordmark">UrbanActive</span>
+    <div class="navbar__right" style="display: flex; gap: 15px; align-items: center; padding-right: 20px;">
+      <a th:href="@{/actividades/nueva}" sec:authorize="hasRole('ORGANIZADOR')" class="btn-primary" style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Nueva Actividad</a>
+      <a th:href="@{/mis-reservas}" sec:authorize="hasRole('DEPORTISTA')" class="btn-secondary" style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Mis Reservas</a>
+      <form th:action="@{/logout}" method="post" style="margin: 0;">
+        <button type="submit" class="btn-secondary" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #ccc; background: white; cursor: pointer;">Salir</button>
+      </form>
+    </div>
   </header>
 
   <!-- MAIN GRID -->
@@ -104,8 +111,11 @@
 
       <!-- Action buttons -->
       <div class="action-buttons">
-        <button class="btn-primary" id="btn-reservar">Reservar plaza</button>
-        <button class="btn-secondary" id="btn-detalles">Ver detalles</button>
+        <form id="form-reservar" method="post" action="#" sec:authorize="hasRole('DEPORTISTA')" style="display:inline; width: 100%;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="btn-primary" id="btn-reservar" style="width: 100%;">Reservar plaza</button>
+        </form>
+        <button class="btn-secondary" id="btn-detalles" style="width: 100%;">Ver detalles</button>
       </div>
 
     </aside>

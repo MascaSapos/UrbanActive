@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Reservas - UrbanActive</title>
+  <link rel="stylesheet" th:href="@{/css/map.css}" href="../static/css/map.css">
+</head>
+<body style="padding: 2rem; font-family: sans-serif;">
+  <h2>Mis Reservas</h2>
+  <table style="width: 100%; text-align: left; border-collapse: collapse; margin-top: 2rem;">
+    <thead>
+        <tr style="border-bottom: 2px solid #ccc;">
+            <th style="padding: 10px;">Actividad</th>
+            <th style="padding: 10px;">Fecha y Hora</th>
+            <th style="padding: 10px;">Estado</th>
+            <th style="padding: 10px;">Fecha de Reserva</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="reserva : ${reservas}" style="border-bottom: 1px solid #eee;">
+            <td th:text="${reserva.actividad.tipoDeporte}" style="padding: 10px;">Running</td>
+            <td th:text="${reserva.actividad.fechaHora}" style="padding: 10px;">2024-05-12T10:00</td>
+            <td th:text="${reserva.estado}" style="padding: 10px;">Activa</td>
+            <td th:text="${reserva.fechaReserva}" style="padding: 10px;">2024-05-10T15:00</td>
+        </tr>
+    </tbody>
+  </table>
+  <br>
+  <a th:href="@{/}" class="btn-secondary" style="padding: 10px 20px; text-decoration: none;">Volver al mapa</a>
+</body>
+</html>

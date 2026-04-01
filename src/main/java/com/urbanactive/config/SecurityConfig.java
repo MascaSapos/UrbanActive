@@ -6,6 +6,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -17,8 +20,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         // Permite archivos estáticos sin contraseña
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/login", "/styles.css", "/script.js",
-                                "/assets/**")
+                                "/assets/**", "/api/usuarios/registro")
                         .permitAll()
+                        .requestMatchers("/actividades/nueva").hasRole("ORGANIZADOR")
+                        .requestMatchers("/mis-reservas", "/actividades/*/reservar").hasRole("DEPORTISTA")
                         // El resto debe estar autenticado
                         .anyRequest().authenticated())
                 // Configuración del login propio
@@ -28,21 +33,15 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/", true)
                         .permitAll())
                 // Configuración de salir
-                .logout(logout -> logout.permitAll());
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/login?logout")
+                        .permitAll());
 
         return http.build();
     }
 
-    // Usuario de prueba
     @Bean
-    public org.springframework.security.core.userdetails.UserDetailsService userDetailsService() {
-        org.springframework.security.core.userdetails.UserDetails user = org.springframework.security.core.userdetails.User
-                .withDefaultPasswordEncoder()
-                .username("hola@test.com")
-                .password("123456")
-                .roles("USER")
-                .build();
-
-        return new org.springframework.security.provisioning.InMemoryUserDetailsManager(user);
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

@@ -25,6 +25,10 @@ public class UsuarioService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con id: " + id));
     }
 
+    public java.util.Optional<Usuario> obtenerPorEmail(String email) {
+        return usuarioRepository.findByEmail(email);
+    }
+
     public List<Usuario> obtenerTodos() {
         return usuarioRepository.findAll();
     }

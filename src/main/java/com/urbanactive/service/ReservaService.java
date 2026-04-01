@@ -17,7 +17,18 @@ public class ReservaService {
     }
 
     public Reserva crear(Reserva reserva) {
+        long ocupadas = reservaRepository.countByActividad(reserva.getActividad());
+        if (ocupadas >= reserva.getActividad().getPlazasTotal()) {
+            throw new IllegalArgumentException("No hay plazas disponibles para esta actividad.");
+        }
+        reserva.setId(java.util.UUID.randomUUID().toString().substring(0, 10));
+        reserva.setFechaReserva(java.time.LocalDateTime.now());
+        reserva.setEstado("Confirmada");
         return reservaRepository.save(reserva);
+    }
+
+    public List<Reserva> obtenerPorUsuario(com.urbanactive.model.Usuario usuario) {
+        return reservaRepository.findByUsuario(usuario);
     }
 
     public Reserva obtenerPorId(String id) {
@@ -33,8 +44,8 @@ public class ReservaService {
         Reserva existente = obtenerPorId(id);
         existente.setFechaReserva(cambios.getFechaReserva());
         existente.setEstado(cambios.getEstado());
-        existente.setId_usuario(cambios.getId_usuario());
-        existente.setId_actividad(cambios.getId_actividad());
+        existente.setUsuario(cambios.getUsuario());
+        existente.setActividad(cambios.getActividad());
         return reservaRepository.save(existente);
     }
 

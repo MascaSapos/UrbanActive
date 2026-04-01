@@ -5,6 +5,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 import com.urbanactive.model.Usuario;
 import com.urbanactive.service.UsuarioService;
 
@@ -13,9 +18,23 @@ import com.urbanactive.service.UsuarioService;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, PasswordEncoder passwordEncoder) {
         this.usuarioService = usuarioService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @PostMapping("/registro")
+    public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
+        if (usuarioService.obtenerPorEmail(usuario.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("El email ya está registrado");
+        }
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        usuario.setId(java.util.UUID.randomUUID().toString().substring(0, 10));
+        usuario.setRol(usuario.getRol().toUpperCase());
+        usuarioService.crear(usuario);
+        return ResponseEntity.ok("Usuario registrado exitosamente");
     }
 
     @GetMapping("/{id}")

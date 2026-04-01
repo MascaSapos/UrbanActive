@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Nueva Actividad - UrbanActive</title>
+  <link rel="stylesheet" th:href="@{/css/map.css}" href="../static/css/map.css">
+</head>
+<body style="padding: 2rem; font-family: sans-serif;">
+  <h2>Crear Nueva Actividad</h2>
+  <form th:action="@{/actividades/nueva}" method="post" style="display: flex; flex-direction: column; gap: 1rem; max-width: 400px; margin-top: 2rem;">
+    <div>
+        <label>Tipo de deporte:</label><br>
+        <input type="text" name="tipoDeporte" required style="width: 100%; padding: 8px;">
+    </div>
+    <div>
+        <label>Fecha y Hora:</label><br>
+        <input type="datetime-local" name="fechaHora" required style="width: 100%; padding: 8px;">
+    </div>
+    <div>
+        <label>Plazas Totales:</label><br>
+        <input type="number" name="plazasTotal" required min="1" style="width: 100%; padding: 8px;">
+    </div>
+    <div>
+        <label>ID Ubicación (Ej: U001):</label><br>
+        <input type="text" name="id_ubicacion.Id" required style="width: 100%; padding: 8px;" placeholder="U001">
+    </div>
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <button type="submit" class="btn-primary" style="padding: 10px; cursor: pointer;">Guardar Actividad</button>
+    <a th:href="@{/}" class="btn-secondary" style="padding: 10px; text-align: center; display: block; text-decoration: none;">Volver</a>
+  </form>
+</body>
+</html>
