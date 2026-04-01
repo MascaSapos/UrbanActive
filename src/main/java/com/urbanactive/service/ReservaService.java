@@ -8,22 +8,33 @@ import org.springframework.stereotype.Service;
 
 import com.urbanactive.model.Reserva;
 import com.urbanactive.model.Usuario;
+import com.urbanactive.model.Actividad;
 import com.urbanactive.repository.ReservaRepository;
+import com.urbanactive.repository.ActividadRepository;
 
 @Service
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
     private final UsuarioService usuarioService;
+    private final ActividadRepository actividadRepository;
 
-    public ReservaService(ReservaRepository reservaRepository, UsuarioService usuarioService) {
+    public ReservaService(ReservaRepository reservaRepository, UsuarioService usuarioService, ActividadRepository actividadRepository) {
         this.reservaRepository = reservaRepository;
         this.usuarioService = usuarioService;
+        this.actividadRepository = actividadRepository;
     }
 
     /** Crea una reserva para el usuario autenticado (identificado por email). */
     public Reserva crearParaUsuario(String actividadId, String email) {
         Usuario usuario = usuarioService.obtenerPorEmail(email);
+        Actividad actividad = actividadRepository.findById(actividadId)
+                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada"));
+
+        int plazasOcupadas = reservaRepository.countActivasPorActividad(actividadId);
+        if (plazasOcupadas >= actividad.getPlazasTotal()) {
+            throw new IllegalArgumentException("La actividad ha alcanzado su aforo máximo");
+        }
 
         // ID único de 10 chars, letras y números
         String nuevaId = UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
@@ -64,5 +75,19 @@ public class ReservaService {
             throw new IllegalArgumentException("Reserva no encontrada con id: " + id);
         }
         reservaRepository.deleteById(id);
+    }
+
+    public void cancelarReserva(String reservaId) {
+        Reserva reserva = obtenerPorId(reservaId);
+        Actividad actividad = actividadRepository.findById(reserva.getId_actividad())
+                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada para la reserva"));
+
+        LocalDateTime limiteCancelacion = actividad.getFechaHora().minusHours(24);
+        if (LocalDateTime.now().isAfter(limiteCancelacion)) {
+            throw new IllegalArgumentException("No se puede cancelar con menos de 24 horas de antelación");
+        }
+
+        reserva.setEstado("CANCELADA");
+        reservaRepository.save(reserva);
     }
 }

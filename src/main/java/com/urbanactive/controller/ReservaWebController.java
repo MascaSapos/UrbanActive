@@ -40,4 +40,17 @@ public class ReservaWebController {
         }
         return "redirect:/";
     }
+
+    @PostMapping("/reservas/cancelar")
+    public String cancelar(
+            @RequestParam("reservaId") String reservaId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            reservaService.cancelarReserva(reservaId);
+            redirectAttributes.addFlashAttribute("reservaExito", "Reserva cancelada correctamente");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("reservaError", e.getMessage());
+        }
+        return "redirect:/";
+    }
 }
