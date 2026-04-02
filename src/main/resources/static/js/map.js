@@ -57,11 +57,48 @@
       card.classList.add('is-selected');
       card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-    // Habilitar botón de reservar
+    // Habilitar botón de reservar y actualizar barra de aforo
     var input = document.getElementById('input-actividad-id');
     if (input) input.value = id;
+    
     var btn = document.getElementById('btn-reservar');
-    if (btn) btn.disabled = false;
+    var activity = activitiesData[id];
+
+    if (activity) {
+      var aforoContainer = document.getElementById('aforo-container');
+      var aforoText = document.getElementById('aforo-text');
+      var aforoBar = document.getElementById('aforo-bar');
+
+      if (aforoContainer && aforoText && aforoBar) {
+        aforoContainer.style.display = 'block';
+        aforoText.textContent = activity.plazasOcupadas + ' / ' + activity.plazasTotal + ' plazas ocupadas';
+        aforoBar.setAttribute('max', activity.plazasTotal);
+        aforoBar.setAttribute('value', activity.plazasOcupadas);
+      }
+
+      if (btn) {
+        if (activity.plazasOcupadas >= activity.plazasTotal || activity.estado === 'CERRADA/COMPLETA') {
+          btn.disabled = true;
+          btn.textContent = 'Aforo completo';
+          btn.style.backgroundColor = '#ccc';
+          btn.style.cursor = 'not-allowed';
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Reservar plaza';
+          btn.style.backgroundColor = '';
+          btn.style.cursor = 'pointer';
+        }
+      }
+    } else {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Reservar plaza';
+        btn.style.backgroundColor = '';
+        btn.style.cursor = 'pointer';
+      }
+      var aContainer = document.getElementById('aforo-container');
+      if (aContainer) aContainer.style.display = 'none';
+    }
   }
 
   /* ═══════════════════════════════════════════════════════════

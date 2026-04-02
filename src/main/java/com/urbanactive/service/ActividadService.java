@@ -13,6 +13,7 @@ import com.urbanactive.dto.ActividadMapDto;
 import com.urbanactive.model.Actividad;
 import com.urbanactive.model.Ubicacion;
 import com.urbanactive.repository.ActividadRepository;
+import com.urbanactive.repository.ReservaRepository;
 
 @Service
 public class ActividadService {
@@ -25,9 +26,11 @@ public class ActividadService {
             Map.entry("ciclismo", "\uD83D\uDEB4"));
 
     private final ActividadRepository actividadRepository;
+    private final ReservaRepository reservaRepository;
 
-    public ActividadService(ActividadRepository actividadRepository) {
+    public ActividadService(ActividadRepository actividadRepository, ReservaRepository reservaRepository) {
         this.actividadRepository = actividadRepository;
+        this.reservaRepository = reservaRepository;
     }
 
     public Actividad crear(Actividad actividad) {
@@ -68,6 +71,9 @@ public class ActividadService {
         dto.setIcon(icon);
         dto.setTitle(title);
         dto.setTipoDeporte(tipo);
+        dto.setPlazasTotal(a.getPlazasTotal());
+        dto.setPlazasOcupadas(reservaRepository.countActivasPorActividad(a.getId()));
+        dto.setEstado(a.getEstado());
         return dto;
     }
 

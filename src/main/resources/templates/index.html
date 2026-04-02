@@ -187,12 +187,17 @@
       <!-- Action buttons -->
       <div class="action-buttons">
         <!-- Flash: reserva exitosa -->
-        <div th:if="${reservaExito}" class="reserva-banner reserva-banner--ok" role="alert">
+        <div th:if="${reservaExito}" class="reserva-banner reserva-banner--ok" role="alert" th:text="'✅ ' + ${reservaExito}">
           ✅ ¡Plaza reservada con éxito!
         </div>
         <!-- Flash: error al reservar -->
         <div th:if="${reservaError}" class="reserva-banner reserva-banner--err"
-             th:text="${reservaError}" role="alert"></div>
+             th:text="'❌ ' + ${reservaError}" role="alert"></div>
+
+        <div id="aforo-container" style="display:none; text-align:center; padding-bottom: 15px;">
+            <span id="aforo-text" style="font-weight: bold; display: block; margin-bottom: 5px; font-size: 0.9em; color: #555;">0 / 0 plazas ocupadas</span>
+            <progress id="aforo-bar" value="0" max="100" style="width:100%; height: 10px;"></progress>
+        </div>
 
         <form th:action="@{/reservas}" method="post" id="form-reservar">
           <input type="hidden" id="input-actividad-id" name="actividadId" value="">

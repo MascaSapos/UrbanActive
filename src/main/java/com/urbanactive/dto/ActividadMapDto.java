@@ -8,6 +8,9 @@ public class ActividadMapDto {
     private String icon;
     private String title;
     private String tipoDeporte;
+    private int plazasOcupadas;
+    private int plazasTotal;
+    private String estado;
 
     public ActividadMapDto() {
     }
@@ -58,5 +61,29 @@ public class ActividadMapDto {
 
     public void setTipoDeporte(String tipoDeporte) {
         this.tipoDeporte = tipoDeporte;
+    }
+
+    public int getPlazasOcupadas() {
+        return plazasOcupadas;
+    }
+
+    public void setPlazasOcupadas(int plazasOcupadas) {
+        this.plazasOcupadas = plazasOcupadas;
+    }
+
+    public int getPlazasTotal() {
+        return plazasTotal;
+    }
+
+    public void setPlazasTotal(int plazasTotal) {
+        this.plazasTotal = plazasTotal;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 }
