@@ -25,16 +25,9 @@ public class ReservaService {
         this.actividadRepository = actividadRepository;
     }
 
-    /** Crea una reserva para el usuario autenticado (identificado por email). */
+    // Crea una reserva para el usuario autenticado (identificado por email).
     public Reserva crearParaUsuario(String actividadId, String email) {
         Usuario usuario = usuarioService.obtenerPorEmail(email);
-        Actividad actividad = actividadRepository.findById(actividadId)
-                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada"));
-
-        int plazasOcupadas = reservaRepository.countActivasPorActividad(actividadId);
-        if (plazasOcupadas >= actividad.getPlazasTotal()) {
-            throw new IllegalArgumentException("La actividad ha alcanzado su aforo máximo");
-        }
 
         // ID único de 10 chars, letras y números
         String nuevaId = UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
@@ -45,11 +38,26 @@ public class ReservaService {
         reserva.setEstado("CONFIRMADA");
         reserva.setId_usuario(usuario.getId());
         reserva.setId_actividad(actividadId);
-        return reservaRepository.save(reserva);
+        return crear(reserva);
     }
 
     public Reserva crear(Reserva reserva) {
-        return reservaRepository.save(reserva);
+        Actividad actividad = actividadRepository.findById(reserva.getId_actividad())
+                .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada"));
+
+        int plazasOcupadas = reservaRepository.countActivasPorActividad(reserva.getId_actividad());
+        if (plazasOcupadas >= actividad.getPlazasTotal()) {
+            throw new IllegalArgumentException("Aforo completo");
+        }
+
+        Reserva reservaGuardada = reservaRepository.save(reserva);
+
+        if (plazasOcupadas + 1 == actividad.getPlazasTotal()) {
+            actividad.setEstado("CERRADA/COMPLETA");
+            actividadRepository.save(actividad);
+        }
+
+        return reservaGuardada;
     }
 
     public Reserva obtenerPorId(String id) {
@@ -89,5 +97,10 @@ public class ReservaService {
 
         reserva.setEstado("CANCELADA");
         reservaRepository.save(reserva);
+
+        if ("CERRADA/COMPLETA".equals(actividad.getEstado())) {
+            actividad.setEstado("ABIERTA");
+            actividadRepository.save(actividad);
+        }
     }
 }
