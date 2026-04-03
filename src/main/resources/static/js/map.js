@@ -2,22 +2,24 @@
 
   function setWeather(a) {
     var actLabel = document.getElementById('w-activity-name');
-    if (actLabel) actLabel.textContent = a.title || '';
+    if (actLabel) actLabel.textContent = a.title || 'Selecciona marcador';
 
     var w = a.weather;
-    if (!w) {
-      document.getElementById('w-clima-icon').textContent = '—';
-      document.getElementById('w-clima-val').textContent = 'Sin datos';
-      document.getElementById('w-temp-val').textContent = '—';
-      document.getElementById('w-lluvia-val').textContent = '—';
-      document.getElementById('w-aire-val').textContent = '—';
+    if (w) {
+      document.getElementById('w-clima-icon').textContent  = w.climaIcon || '—';
+      document.getElementById('w-clima-val').textContent   = w.clima || 'Sin datos';
+      document.getElementById('w-temp-val').textContent    = w.temp || '—';
+      document.getElementById('w-lluvia-val').textContent  = w.lluvia || '—';
+      document.getElementById('w-aire-val').textContent    = w.aire || '—';
       return;
     }
-    document.getElementById('w-clima-icon').textContent  = w.climaIcon;
-    document.getElementById('w-clima-val').textContent   = w.clima;
-    document.getElementById('w-temp-val').textContent    = w.temp;
-    document.getElementById('w-lluvia-val').textContent  = w.lluvia;
-    document.getElementById('w-aire-val').textContent    = w.aire;
+
+    /* Sin fila InformeMeteorologico para esta actividad (id_actividad = Id actividad): ejemplo visual */
+    document.getElementById('w-clima-icon').textContent = '☀️';
+    document.getElementById('w-clima-val').textContent = 'Soleado';
+    document.getElementById('w-temp-val').textContent = '22°C';
+    document.getElementById('w-lluvia-val').textContent = '10%';
+    document.getElementById('w-aire-val').textContent = 'Buena';
   }
 
   function getMarkerHtml(a) {

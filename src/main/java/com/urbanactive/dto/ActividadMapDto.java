@@ -6,6 +6,7 @@ public class ActividadMapDto {
     private double lng;
     private String icon;
     private String title;
+    private WeatherDto weather;
 
     public ActividadMapDto() {
     }
@@ -47,5 +48,61 @@ public class ActividadMapDto {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public WeatherDto getWeather() {
+        return weather;
+    }
+
+    public void setWeather(WeatherDto weather) {
+        this.weather = weather;
+    }
+
+    public static class WeatherDto {
+        private String clima;
+        private String climaIcon;
+        private String temp;
+        private String lluvia;
+        private String aire;
+
+        public String getClima() {
+            return clima;
+        }
+
+        public void setClima(String clima) {
+            this.clima = clima;
+        }
+
+        public String getClimaIcon() {
+            return climaIcon;
+        }
+
+        public void setClimaIcon(String climaIcon) {
+            this.climaIcon = climaIcon;
+        }
+
+        public String getTemp() {
+            return temp;
+        }
+
+        public void setTemp(String temp) {
+            this.temp = temp;
+        }
+
+        public String getLluvia() {
+            return lluvia;
+        }
+
+        public void setLluvia(String lluvia) {
+            this.lluvia = lluvia;
+        }
+
+        public String getAire() {
+            return aire;
+        }
+
+        public void setAire(String aire) {
+            this.aire = aire;
+        }
     }
 }
