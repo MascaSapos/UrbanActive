@@ -32,51 +32,133 @@
     <span class="navbar__wordmark">UrbanActive</span>
   </header>
 
-  <!-- MAIN GRID -->
-  <main class="main-content">
-
-    <!-- ROW: Search + Filters (full width) -->
-    <div class="search-area">
-      <div class="search-bar">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input type="search" id="main-search" placeholder="Buscar actividades, lugares..." aria-label="Buscar actividades o lugares">
-      </div>
-      <div class="filter-row" aria-label="Filtros rápidos">
-        <button class="pill pill--active" data-filter="deporte">Deporte</button>
-        <button class="pill pill--active" data-filter="fecha">Fecha</button>
-        <button class="pill pill--active" data-filter="hora">Hora</button>
-        <div class="filter-row__others">
-          <button class="pill pill--idle" id="filter-otros" aria-haspopup="true" aria-expanded="false">
-            Otros
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="others-dropdown" id="otros-dropdown" role="menu">
-            <button class="others-dropdown__item" role="menuitem">Nivel</button>
-            <button class="others-dropdown__item" role="menuitem">Plazas libres</button>
-            <button class="others-dropdown__item" role="menuitem">Duración</button>
-          </div>
-        </div>
-      </div>
+  <!-- SEARCH BAR (ancho completo) -->
+  <div class="search-area">
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="search" id="main-search" placeholder="Buscar actividades, lugares..." aria-label="Buscar actividades o lugares">
     </div>
 
-    <!-- MAP (left, fills height) -->
+    <div class="filter-row" aria-label="Filtros rápidos">
+
+      <!-- Filtro DEPORTE -->
+      <div class="filter-pill-wrap" id="wrap-deporte">
+        <button class="pill pill--idle" id="btn-deporte" aria-haspopup="true" aria-expanded="false" data-filter="deporte">
+          Deporte
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="filter-dropdown" id="dd-deporte" role="menu">
+          <button class="filter-dropdown__item" role="menuitem" data-value="">Todos</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="baloncesto">🏀 Baloncesto</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="running">🏃 Running</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="ciclismo">🚴 Ciclismo</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="futbol">⚽ Fútbol</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="natacion">🏊 Natación</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="yoga">🧘 Yoga</button>
+        </div>
+      </div>
+
+      <!-- Filtro FECHA -->
+      <div class="filter-pill-wrap" id="wrap-fecha">
+        <button class="pill pill--idle" id="btn-fecha" aria-haspopup="true" aria-expanded="false" data-filter="fecha">
+          Fecha
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="filter-dropdown" id="dd-fecha" role="menu">
+          <button class="filter-dropdown__item" role="menuitem" data-value="">Cualquier día</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="hoy">Hoy</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="manana">Mañana</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="semana">Esta semana</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="mes">Este mes</button>
+        </div>
+      </div>
+
+      <!-- Filtro HORA -->
+      <div class="filter-pill-wrap" id="wrap-hora">
+        <button class="pill pill--idle" id="btn-hora" aria-haspopup="true" aria-expanded="false" data-filter="hora">
+          Hora
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="filter-dropdown" id="dd-hora" role="menu">
+          <button class="filter-dropdown__item" role="menuitem" data-value="">Cualquier hora</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="manana">Mañanas (6h–12h)</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="tarde">Tardes (12h–18h)</button>
+          <button class="filter-dropdown__item" role="menuitem" data-value="noche">Noches (18h–24h)</button>
+        </div>
+      </div>
+
+      <!-- Otros -->
+      <div class="filter-pill-wrap" id="wrap-otros">
+        <button class="pill pill--idle" id="filter-otros" aria-haspopup="true" aria-expanded="false">
+          Otros
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="filter-dropdown" id="otros-dropdown" role="menu">
+          <button class="filter-dropdown__item" role="menuitem">Plazas libres</button>
+          <button class="filter-dropdown__item" role="menuitem">Duración</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MAIN: 3 columnas -->
+  <main class="main-content">
+
+    <!-- MAPA (izquierda, ocupa todo el alto) -->
     <section class="map-section" aria-label="Mapa de actividades">
       <div id="map"></div>
       <div class="map-city-label">Madrid</div>
     </section>
 
-    <!-- SIDEBAR (right) -->
+    <!-- PANEL CENTRAL: Lista de actividades filtradas -->
+    <aside class="activity-panel">
+      <div class="activity-panel__header">
+        <span class="activity-panel__title">Actividades</span>
+        <span class="activity-panel__count" id="act-count"
+              th:text="${actividades != null ? actividades.size() : 0} + ' encontradas'">0 encontradas</span>
+      </div>
+
+      <!-- Sin resultados -->
+      <div th:if="${actividades == null or #lists.isEmpty(actividades)}" class="activity-empty">
+        No hay actividades disponibles
+      </div>
+
+      <!-- Tarjetas por actividad -->
+      <div class="activity-list-scroll">
+        <div th:each="a : ${actividades}"
+             class="activity-item"
+             th:data-id="${a.id}"
+             th:data-deporte="${a.tipoDeporte}"
+             th:data-fecha="${#temporals.format(a.fechaHora, 'yyyy-MM-dd''T''HH:mm')}"
+             th:id="'act-' + ${a.id}"
+             onclick="seleccionarActividad(this)">
+          <div class="activity-item__sport" th:text="${a.tipoDeporte}">Deporte</div>
+          <div class="activity-item__meta">
+            <span class="activity-item__fecha"
+                  th:text="${#temporals.format(a.fechaHora, 'dd MMM · HH:mm')}">Fecha</span>
+            <span class="activity-item__lugar"
+                  th:if="${a.id_ubicacion != null}"
+                  th:text="${a.id_ubicacion.nombre}">Lugar</span>
+          </div>
+          <div class="activity-item__plazas"
+               th:text="${a.plazasTotal} + ' plazas'">Plazas</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PANEL DERECHO: Informe Meteo + Botones -->
     <aside class="sidebar">
 
-      <!-- Weather / Adequacy Card -->
+      <!-- Weather Card -->
       <div class="weather-card">
         <div class="weather-card__header">
           <div class="weather-card__dot"></div>
-          <span class="weather-card__title">Adecuación</span>
+          <span class="weather-card__title">Adecuación Meteorológica</span>
         </div>
-        <div class="weather-card__activity" id="w-activity-name">Selecciona un marcador</div>
+        <div class="weather-card__activity" id="w-activity-name">Selecciona una actividad</div>
 
         <div class="weather-grid">
           <div class="weather-tile">
@@ -104,16 +186,24 @@
 
       <!-- Action buttons -->
       <div class="action-buttons">
-        <button class="btn-primary" id="btn-reservar">Reservar plaza</button>
-        <button class="btn-secondary" id="btn-detalles">Ver detalles</button>
+        <!-- Flash: reserva exitosa -->
+        <div th:if="${reservaExito}" class="reserva-banner reserva-banner--ok" role="alert">
+          ✅ ¡Plaza reservada con éxito!
+        </div>
+        <!-- Flash: error al reservar -->
+        <div th:if="${reservaError}" class="reserva-banner reserva-banner--err"
+             th:text="${reservaError}" role="alert"></div>
+
+        <form th:action="@{/reservas}" method="post" id="form-reservar">
+          <input type="hidden" id="input-actividad-id" name="actividadId" value="">
+          <button type="submit" class="btn-primary" id="btn-reservar"
+                  disabled
+                  style="width:100%;justify-content:center;">Reservar plaza</button>
+        </form>
+        <button class="btn-secondary" id="btn-detalles" style="width:100%;justify-content:center;">Ver detalles</button>
       </div>
 
     </aside>
-
-    <!-- FILTERS BAR (below map, left column only) -->
-    <div class="filters-area" aria-label="Filtros">
-      <span style="font-size:.75rem;color:var(--text-3);font-weight:500;flex-shrink:0">3 actividades cercanas</span>
-    </div>
 
   </main>
 </div>

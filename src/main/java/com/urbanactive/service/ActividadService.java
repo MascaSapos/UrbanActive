@@ -68,10 +68,12 @@ public class ActividadService {
         String lugar = u.getNombre() != null && !u.getNombre().isBlank() ? u.getNombre() : u.getId();
         String title = tipo.isEmpty() ? lugar : tipo + " · " + lugar;
         ActividadMapDto dto = new ActividadMapDto();
+        dto.setId(a.getId());
         dto.setLat(u.getLatitud().doubleValue());
         dto.setLng(u.getLongitud().doubleValue());
         dto.setIcon(icon);
         dto.setTitle(title);
+        dto.setTipoDeporte(tipo);
         dto.setWeather(aWeatherDto(a.getId()));
         return dto;
     }
