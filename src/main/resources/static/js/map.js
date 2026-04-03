@@ -13,22 +13,37 @@
   ═══════════════════════════════════════════════════════════ */
   function setWeather(a) {
     var actLabel = document.getElementById('w-activity-name');
-    if (actLabel) actLabel.textContent = a ? (a.title || a.tipoDeporte || 'Actividad') : 'Selecciona una actividad';
+    if (actLabel) {
+      actLabel.textContent = a ? (a.title || a.tipoDeporte || 'Actividad') : 'Selecciona una actividad';
+    }
+
+    function setPanel(icon, clima, temp, lluvia, aire) {
+      var el = document.getElementById('w-clima-icon');  if (el) el.textContent = icon;
+      el = document.getElementById('w-clima-val');       if (el) el.textContent = clima;
+      el = document.getElementById('w-temp-val');        if (el) el.textContent = temp;
+      el = document.getElementById('w-lluvia-val');      if (el) el.textContent = lluvia;
+      el = document.getElementById('w-aire-val');        if (el) el.textContent = aire;
+    }
 
     var w = a && a.weather;
-    if (!w) {
-      var el = document.getElementById('w-clima-icon'); if (el) el.textContent = '—';
-      el = document.getElementById('w-clima-val');  if (el) el.textContent = 'Sin datos';
-      el = document.getElementById('w-temp-val');   if (el) el.textContent = '—';
-      el = document.getElementById('w-lluvia-val'); if (el) el.textContent = '—';
-      el = document.getElementById('w-aire-val');   if (el) el.textContent = '—';
+    if (w) {
+      setPanel(
+        w.climaIcon || '☀️',
+        w.clima || '—',
+        w.temp || '—',
+        w.lluvia || '—',
+        w.aire || '—'
+      );
       return;
     }
-    var el = document.getElementById('w-clima-icon');  if (el) el.textContent = w.climaIcon || '☀️';
-    el = document.getElementById('w-clima-val');        if (el) el.textContent = w.clima    || '—';
-    el = document.getElementById('w-temp-val');         if (el) el.textContent = w.temp     || '—';
-    el = document.getElementById('w-lluvia-val');       if (el) el.textContent = w.lluvia   || '—';
-    el = document.getElementById('w-aire-val');         if (el) el.textContent = w.aire     || '—';
+
+    if (!a) {
+      setPanel('—', 'Sin datos', '—', '—', '—');
+      return;
+    }
+
+    /* Actividad sin fila InformeMeteorologico: ejemplo visual */
+    setPanel('☀️', 'Soleado', '22°C', '10%', 'Buena');
   }
 
   /* ═══════════════════════════════════════════════════════════
