@@ -75,6 +75,7 @@ public class ActividadMapDto {
         private String temp;
         private String lluvia;
         private String aire;
+        private String alerta;
 
         public String getClima() {
             return clima;
@@ -114,6 +115,14 @@ public class ActividadMapDto {
 
         public void setAire(String aire) {
             this.aire = aire;
+        }
+
+        public String getAlerta() {
+            return alerta;
+        }
+
+        public void setAlerta(String alerta) {
+            this.alerta = alerta;
         }
     }
 }

@@ -29,11 +29,14 @@ public class ActividadService {
 
     private final ActividadRepository actividadRepository;
     private final InformeMeteorologicoRepository informeMeteorologicoRepository;
+    private final OpenMeteoClientService openMeteoClientService;
 
     public ActividadService(ActividadRepository actividadRepository,
-            InformeMeteorologicoRepository informeMeteorologicoRepository) {
+                            InformeMeteorologicoRepository informeMeteorologicoRepository,
+                            OpenMeteoClientService openMeteoClientService) {
         this.actividadRepository = actividadRepository;
         this.informeMeteorologicoRepository = informeMeteorologicoRepository;
+        this.openMeteoClientService = openMeteoClientService;
     }
 
     public Actividad crear(Actividad actividad) {
@@ -74,37 +77,75 @@ public class ActividadService {
         dto.setIcon(icon);
         dto.setTitle(title);
         dto.setTipoDeporte(tipo);
-        dto.setWeather(aWeatherDto(a.getId()));
+        dto.setWeather(aWeatherDto(a)); // Pasa todo el objeto Actividad en vez del Id
         return dto;
     }
 
-    private ActividadMapDto.WeatherDto aWeatherDto(String actividadId) {
-        if (actividadId == null || actividadId.isBlank()) {
+    private ActividadMapDto.WeatherDto aWeatherDto(Actividad a) {
+        if (a == null || a.getId() == null) {
             return null;
         }
-        Optional<InformeMeteorologico> optInforme = informeMeteorologicoRepository.findByActividadId(actividadId);
-        if (optInforme.isEmpty()) {
-            return null;
+        
+        Optional<InformeMeteorologico> optInforme = informeMeteorologicoRepository.findByActividadId(a.getId());
+        
+        if (optInforme.isPresent()) {
+            // Caso BBDD
+            InformeMeteorologico informe = optInforme.get();
+            ActividadMapDto.WeatherDto weather = new ActividadMapDto.WeatherDto();
+            Integer lluvia = informe.getProbabilidadLluvia();
+            weather.setLluvia(lluvia != null ? lluvia + "%" : "—");
+            weather.setTemp(informe.getTemperatura() != null ? informe.getTemperatura() + "°C" : "—");
+            weather.setAire(mapearCalidadAire(informe.getCalidadAire()));
+            weather.setClima(mapearClima(lluvia));
+            weather.setClimaIcon(iconoClima(lluvia));
+            
+            // Validador de Advertencia (Caso BBDD)
+            boolean advT = informe.getTemperatura() != null && informe.getTemperatura().compareTo(new java.math.BigDecimal("5")) < 0;
+            boolean advAqi = informe.getCalidadAire() != null && informe.getCalidadAire() >= 60;
+            if (advT || advAqi) {
+                weather.setAlerta("⚠️ Condiciones adversas");
+            }
+            
+            return weather;
+        } else {
+            // Caso API Tiempo Real (Fallback dinámico y con caché!)
+            Ubicacion u = a.getId_ubicacion();
+            if (u == null || u.getLatitud() == null || u.getLongitud() == null || a.getFechaHora() == null) {
+                return null;
+            }
+            try {
+                com.urbanactive.dto.WeatherDto live = openMeteoClientService.getWeather(
+                        u.getLatitud().doubleValue(), u.getLongitud().doubleValue(), a.getFechaHora());
+                
+                ActividadMapDto.WeatherDto weather = new ActividadMapDto.WeatherDto();
+                weather.setTemp(live.getTemperatura() + "°C");
+                weather.setLluvia(live.getProbabilidadLluvia() + "%");
+                weather.setAire(mapearCalidadAire(live.getAqi()));
+                weather.setClimaIcon(live.getEmojiClima());
+                weather.setClima(mapearClima(live.getProbabilidadLluvia()));
+
+                // Validador de Advertencia (Caso API En vivo)
+                boolean advT = live.getTemperatura() != null && live.getTemperatura().compareTo(new java.math.BigDecimal("5")) < 0;
+                boolean advAqi = live.getAqi() != null && live.getAqi() >= 60;
+                if (advT || advAqi) {
+                    weather.setAlerta("⚠️ Condiciones adversas");
+                }
+
+                return weather;
+            } catch (Exception e) {
+                return null;
+            }
         }
-        InformeMeteorologico informe = optInforme.get();
-        ActividadMapDto.WeatherDto weather = new ActividadMapDto.WeatherDto();
-        Integer lluvia = informe.getProbabilidadLluvia();
-        weather.setLluvia(lluvia != null ? lluvia + "%" : "—");
-        weather.setTemp(informe.getTemperatura() != null ? informe.getTemperatura() + "°C" : "—");
-        weather.setAire(mapearCalidadAire(informe.getCalidadAire()));
-        weather.setClima(mapearClima(lluvia));
-        weather.setClimaIcon(iconoClima(lluvia));
-        return weather;
     }
 
     private String mapearCalidadAire(Integer calidadAire) {
-        if (calidadAire == null) {
+        if (calidadAire == null || calidadAire == 0) {
             return "Sin datos";
         }
-        if (calidadAire <= 50) {
+        if (calidadAire <= 40) {
             return "Buena";
         }
-        if (calidadAire <= 100) {
+        if (calidadAire <= 60) {
             return "Moderada";
         }
         return "Mala";
