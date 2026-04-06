@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 public class Actividad {
 
     @Id
-    @Column(name = "Id", length = 10, nullable = false, unique = true)
+    @Column(name = "Id", length = 255, nullable = false, unique = true)
     private String Id;
 
     @Column(name = "tipoDeporte", length = 50, nullable = false)

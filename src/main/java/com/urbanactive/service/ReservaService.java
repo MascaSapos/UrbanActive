@@ -6,24 +6,34 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.urbanactive.model.Actividad;
 import com.urbanactive.model.Reserva;
 import com.urbanactive.model.Usuario;
 import com.urbanactive.repository.ReservaRepository;
+import com.urbanactive.service.ActividadService;
 
 @Service
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
     private final UsuarioService usuarioService;
+    private final ActividadService actividadService;
 
-    public ReservaService(ReservaRepository reservaRepository, UsuarioService usuarioService) {
+    public ReservaService(ReservaRepository reservaRepository, UsuarioService usuarioService, ActividadService actividadService) {
         this.reservaRepository = reservaRepository;
         this.usuarioService = usuarioService;
+        this.actividadService = actividadService;
     }
 
     /** Crea una reserva para el usuario autenticado (identificado por email). */
     public Reserva crearParaUsuario(String actividadId, String email) {
         Usuario usuario = usuarioService.obtenerPorEmail(email);
+        Actividad actividad = actividadService.obtenerPorId(actividadId);
+
+        long ocupadas = reservaRepository.countByActividad(actividad);
+        if (ocupadas >= actividad.getPlazasTotal()) {
+            throw new IllegalArgumentException("No hay plazas disponibles para esta actividad.");
+        }
 
         // ID único de 10 chars, letras y números
         String nuevaId = UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
@@ -32,8 +42,8 @@ public class ReservaService {
         reserva.setId(nuevaId);
         reserva.setFechaReserva(LocalDateTime.now());
         reserva.setEstado("CONFIRMADA");
-        reserva.setId_usuario(usuario.getId());
-        reserva.setId_actividad(actividadId);
+        reserva.setUsuario(usuario);
+        reserva.setActividad(actividad);
         return reservaRepository.save(reserva);
     }
 

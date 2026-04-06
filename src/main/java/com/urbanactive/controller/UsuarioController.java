@@ -27,7 +27,7 @@ public class UsuarioController {
 
     @PostMapping("/registro")
     public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
-        if (usuarioService.obtenerPorEmail(usuario.getEmail()).isPresent()) {
+        if (usuarioService.existePorEmail(usuario.getEmail())) {
             return ResponseEntity.badRequest().body("El email ya está registrado");
         }
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));

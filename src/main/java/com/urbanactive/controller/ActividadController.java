@@ -16,7 +16,7 @@ public class ActividadController {
         this.actividadService = actividadService;
     }
 
-    @GetMapping("/")
+    @GetMapping("/actividades/mapa")
     public String verActividadesLeaflet(Model model) {
         model.addAttribute("actividades", actividadService.obtenerTodas());
         return "index";
@@ -35,4 +35,3 @@ public class ActividadController {
         return "redirect:/";
     }
 }
-

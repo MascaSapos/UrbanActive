@@ -15,7 +15,7 @@ import jakarta.persistence.JoinColumn;
 public class Reserva {
 
     @Id
-    @Column(name = "Id", length = 10, nullable = false, unique = true)
+    @Column(name = "Id", length = 255, nullable = false, unique = true)
     private String Id;
 
     @Column(name = "fechaReserva", nullable = false)
