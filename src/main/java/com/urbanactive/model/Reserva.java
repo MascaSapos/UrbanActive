@@ -7,12 +7,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+
 @Entity
 @Table(name = "Reserva")
 public class Reserva {
 
     @Id
-    @Column(name = "Id", length = 10, nullable = false, unique = true)
+    @Column(name = "Id", length = 255, nullable = false, unique = true)
     private String Id;
 
     @Column(name = "fechaReserva", nullable = false)
@@ -21,21 +24,23 @@ public class Reserva {
     @Column(name = "estado", length = 20, nullable = false)
     private String estado;
 
-    @Column(name = "id_usuario", length = 4, nullable = false)
-    private String id_usuario;
+    @ManyToOne
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
 
-    @Column(name = "id_actividad", length = 4, nullable = false)
-    private String id_actividad;
+    @ManyToOne
+    @JoinColumn(name = "id_actividad", nullable = false)
+    private Actividad actividad;
 
     public Reserva() {
     }
 
-    public Reserva(String Id, LocalDateTime fechaReserva, String estado, String id_usuario, String id_actividad) {
+    public Reserva(String Id, LocalDateTime fechaReserva, String estado, Usuario usuario, Actividad actividad) {
         this.Id = Id;
         this.fechaReserva = fechaReserva;
         this.estado = estado;
-        this.id_usuario = id_usuario;
-        this.id_actividad = id_actividad;
+        this.usuario = usuario;
+        this.actividad = actividad;
     }
 
     public String getId() {
@@ -62,19 +67,19 @@ public class Reserva {
         this.estado = estado;
     }
 
-    public String getId_usuario() {
-        return id_usuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setId_usuario(String id_usuario) {
-        this.id_usuario = id_usuario;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
-    public String getId_actividad() {
-        return id_actividad;
+    public Actividad getActividad() {
+        return actividad;
     }
 
-    public void setId_actividad(String id_actividad) {
-        this.id_actividad = id_actividad;
+    public void setActividad(Actividad actividad) {
+        this.actividad = actividad;
     }
 }

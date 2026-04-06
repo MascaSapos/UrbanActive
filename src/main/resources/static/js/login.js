@@ -159,14 +159,36 @@
   if (regForm) {
     regForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      // TODO: connect to backend
-      console.log('Registro:', {
+      var csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+      var csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+      
+      var newUsuario = {
         nombre: regNameEl ? regNameEl.value : '',
         email:  regEmailEl ? regEmailEl.value : '',
+        password: regPassEl ? regPassEl.value : '',
         rol:    regInputRol ? regInputRol.value : ''
+      };
+
+      fetch('/api/usuarios/registro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          [csrfHeader]: csrfToken
+        },
+        body: JSON.stringify(newUsuario)
+      })
+      .then(function(res) {
+        if(res.ok) {
+           showPanel(loginPanel, registerPanel);
+           if (hintEl) hintEl.textContent = '¡Cuenta creada con éxito! Ya puedes iniciar sesión.';
+        } else {
+           res.text().then(function(text) { alert(text); });
+        }
+      })
+      .catch(function(err) {
+         console.error("Error:", err);
+         alert("Error de red durante el registro");
       });
-      showPanel(loginPanel, registerPanel);
-      if (hintEl) hintEl.textContent = '¡Cuenta creada! Ya puedes iniciar sesión.';
     });
   }
 

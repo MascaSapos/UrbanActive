@@ -1,0 +1,74 @@
+Resumen de Cambios - Sistema de Autenticación y Autorización de Roles (UrbanActive)
+===================================================================================
+
+ARCHIVOS MODIFICADOS:
+-----------------------------------------------------------------------------------
+1. pom.xml
+   - Modificación: Se agregaron las dependencias de `spring-boot-starter-security` y `thymeleaf-extras-springsecurity6`.
+
+2. src/main/java/com/urbanactive/UrbanActiveApplication.java
+   - Modificación: Se implementó un `@Bean CommandLineRunner initData(...)` para poblar la base de datos de manera automática con usuarios de prueba ("hola@test.com" como deportista y "admin@test.com" como organizador) junto con sus contraseñas pre-encriptadas usando BCrypt.
+
+3. src/main/java/com/urbanactive/model/Usuario.java
+   - Modificación: Se añadió el atributo `password` de tipo String (añadiendo Getter, Setter y actualizando el constructor de inicialización de la entidad).
+
+4. src/main/java/com/urbanactive/model/Reserva.java
+   - Modificación: Sustituidos los atributos rígidos `id_usuario` e `id_actividad` (que originalmente eran tipo String) por relaciones de objetos ORM avanzados utilizando `@ManyToOne` para permitir extracciones complejas automáticas de datos cruzados.
+
+5. src/main/java/com/urbanactive/repository/UsuarioRepository.java
+   - Método Creado: `Optional<Usuario> findByEmail(String email);` añadido para buscar credenciales.
+
+6. src/main/java/com/urbanactive/repository/ReservaRepository.java
+   - Método Creado: `long countByActividad(Actividad actividad);`
+   - Método Creado: `List<Reserva> findByUsuario(Usuario usuario);`
+
+7. src/main/java/com/urbanactive/service/UsuarioService.java
+   - Método Creado: `Optional<Usuario> obtenerPorEmail(String email);` que enlaza al repositorio permitiendo su consulta universal desde nuestros controladores.
+
+8. src/main/java/com/urbanactive/service/ReservaService.java
+   - Modificación global del método `crear()`: Se introdujo código para examinar vía base de datos la correspondencia real del límite físico y su comparativa matemática frente a `plazasTotal`. Sumado a la delegación interna de ID y tiempos.
+   - Método Creado: `List<Reserva> obtenerPorUsuario(Usuario usuario);`
+
+9. src/main/java/com/urbanactive/controller/ActividadController.java
+   - Modificación: Se reemplazaron y relocalizaron las URLs troncales del proyecto para que la landing principal fuera el mapa (`/leaflet` se transformó formalmente en `/`).
+   - Método Creado: `nuevaActividadForm()` manejando `/actividades/nueva` (GET).
+   - Método Creado: `guardarActividad()` administrando el guardado natural de peticiones POST de los Formularios Organizadores.
+
+10. src/main/java/com/urbanactive/controller/UsuarioController.java
+   - Método Creado: `ResponseEntity<?> registrar(@RequestBody Usuario usuario)` captando los metadatos JSON para crear usuarios (POST hacia `/api/usuarios/registro`).
+
+11. src/main/resources/templates/index.html
+   - Modificación en cabecera: Se habilitaron atributos xml Thymeleaf-Security.
+   - Modificación visual: Despliegue condicional por rol (`sec:authorize`) visualizando a gusto del consumidor los accesos y escondiéndolos al intruso. 
+   - Modificación funcional interna: Se convirtió el disparador del click para reservas en un formulario de seguridad atado al token anti-falsificación correspondiente a la sesión del Deportista navegando actualmente.
+
+12. src/main/resources/templates/login.html
+   - Modificación: En la cabecera `<head>` se empotraron las variables subyacentes `_csrf` y su `_csrf_header` permitiéndole a los navegadores tomar huellas.
+
+13. src/main/resources/static/js/login.js
+   - Modificación: Sustitución de líneas estáticas "console.log" en la parte de registro por un encadenamiento promisor real `fetch()` capturando metadatos de usuario y tokens de seguridad asistiéndose vía API Restful y despachando alertas correctivas o felicitaciones.
+
+
+ARCHIVOS CREADOS DESDE CERO:
+-----------------------------------------------------------------------------------
+14. src/main/java/com/urbanactive/security/CustomUserDetails.java
+   - Archivo Creado: Representación transicional del `Usuario` original forjada ad-hoc para que entienda el motor de Spring el set de Authorities (ROLE_ORGANIZADOR o DEPORTISTA).
+
+15. src/main/java/com/urbanactive/security/CustomUserDetailsService.java
+   - Archivo Creado: Clase adaptada conteniendo el sobre-escrito `loadUserByUsername()` ordenando la inmersión por base de datos que validará verdaderamente las llaves.
+
+16. src/main/java/com/urbanactive/config/SecurityConfig.java
+   - Archivo Creado: Estandariza todo lo anterior, impone candados a los endpoints impidiendo que cualquier invitado penetre, excluye las partes públicas (CSS, Registros), acota accesos por Roles y asigna un `BCryptPasswordEncoder` transversal.
+
+17. src/main/java/com/urbanactive/controller/ReservaController.java
+   - Archivo Creado conteniendo lo siguiente:
+       - Método de captura para transacciones (`POST`) de los Deportistas que cliquen "Reservar": `reservarActividad()`
+       - Método de enrutamiento (`GET` `/mis-reservas`) al portal estadístico: `verMisReservas()`
+
+18. src/main/resources/templates/nueva-actividad.html
+   - Archivo Creado: Interfaz pura de formularios de HTML+Thymeleaf solicitando a Organizadores deporte, lugares, fechas y plazas para expandir catálogos dinámicamente. 
+
+19. src/main/resources/templates/mis-reservas.html
+   - Archivo Creado: Espacio personal del Deportista dotado de tabla auto-iterativa rellenada recursivamente. 
+
+===================================================================================

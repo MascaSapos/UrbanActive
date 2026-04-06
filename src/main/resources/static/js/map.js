@@ -47,6 +47,36 @@
   }
 
   /* ═══════════════════════════════════════════════════════════
+     AFORO PANEL
+  ═══════════════════════════════════════════════════════════ */
+  function setAforo(id) {
+    if (!id) {
+      if (document.getElementById('w-aforo-libres')) {
+        document.getElementById('w-aforo-libres').textContent = '-- libres';
+        document.getElementById('w-aforo-total').textContent = '-- plazas';
+        document.getElementById('w-aforo-fill').style.width = '0%';
+        document.getElementById('w-aforo-marker').style.left = '0%';
+      }
+      return;
+    }
+    var card = document.getElementById('act-' + id);
+    if (!card) return;
+    
+    var plazas = parseInt(card.getAttribute('data-plazas')) || 0;
+    var libres = parseInt(card.getAttribute('data-libres')) || 0;
+    var ocupadas = Math.max(0, plazas - libres);
+    var pct = plazas > 0 ? (ocupadas / plazas) * 100 : 0;
+    
+    var libresEl = document.getElementById('w-aforo-libres');
+    if (libresEl) {
+      libresEl.textContent = libres + ' libres';
+      document.getElementById('w-aforo-total').textContent = plazas + ' plazas';
+      document.getElementById('w-aforo-fill').style.width = pct + '%';
+      document.getElementById('w-aforo-marker').style.left = pct + '%';
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      MARKER HIGHLIGHTING
   ═══════════════════════════════════════════════════════════ */
   function setActiveMarker(id) {
@@ -87,6 +117,7 @@
     setActiveMarker(id);
     highlightCard(id);
     setWeather(activitiesData[id] || null);
+    setAforo(id);
 
     if (source !== 'map' && theMap && markersMap[id]) {
       theMap.flyTo(markersMap[id].getLatLng(), 15, { animate: true, duration: 0.4 });
@@ -108,6 +139,7 @@
   window.selectActivityCard = function (id) {
     highlightCard(id);
     setWeather(activitiesData[id] || null);
+    setAforo(id);
   };
 
   // Called from map.js to fly map to marker
@@ -398,5 +430,81 @@
         initMap([]);
       });
   });
+
+  /* ═══════════════════════════════════════════════════════════
+     AJAX RESERVATION
+  ═══════════════════════════════════════════════════════════ */
+  window.submitReservaAjax = function() {
+    var actividadId = document.getElementById('input-actividad-id').value;
+    if (!actividadId) return;
+
+    var btn = document.getElementById('btn-reservar');
+    var originalText = btn.innerHTML;
+    btn.innerHTML = 'Reservando...';
+    btn.disabled = true;
+
+    // Get CSRF token if present
+    var form = document.getElementById('form-reservar');
+    var csrfToken = form.querySelector('input[name="_csrf"]');
+    var bodyParams = new URLSearchParams();
+    if (csrfToken) bodyParams.append('_csrf', csrfToken.value);
+
+    fetch('/api/actividades/' + actividadId + '/reservar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: bodyParams
+    })
+    .then(function(res) {
+      if (res.status === 401 || res.status === 403 || res.redirected) {
+        window.location.href = res.url || '/login';
+        throw new Error('No autorizado');
+      }
+      return res.json();
+    })
+    .then(function(data) {
+      if (data.exito) {
+        showModal('✅', '¡Reserva exitosa!', data.mensaje);
+        
+        // Update occupancy locally
+        var card = document.getElementById('act-' + actividadId);
+        if (card) {
+          var libres = parseInt(card.getAttribute('data-libres')) || 0;
+          if (libres > 0) {
+            card.setAttribute('data-libres', libres - 1);
+          }
+        }
+        setAforo(actividadId);
+      } else {
+        var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
+        showModal('❌', 'Error al reservar', msg);
+      }
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    })
+    .catch(function(err) {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      showModal('❌', 'Error de red', err.message || "No se ha podido contactar con el servidor");
+      console.error(err);
+    });
+  };
+
+  function showModal(icon, title, msg) {
+    document.getElementById('modal-icon').innerText = icon;
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-msg').innerText = msg;
+    
+    var modal = document.getElementById('reserva-modal');
+    modal.style.display = 'flex';
+    setTimeout(function() { modal.classList.add('is-visible'); }, 10);
+  }
+
+  window.closeModal = function() {
+    var modal = document.getElementById('reserva-modal');
+    modal.classList.remove('is-visible');
+    setTimeout(function() { modal.style.display = 'none'; }, 300);
+  };
 
 }());

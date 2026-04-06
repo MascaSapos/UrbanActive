@@ -25,6 +25,10 @@ public class UsuarioService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con id: " + id));
     }
 
+    public boolean existePorEmail(String email) {
+        return usuarioRepository.findByEmail(email).isPresent();
+    }
+
     public Usuario obtenerPorEmail(String email) {
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con email: " + email));
