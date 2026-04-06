@@ -26,6 +26,9 @@ public class Actividad {
     @Column(name = "plazasTotal", nullable = false)
     private Integer plazasTotal;
 
+    @Column(name = "estado", length = 20)
+    private String estado = "ABIERTA";
+
     @ManyToOne
     @JoinColumn(name = "id_ubicacion", nullable = false)
     private Ubicacion id_ubicacion;
@@ -79,5 +82,13 @@ public class Actividad {
 
     public void setId_ubicacion(Ubicacion id_ubicacion) {
         this.id_ubicacion = id_ubicacion;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 }

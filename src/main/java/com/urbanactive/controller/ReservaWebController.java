@@ -34,7 +34,20 @@ public class ReservaWebController {
         String email = authentication.getName(); // Spring Security devuelve el username (email)
         try {
             reservaService.crearParaUsuario(actividadId, email);
-            redirectAttributes.addFlashAttribute("reservaExito", true);
+            redirectAttributes.addFlashAttribute("reservaExito", "Éxito");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("reservaError", "Error de aforo");
+        }
+        return "redirect:/";
+    }
+
+    @PostMapping("/reservas/cancelar")
+    public String cancelar(
+            @RequestParam("reservaId") String reservaId,
+            RedirectAttributes redirectAttributes) {
+        try {
+            reservaService.cancelarReserva(reservaId);
+            redirectAttributes.addFlashAttribute("reservaExito", "Reserva cancelada correctamente");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("reservaError", e.getMessage());
         }

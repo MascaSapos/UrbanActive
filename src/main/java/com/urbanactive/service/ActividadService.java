@@ -16,6 +16,7 @@ import com.urbanactive.model.InformeMeteorologico;
 import com.urbanactive.model.Ubicacion;
 import com.urbanactive.repository.ActividadRepository;
 import com.urbanactive.repository.InformeMeteorologicoRepository;
+import com.urbanactive.repository.ReservaRepository;
 
 @Service
 public class ActividadService {
@@ -30,13 +31,16 @@ public class ActividadService {
     private final ActividadRepository actividadRepository;
     private final InformeMeteorologicoRepository informeMeteorologicoRepository;
     private final OpenMeteoClientService openMeteoClientService;
+    private final ReservaRepository reservaRepository;
 
     public ActividadService(ActividadRepository actividadRepository,
                             InformeMeteorologicoRepository informeMeteorologicoRepository,
-                            OpenMeteoClientService openMeteoClientService) {
+                            OpenMeteoClientService openMeteoClientService,
+                            ReservaRepository reservaRepository) {
         this.actividadRepository = actividadRepository;
         this.informeMeteorologicoRepository = informeMeteorologicoRepository;
         this.openMeteoClientService = openMeteoClientService;
+        this.reservaRepository = reservaRepository;
     }
 
     public Actividad crear(Actividad actividad) {
@@ -78,6 +82,9 @@ public class ActividadService {
         dto.setTitle(title);
         dto.setTipoDeporte(tipo);
         dto.setWeather(aWeatherDto(a)); // Pasa todo el objeto Actividad en vez del Id
+        dto.setPlazasTotal(a.getPlazasTotal());
+        dto.setPlazasOcupadas(reservaRepository.countActivasPorActividad(a.getId()));
+        dto.setEstado(a.getEstado());
         return dto;
     }
 

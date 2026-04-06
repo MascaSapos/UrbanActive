@@ -59,12 +59,13 @@
       }
       return;
     }
-    var card = document.getElementById('act-' + id);
-    if (!card) return;
     
-    var plazas = parseInt(card.getAttribute('data-plazas')) || 0;
-    var libres = parseInt(card.getAttribute('data-libres')) || 0;
-    var ocupadas = Math.max(0, plazas - libres);
+    var activity = activitiesData[id];
+    if (!activity) return;
+    
+    var plazas = typeof activity.plazasTotal === 'number' ? activity.plazasTotal : 0;
+    var ocupadas = typeof activity.plazasOcupadas === 'number' ? activity.plazasOcupadas : 0;
+    var libres = Math.max(0, plazas - ocupadas);
     var pct = plazas > 0 ? (ocupadas / plazas) * 100 : 0;
     
     var libresEl = document.getElementById('w-aforo-libres');
@@ -102,11 +103,35 @@
       card.classList.add('is-selected');
       card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-    // Habilitar botón de reservar
+    // Habilitar botón de reservar y actualizar barra de aforo
     var input = document.getElementById('input-actividad-id');
     if (input) input.value = id;
+    
     var btn = document.getElementById('btn-reservar');
-    if (btn) btn.disabled = false;
+    var activity = activitiesData[id];
+
+    if (activity) {
+      if (btn) {
+        if (activity.plazasOcupadas >= activity.plazasTotal || activity.estado === 'CERRADA/COMPLETA') {
+          btn.disabled = true;
+          btn.textContent = 'Aforo completo';
+          btn.style.backgroundColor = '#ccc';
+          btn.style.cursor = 'not-allowed';
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Reservar plaza';
+          btn.style.backgroundColor = '';
+          btn.style.cursor = 'pointer';
+        }
+      }
+    } else {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Reservar plaza';
+        btn.style.backgroundColor = '';
+        btn.style.cursor = 'pointer';
+      }
+    }
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -468,12 +493,8 @@
         showModal('✅', '¡Reserva exitosa!', data.mensaje);
         
         // Update occupancy locally
-        var card = document.getElementById('act-' + actividadId);
-        if (card) {
-          var libres = parseInt(card.getAttribute('data-libres')) || 0;
-          if (libres > 0) {
-            card.setAttribute('data-libres', libres - 1);
-          }
+        if (activitiesData[actividadId]) {
+          activitiesData[actividadId].plazasOcupadas = (activitiesData[actividadId].plazasOcupadas || 0) + 1;
         }
         setAforo(actividadId);
       } else {
