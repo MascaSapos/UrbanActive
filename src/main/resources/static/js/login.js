@@ -1,28 +1,11 @@
 (function () {
 
-  /* ── ROLE TOGGLE ─────────────────────────────────────── */
-
-  var roleButtons = document.querySelectorAll('.role-toggle__btn');
-  var inputRol    = document.getElementById('input-rol');
-  var hintEl      = document.getElementById('role-hint');
+  /* ── GLOBALS ─────────────────────────────────────── */
 
   var hints = {
     deportista: 'Buscas y reservas actividades deportivas',
     organizador: 'Publicas y gestionas tus propias sesiones'
   };
-
-  roleButtons.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      roleButtons.forEach(function (b) {
-        b.classList.remove('is-active');
-        b.setAttribute('aria-pressed', 'false');
-      });
-      btn.classList.add('is-active');
-      btn.setAttribute('aria-pressed', 'true');
-      if (inputRol) inputRol.value = btn.dataset.role;
-      if (hintEl) hintEl.textContent = hints[btn.dataset.role] || '';
-    });
-  });
 
   /* ── LOGIN FORM VALIDATION ───────────────────────────── */
 

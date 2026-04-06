@@ -29,10 +29,15 @@ Spring Boot intentará conectarse automáticamente a vuestro MySQL local seguir 
 
 > *Nota: Al arrancar la aplicación, se crearán todas las tablas automáticamente.*
 
-### 2. Cuenta de Prueba para el Login (Frontend)
-Para probar que el mapa y las vistas funcionan sin tener que registrar un usuario a mano en la base de datos, se ha creado una **cuenta en la memoria del sistema**.
+### 2. Cuentas de Prueba para el Login (Frontend)
+Para probar que el mapa y las vistas funcionan sin tener que registrar un usuario a mano en la base de datos, se crean unas **cuentas de prueba automáticamente** al iniciar la aplicación.
 
-Cuando arranquéis la aplicación (`mvn spring-boot:run`) y vayáis a `http://localhost:8080/login`, usad estas credenciales para entrar:
+Cuando arranquéis la aplicación (`mvn spring-boot:run`) y vayáis a `http://localhost:8080/login`, podéis usar estas credenciales para probar los diferentes roles:
 
+**Para entrar como Deportista:**
 * **Correo electrónico:** `hola@test.com`
+* **Contraseña:** `123456`
+
+**Para entrar como Organizador:**
+* **Correo electrónico:** `admin@test.com`
 * **Contraseña:** `123456`

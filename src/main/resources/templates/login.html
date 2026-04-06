@@ -24,11 +24,7 @@
     <!-- ── PANEL: LOGIN ──────────────────────────────────── -->
     <div id="panel-login" class="panel is-visible">
 
-      <div class="role-toggle" role="group" aria-label="Tipo de usuario">
-        <button type="button" class="role-toggle__btn is-active" aria-pressed="true" data-role="deportista">Deportista</button>
-        <button type="button" class="role-toggle__btn" aria-pressed="false" data-role="organizador">Organizador</button>
-      </div>
-      <p class="role-hint" id="role-hint">Buscas y reservas actividades deportivas</p>
+
 
       <!-- Mensaje de error de autenticación -->
       <div th:if="${loginError}" class="login-error" role="alert">
@@ -37,7 +33,7 @@
       </div>
 
       <form class="login-form" th:action="@{/login}" method="post" novalidate>
-        <input type="hidden" name="rol" id="input-rol" value="deportista">
+        
 
         <div class="form-group">
           <label for="email">Correo electrónico</label>
