@@ -39,9 +39,9 @@
       </div>
       <span class="navbar__wordmark">UrbanActive</span>
       <div class="navbar__right" style="display: flex; gap: 15px; align-items: center; padding-right: 20px;">
-        <a th:href="@{/actividades/nueva}" sec:authorize="hasRole('ORGANIZADOR')" class="btn-primary"
+        <a th:href="@{/actividades/nueva}" sec:authorize="hasAnyAuthority('ORGANIZADOR', 'ROLE_ORGANIZADOR')" class="btn-primary"
           style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Nueva Actividad</a>
-        <a th:href="@{/mis-reservas}" sec:authorize="hasRole('DEPORTISTA')" class="btn-secondary"
+        <a th:href="@{/mis-reservas}" sec:authorize="hasAnyAuthority('DEPORTISTA', 'ROLE_DEPORTISTA', 'USER', 'ROLE_USER')" class="btn-secondary"
           style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Mis Reservas</a>
         <form th:action="@{/logout}" method="post" style="margin: 0;">
           <button type="submit" class="btn-secondary"

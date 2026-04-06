@@ -107,6 +107,11 @@
     var input = document.getElementById('input-actividad-id');
     if (input) input.value = id;
     
+    var btnDetalles = document.getElementById('btn-detalles');
+    if (btnDetalles) {
+      btnDetalles.onclick = function(e) { e.preventDefault(); };
+    }
+    
     var btn = document.getElementById('btn-reservar');
     var activity = activitiesData[id];
 

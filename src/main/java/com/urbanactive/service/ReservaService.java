@@ -41,6 +41,12 @@ public class ReservaService {
             throw new IllegalArgumentException("No hay plazas disponibles para esta actividad.");
         }
 
+        boolean yaInscrito = reservaRepository.findByUsuario(usuario).stream()
+                .anyMatch(r -> r.getActividad().getId().equals(actividadId) && !"CANCELADA".equals(r.getEstado()));
+        if (yaInscrito) {
+            throw new IllegalArgumentException("Ya tienes una plaza confirmada en esta actividad.");
+        }
+
         // ID único de 10 chars, letras y números
         String nuevaId = UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
 
