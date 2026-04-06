@@ -91,4 +91,21 @@ public class Actividad {
     public void setEstado(String estado) {
         this.estado = estado;
     }
+
+    @jakarta.persistence.Transient
+    private Integer plazasOcupadas;
+
+    public Integer getPlazasOcupadas() {
+        return plazasOcupadas;
+    }
+
+    public void setPlazasOcupadas(Integer plazasOcupadas) {
+        this.plazasOcupadas = plazasOcupadas;
+    }
+
+    public Integer getPlazasLibres() {
+        if (plazasTotal == null) return 0;
+        int ocupadas = plazasOcupadas != null ? plazasOcupadas : 0;
+        return Math.max(0, plazasTotal - ocupadas);
+    }
 }

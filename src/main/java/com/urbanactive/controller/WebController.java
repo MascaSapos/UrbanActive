@@ -7,13 +7,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.urbanactive.service.ActividadService;
 
+import com.urbanactive.repository.ReservaRepository;
+import com.urbanactive.model.Actividad;
+import java.util.List;
+
 @Controller
 public class WebController {
 
     private final ActividadService actividadService;
+    private final ReservaRepository reservaRepository;
 
-    public WebController(ActividadService actividadService) {
+    public WebController(ActividadService actividadService, ReservaRepository reservaRepository) {
         this.actividadService = actividadService;
+        this.reservaRepository = reservaRepository;
     }
 
     @GetMapping("/login")
@@ -28,7 +34,11 @@ public class WebController {
 
     @GetMapping("/")
     public String showIndex(Model model) {
-        model.addAttribute("actividades", actividadService.obtenerTodas());
+        List<Actividad> actividades = actividadService.obtenerTodas();
+        for (Actividad a : actividades) {
+            a.setPlazasOcupadas(reservaRepository.countActivasPorActividad(a.getId()));
+        }
+        model.addAttribute("actividades", actividades);
         return "index";
     }
 }

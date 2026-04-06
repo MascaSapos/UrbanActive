@@ -165,7 +165,7 @@
           <div th:each="a : ${actividades}" class="activity-item" th:data-id="${a.id}"
             th:data-deporte="${a.tipoDeporte}" th:data-fecha="${#temporals.format(a.fechaHora, 'yyyy-MM-dd''T''HH:mm')}"
             th:data-plazas="${a.plazasTotal}"
-            th:data-libres="${a.plazasTotal > 15 ? a.plazasTotal - 5 : a.plazasTotal - 2}"
+            th:data-libres="${a.plazasLibres}"
             th:id="'act-' + ${a.id}" onclick="seleccionarActividad(this)">
             <div class="activity-item__sport" th:text="${a.tipoDeporte}">Deporte</div>
             <div class="activity-item__meta">
@@ -174,7 +174,7 @@
               <span class="activity-item__lugar" th:if="${a.id_ubicacion != null}"
                 th:text="${a.id_ubicacion.nombre}">Lugar</span>
             </div>
-            <div class="activity-item__plazas" th:text="${a.plazasTotal} + ' plazas'">Plazas</div>
+            <div class="activity-item__plazas" th:text="${a.plazasLibres} + ' libres'">Plazas</div>
           </div>
         </div>
       </aside>
