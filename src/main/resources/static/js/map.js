@@ -468,22 +468,50 @@
     var actividadId = document.getElementById('input-actividad-id').value;
     if (!actividadId) return;
 
-    // Check for weather alert before reserving
-    var activity = activitiesData[actividadId];
-    if (activity && activity.weather && activity.weather.alerta) {
-      // Build a descriptive warning message
-      var w = activity.weather;
-      var details = 'Temperatura: ' + (w.temp || '—') + '  ·  Aire: ' + (w.aire || '—');
-      document.getElementById('weather-warn-msg').textContent = details;
+    var btn = document.getElementById('btn-reservar');
+    var originalText = btn.innerHTML;
+    btn.innerHTML = 'Verificando...';
+    btn.disabled = true;
 
-      var modal = document.getElementById('weather-warn-modal');
-      modal.style.display = 'flex';
-      setTimeout(function() { modal.classList.add('is-visible'); }, 10);
-      return; // Don't reserve yet, wait for user confirmation
-    }
+    fetch('/api/actividades/' + actividadId + '/check-inscripcion')
+      .then(function(res) {
+          if (!res.ok) throw new Error('Network error');
+          return res.json();
+      })
+      .then(function(data) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
 
-    // No alert → reserve directly
-    doReserva(actividadId);
+          // Si el usuario ya está inscrito, ignoramos la alerta de clima para permitir que 
+          // el backend directamente falle mostrando "Ya tienes una plaza en esta actividad".
+          if (data && data.inscrito) {
+              doReserva(actividadId);
+              return;
+          }
+
+          // Check for weather alert before reserving
+          var activity = activitiesData[actividadId];
+          if (activity && activity.weather && activity.weather.alerta) {
+            // Build a descriptive warning message
+            var w = activity.weather;
+            var details = 'Temperatura: ' + (w.temp || '—') + '  ·  Aire: ' + (w.aire || '—');
+            document.getElementById('weather-warn-msg').textContent = details;
+
+            var modal = document.getElementById('weather-warn-modal');
+            modal.style.display = 'flex';
+            setTimeout(function() { modal.classList.add('is-visible'); }, 10);
+            return; // Don't reserve yet, wait for user confirmation
+          }
+
+          // No alert → reserve directly
+          doReserva(actividadId);
+      })
+      .catch(function(err) {
+          // Fallback silente en caso de error: intenta la reserva normal
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          doReserva(actividadId);
+      });
   };
 
   function doReserva(actividadId) {

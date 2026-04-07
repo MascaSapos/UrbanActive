@@ -63,4 +63,21 @@ public class ActividadMapRestController {
     public ResponseEntity<List<ActividadMapDto>> testmap() {
         return ResponseEntity.ok(actividadService.obtenerParaMapa());
     }
+
+    @GetMapping("/{actividadId}/check-inscripcion")
+    public ResponseEntity<Map<String, Object>> checkInscripcion(@PathVariable String actividadId, Authentication auth) {
+        Map<String, Object> response = new HashMap<>();
+        if (auth == null || !auth.isAuthenticated()) {
+            response.put("inscrito", false);
+            return ResponseEntity.ok(response);
+        }
+        try {
+            boolean inscrito = reservaService.estaUsuarioInscrito(actividadId, auth.getName());
+            response.put("inscrito", inscrito);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("inscrito", false);
+            return ResponseEntity.ok(response);
+        }
+    }
 }
