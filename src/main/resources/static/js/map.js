@@ -569,6 +569,16 @@
           activitiesData[actividadId].plazasOcupadas = (activitiesData[actividadId].plazasOcupadas || 0) + 1;
         }
         setAforo(actividadId);
+
+        // Update the activity card in the left panel
+        var card = document.getElementById('act-' + actividadId);
+        if (card && activitiesData[actividadId]) {
+          var act = activitiesData[actividadId];
+          var libres = Math.max(0, (act.plazasTotal || 0) - (act.plazasOcupadas || 0));
+          card.setAttribute('data-libres', libres);
+          var plazasEl = card.querySelector('.activity-item__plazas');
+          if (plazasEl) plazasEl.textContent = libres + ' libres';
+        }
       } else {
         var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
         showModal('❌', 'Error al reservar', msg);
