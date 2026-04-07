@@ -124,6 +124,8 @@ public class ActividadService {
                 com.urbanactive.dto.WeatherDto live = openMeteoClientService.getWeather(
                         u.getLatitud().doubleValue(), u.getLongitud().doubleValue(), a.getFechaHora());
                 
+                System.out.println("DEBUG WEATHER - Actividad: " + a.getId() + " - Temp: " + live.getTemperatura());
+                
                 ActividadMapDto.WeatherDto weather = new ActividadMapDto.WeatherDto();
                 weather.setTemp(live.getTemperatura() + "°C");
                 weather.setLluvia(live.getProbabilidadLluvia() + "%");

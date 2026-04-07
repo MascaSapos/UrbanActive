@@ -74,7 +74,7 @@ public class OpenMeteoClientService {
         if (weatherResponse != null && weatherResponse.getHourly() != null && weatherResponse.getHourly().getTime() != null) {
             List<String> times = weatherResponse.getHourly().getTime();
             for (int i = 0; i < times.size(); i++) {
-                if (times.get(i).startsWith(targetTimeStr.substring(0, 13))) {
+                if (times.get(i).equals(targetTimeStr) || times.get(i).startsWith(targetTimeStr.substring(0, 13))) {
                     indexWeather = i;
                     break;
                 }

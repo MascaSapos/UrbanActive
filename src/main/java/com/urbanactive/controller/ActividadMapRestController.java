@@ -58,4 +58,9 @@ public class ActividadMapRestController {
             return ResponseEntity.status(500).body(response);
         }
     }
+
+    @GetMapping("/testmap")
+    public ResponseEntity<List<ActividadMapDto>> testmap() {
+        return ResponseEntity.ok(actividadService.obtenerParaMapa());
+    }
 }

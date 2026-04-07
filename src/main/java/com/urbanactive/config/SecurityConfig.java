@@ -20,7 +20,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         // Permite archivos estáticos sin contraseña
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/login", "/styles.css", "/script.js",
-                                "/assets/**", "/api/usuarios/registro")
+                                "/assets/**", "/api/usuarios/registro", "/api/actividades/testmap")
                         .permitAll()
                         .requestMatchers("/actividades/nueva").hasRole("ORGANIZADOR")
                         .requestMatchers("/mis-reservas", "/actividades/*/reservar").hasAnyRole("DEPORTISTA", "USER")
