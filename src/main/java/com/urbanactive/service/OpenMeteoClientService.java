@@ -27,7 +27,10 @@ public class OpenMeteoClientService {
     private String airQualityApiUrl;
 
     public OpenMeteoClientService() {
-        this.restClient = RestClient.create();
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(2500);
+        factory.setReadTimeout(3500);
+        this.restClient = RestClient.builder().requestFactory(factory).build();
     }
 
     @Cacheable("weather")
@@ -82,7 +85,7 @@ public class OpenMeteoClientService {
         }
 
         if (indexWeather == -1 || weatherResponse == null || weatherResponse.getHourly() == null) {
-            return new WeatherDto(BigDecimal.ZERO, 0, "❓", 0);
+            return new WeatherDto(BigDecimal.ZERO, 0, "❓", "Desconocido", 0);
         }
 
         Double temp = weatherResponse.getHourly().getTemperature2m().get(indexWeather);
@@ -107,11 +110,13 @@ public class OpenMeteoClientService {
         }
 
         String emoji = mapCodeToEmoji(weatherCode);
+        String texto = mapCodeToText(weatherCode);
 
         return new WeatherDto(
                 BigDecimal.valueOf(temp != null ? temp : 0.0),
                 precip != null ? precip : 0,
                 emoji,
+                texto,
                 aqi
         );
     }
@@ -129,6 +134,22 @@ public class OpenMeteoClientService {
             case 80: case 81: case 82: return "🌦️"; // Showers
             case 95: case 96: case 99: return "⛈️"; // Thunderstorm
             default: return "🌡️";
+        }
+    }
+
+    private String mapCodeToText(Integer weatherCode) {
+        if (weatherCode == null) return "Desconocido";
+        switch (weatherCode) {
+            case 0: return "Soleado";
+            case 1: case 2: return "Nubes y claros";
+            case 3: return "Nublado";
+            case 45: case 48: return "Niebla";
+            case 51: case 53: case 55: case 56: case 57: return "Llovizna";
+            case 61: case 63: case 65: case 66: case 67: return "Lluvia";
+            case 71: case 73: case 75: case 77: case 85: case 86: return "Nieve";
+            case 80: case 81: case 82: return "Chubascos";
+            case 95: case 96: case 99: return "Tormenta";
+            default: return "Desconocido";
         }
     }
 }

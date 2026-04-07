@@ -6,15 +6,25 @@ public class WeatherDto {
     private BigDecimal temperatura;
     private Integer probabilidadLluvia;
     private String emojiClima;
+    private String textoClima;
     private Integer aqi;
 
     public WeatherDto() {}
 
-    public WeatherDto(BigDecimal temperatura, Integer probabilidadLluvia, String emojiClima, Integer aqi) {
+    public WeatherDto(BigDecimal temperatura, Integer probabilidadLluvia, String emojiClima, String textoClima, Integer aqi) {
         this.temperatura = temperatura;
         this.probabilidadLluvia = probabilidadLluvia;
         this.emojiClima = emojiClima;
+        this.textoClima = textoClima;
         this.aqi = aqi;
+    }
+
+    public String getTextoClima() {
+        return textoClima;
+    }
+
+    public void setTextoClima(String textoClima) {
+        this.textoClima = textoClima;
     }
 
     public BigDecimal getTemperatura() {

@@ -121,6 +121,9 @@ public class ActividadService {
                 return null;
             }
             try {
+                // Buffer to respect Open-Meteo's limit (1000 requests/hour, burst limits heavily restricted under multiple queries)
+                Thread.sleep(700);
+
                 com.urbanactive.dto.WeatherDto live = openMeteoClientService.getWeather(
                         u.getLatitud().doubleValue(), u.getLongitud().doubleValue(), a.getFechaHora());
                 
@@ -131,9 +134,9 @@ public class ActividadService {
                 weather.setLluvia(live.getProbabilidadLluvia() + "%");
                 weather.setAire(mapearCalidadAire(live.getAqi()));
                 weather.setClimaIcon(live.getEmojiClima());
-                weather.setClima(mapearClima(live.getProbabilidadLluvia()));
+                weather.setClima(live.getTextoClima());
 
-                // Validador de Advertencia (Caso API En vivo)
+                // Validador de Advertencia
                 boolean advT = live.getTemperatura() != null && live.getTemperatura().compareTo(new java.math.BigDecimal("5")) < 0;
                 boolean advAqi = live.getAqi() != null && live.getAqi() >= 60;
                 if (advT || advAqi) {
@@ -141,6 +144,9 @@ public class ActividadService {
                 }
 
                 return weather;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return null;
             } catch (Exception e) {
                 return null;
             }
