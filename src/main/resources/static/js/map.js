@@ -468,6 +468,25 @@
     var actividadId = document.getElementById('input-actividad-id').value;
     if (!actividadId) return;
 
+    // Check for weather alert before reserving
+    var activity = activitiesData[actividadId];
+    if (activity && activity.weather && activity.weather.alerta) {
+      // Build a descriptive warning message
+      var w = activity.weather;
+      var details = 'Temperatura: ' + (w.temp || '—') + '  ·  Aire: ' + (w.aire || '—');
+      document.getElementById('weather-warn-msg').textContent = details;
+
+      var modal = document.getElementById('weather-warn-modal');
+      modal.style.display = 'flex';
+      setTimeout(function() { modal.classList.add('is-visible'); }, 10);
+      return; // Don't reserve yet, wait for user confirmation
+    }
+
+    // No alert → reserve directly
+    doReserva(actividadId);
+  };
+
+  function doReserva(actividadId) {
     var btn = document.getElementById('btn-reservar');
     var originalText = btn.innerHTML;
     btn.innerHTML = 'Reservando...';
@@ -515,6 +534,21 @@
       showModal('❌', 'Error de red', err.message || "No se ha podido contactar con el servidor");
       console.error(err);
     });
+  }
+
+  window.closeWeatherWarnAndReserve = function() {
+    var modal = document.getElementById('weather-warn-modal');
+    modal.classList.remove('is-visible');
+    setTimeout(function() { modal.style.display = 'none'; }, 300);
+    // User confirmed → proceed with reservation
+    var actividadId = document.getElementById('input-actividad-id').value;
+    if (actividadId) doReserva(actividadId);
+  };
+
+  window.closeWeatherWarn = function() {
+    var modal = document.getElementById('weather-warn-modal');
+    modal.classList.remove('is-visible');
+    setTimeout(function() { modal.style.display = 'none'; }, 300);
   };
 
   function showModal(icon, title, msg) {
