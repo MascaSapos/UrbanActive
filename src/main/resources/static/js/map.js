@@ -466,19 +466,56 @@
   /* ═══════════════════════════════════════════════════════════
      BOOT
   ═══════════════════════════════════════════════════════════ */
+  var CACHE_KEY = 'urbanactive_activities_cache';
+
+  function getCachedActivities() {
+    try {
+      var raw = sessionStorage.getItem(CACHE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  function setCachedActivities(data) {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    } catch (e) { /* ignore quota errors */ }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     // Init filter dropdowns FIRST (no dependency on map)
     initFilterDropdowns();
 
-    // Then load map + markers
-    fetchActivities()
-      .then(function (activities) {
-        initMap(activities);
-      })
-      .catch(function (err) {
-        console.warn('No se pudieron cargar actividades del servidor:', err.message);
-        initMap([]);
-      });
+    var cached = getCachedActivities();
+
+    if (cached && cached.length > 0) {
+      // Instant init with cached data
+      initMap(cached);
+
+      // Then refresh in background
+      fetchActivities()
+        .then(function (fresh) {
+          setCachedActivities(fresh);
+          // Update activitiesData with fresh occupancy numbers
+          fresh.forEach(function (a) {
+            if (a.id != null) activitiesData[a.id] = a;
+          });
+          // Refresh the aforo panel if an activity is selected
+          if (activeId) setAforo(activeId);
+        })
+        .catch(function () { /* keep using cache */ });
+    } else {
+      // First visit: fetch then init
+      fetchActivities()
+        .then(function (activities) {
+          setCachedActivities(activities);
+          initMap(activities);
+        })
+        .catch(function (err) {
+          console.warn('No se pudieron cargar actividades del servidor:', err.message);
+          initMap([]);
+        });
+    }
   });
 
   /* ═══════════════════════════════════════════════════════════
