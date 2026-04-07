@@ -273,13 +273,13 @@
      FILTER DROPDOWNS
   ═══════════════════════════════════════════════════════════ */
   var activeFilters = { deporte: '', fecha: '', hora: '' };
+  var filterPlazasLibres = false;
 
   function initFilterDropdowns() {
     var configs = [
       { btnId: 'btn-deporte', ddId: 'dd-deporte', key: 'deporte', label: 'Deporte' },
       { btnId: 'btn-fecha',   ddId: 'dd-fecha',   key: 'fecha',   label: 'Fecha'   },
-      { btnId: 'btn-hora',    ddId: 'dd-hora',    key: 'hora',    label: 'Hora'    },
-      { btnId: 'filter-otros', ddId: 'otros-dropdown', key: null,  label: 'Otros'  }
+      { btnId: 'btn-hora',    ddId: 'dd-hora',    key: 'hora',    label: 'Hora'    }
     ];
 
     configs.forEach(function (cfg) {
@@ -354,6 +354,19 @@
     if (searchInput) {
       searchInput.addEventListener('input', applyFrontendFilters);
     }
+
+    // Toggle "Plazas disponibles"
+    var btnPlazas = document.getElementById('btn-plazas-libres');
+    if (btnPlazas) {
+      btnPlazas.addEventListener('click', function (e) {
+        e.stopPropagation();
+        filterPlazasLibres = !filterPlazasLibres;
+        btnPlazas.classList.toggle('pill--active', filterPlazasLibres);
+        btnPlazas.classList.toggle('pill--idle',  !filterPlazasLibres);
+        btnPlazas.setAttribute('aria-pressed', String(filterPlazasLibres));
+        applyFrontendFilters();
+      });
+    }
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -417,7 +430,14 @@
         }
       }
 
-      var visible = matchText && matchDeporte && matchFecha && matchHora;
+      // ── Filtro Plazas libres ─────────────────────────────────
+      var matchPlazas = true;
+      if (filterPlazasLibres) {
+        var libres = parseInt(item.getAttribute('data-libres'), 10);
+        matchPlazas = !isNaN(libres) && libres > 0;
+      }
+
+      var visible = matchText && matchDeporte && matchFecha && matchHora && matchPlazas;
 
       // ── Tarjeta DOM ──────────────────────────────────────────
       item.style.display = visible ? '' : 'none';
