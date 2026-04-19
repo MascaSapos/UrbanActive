@@ -8,7 +8,7 @@
   <meta name="description" content="Gestiona tus actividades como organizador en UrbanActive.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" th:href="@{/css/perfil-organizador.css}" href="../static/css/perfil-organizador.css">
+  <link rel="stylesheet" th:href="@{/css/profile-shared.css}" href="../static/css/profile-shared.css">
 </head>
 
 <body>
@@ -21,6 +21,9 @@
       </a>
       <span class="navbar__wordmark">UrbanActive</span>
       <div class="navbar__actions">
+        <button class="btn-theme" id="btn-theme" aria-label="Cambiar modo oscuro/claro" title="Modo oscuro">
+          🌙
+        </button>
         <a th:href="@{/actividades/nueva}" href="/actividades/nueva" class="btn-primary" id="btn-nueva-actividad">
           + Nueva Actividad
         </a>
@@ -341,7 +344,22 @@
       }, 3500);
     }
 
-    // ── INIT ──────────────────────────────────────────────────
+    // ── DARK MODE ────────────────────────────────────────
+    const THEME_KEY = 'ua_theme';
+    const btnTheme  = document.getElementById('btn-theme');
+    function applyTheme(dark) {
+      document.body.classList.toggle('dark', dark);
+      btnTheme.textContent = dark ? '\u2600\uFE0F' : '\uD83C\uDF19';
+      btnTheme.title = dark ? 'Modo claro' : 'Modo oscuro';
+    }
+    applyTheme(localStorage.getItem(THEME_KEY) === 'dark');
+    btnTheme.addEventListener('click', () => {
+      const isDark = !document.body.classList.contains('dark');
+      localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+      applyTheme(isDark);
+    });
+
+    // ── INIT ───────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', loadActividades);
 
     // Cerrar modal al hacer clic fuera

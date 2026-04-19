@@ -1,31 +1,233 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 <head>
   <meta charset="UTF-8">
-  <title>Mis Reservas - UrbanActive</title>
-  <link rel="stylesheet" th:href="@{/css/map.css}" href="../static/css/map.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrbanActive – Mis Reservas</title>
+  <meta name="description" content="Consulta y gestiona tus reservas de actividades deportivas en UrbanActive.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" th:href="@{/css/profile-shared.css}" href="../static/css/profile-shared.css">
 </head>
-<body style="padding: 2rem; font-family: sans-serif;">
-  <h2>Mis Reservas</h2>
-  <table style="width: 100%; text-align: left; border-collapse: collapse; margin-top: 2rem;">
-    <thead>
-        <tr style="border-bottom: 2px solid #ccc;">
-            <th style="padding: 10px;">Actividad</th>
-            <th style="padding: 10px;">Fecha y Hora</th>
-            <th style="padding: 10px;">Estado</th>
-            <th style="padding: 10px;">Fecha de Reserva</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr th:each="reserva : ${reservas}" style="border-bottom: 1px solid #eee;">
-            <td th:text="${reserva.actividad.tipoDeporte}" style="padding: 10px;">Running</td>
-            <td th:text="${reserva.actividad.fechaHora}" style="padding: 10px;">2024-05-12T10:00</td>
-            <td th:text="${reserva.estado}" style="padding: 10px;">Activa</td>
-            <td th:text="${reserva.fechaReserva}" style="padding: 10px;">2024-05-10T15:00</td>
-        </tr>
-    </tbody>
-  </table>
-  <br>
-  <a th:href="@{/}" class="btn-secondary" style="padding: 10px 20px; text-decoration: none;">Volver al mapa</a>
+
+<body>
+  <div class="page-wrapper">
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <a th:href="@{/}" href="/" class="btn-back" id="btn-volver-mapa">← Atrás</a>
+      <span class="navbar__wordmark">UrbanActive</span>
+      <div class="navbar__actions">
+        <button class="btn-theme" id="btn-theme" aria-label="Cambiar modo oscuro/claro" title="Modo oscuro">
+          🌙
+        </button>
+        <form th:action="@{/logout}" method="post" style="margin: 0;">
+          <button type="submit" class="btn-secondary" id="btn-salir">Salir</button>
+        </form>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="profile-main">
+
+      <!-- BLOQUE SUPERIOR: Datos del deportista -->
+      <section class="profile-hero" aria-label="Datos del deportista">
+        <div class="profile-hero__body">
+          <div class="profile-avatar profile-avatar--athlete" id="profile-avatar"
+               th:text="${avatarInicial}">?</div>
+          <div class="profile-info">
+            <h1 class="profile-info__name" id="profile-name"
+                th:text="${usuario != null ? usuario.nombre : 'Deportista'}">Deportista</h1>
+            <p class="profile-info__email" id="profile-email"
+               th:text="${usuario != null ? usuario.email : ''}"></p>
+            <div class="profile-info__badges">
+              <span class="badge badge--athlete">🏃 Deportista</span>
+              <span class="badge badge--count" id="badge-count">… reservas</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-hero__stats">
+          <div class="profile-stat">
+            <span class="profile-stat__value" id="stat-total">—</span>
+            <span class="profile-stat__label">Total</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value" id="stat-confirmadas">—</span>
+            <span class="profile-stat__label">Confirmadas</span>
+          </div>
+          <div class="profile-stat">
+            <span class="profile-stat__value" id="stat-canceladas">—</span>
+            <span class="profile-stat__label">Canceladas</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- LISTA DE RESERVAS -->
+      <section aria-label="Lista de reservas">
+        <div class="section-header">
+          <h2 class="section-title">Mis Reservas</h2>
+        </div>
+
+        <div id="reservas-loading" class="loading-state">
+          <span class="spinner"></span>
+          <span class="loading-state__text">Cargando reservas…</span>
+        </div>
+
+        <div id="reservas-empty" class="empty-state" style="display:none;">
+          <span class="empty-state__icon">🎯</span>
+          <strong class="empty-state__title">Aún no tienes reservas</strong>
+          <span class="empty-state__desc">Explora el mapa y reserva tu primera actividad.</span>
+          <a th:href="@{/}" href="/" class="btn-primary" style="margin-top: 4px;">
+            Explorar actividades
+          </a>
+        </div>
+
+        <div id="reservas-list" role="list" aria-label="Reservas"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <script th:inline="none">
+
+    // ── DARK MODE ────────────────────────────────────────
+    const THEME_KEY = 'ua_theme';
+    const btnTheme  = document.getElementById('btn-theme');
+    function applyTheme(dark) {
+      document.body.classList.toggle('dark', dark);
+      btnTheme.textContent = dark ? '☀️' : '🌙';
+      btnTheme.title = dark ? 'Modo claro' : 'Modo oscuro';
+    }
+    applyTheme(localStorage.getItem(THEME_KEY) === 'dark');
+    btnTheme.addEventListener('click', () => {
+      const isDark = !document.body.classList.contains('dark');
+      localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+      applyTheme(isDark);
+    });
+
+    // ── LAST-VISIT TRACKING ──────────────────────────────
+    const LAST_VISIT_KEY = 'ua_reservas_last_visit';
+    const lastVisit = parseInt(localStorage.getItem(LAST_VISIT_KEY) || '0', 10);
+    localStorage.setItem(LAST_VISIT_KEY, Date.now().toString());
+
+    // ── UTILS ────────────────────────────────────────────
+    function showToast(msg, type) {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = 'toast toast--' + (type || 'ok');
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 4000);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      try {
+        const d = new Date(dateStr.replace('T', ' '));
+        return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+             + ' · ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      } catch { return dateStr; }
+    }
+
+    function sportIcon(tipo) {
+      const map = {
+        'futbol': '⚽', 'fútbol': '⚽', 'natacion': '🏊', 'natación': '🏊',
+        'yoga': '🧘', 'running': '🏃', 'ciclismo': '🚴', 'tenis': '🎾',
+        'baloncesto': '🏀', 'padel': '🏓', 'pádel': '🏓',
+      };
+      return map[(tipo || '').toLowerCase().trim()] || '🏅';
+    }
+
+    function pillClass(estado) {
+      const e = (estado || '').toUpperCase();
+      if (e === 'CONFIRMADA') return 'status-pill--confirmada';
+      if (e === 'CANCELADA')  return 'status-pill--cancelada';
+      return 'status-pill--pendiente';
+    }
+
+    // ── RENDER CARD ──────────────────────────────────────
+    function renderCard(reserva) {
+      const act = reserva.actividad || {};
+      const actId = act.id || '';
+      const fechaReservaMs = reserva.fechaReserva ? new Date(reserva.fechaReserva.replace('T', ' ')).getTime() : 0;
+      const isNew = fechaReservaMs > lastVisit && lastVisit > 0;
+
+      const card = document.createElement('a');
+      card.className = 'reserva-card' + (isNew ? ' reserva-card--new' : '');
+      card.setAttribute('role', 'listitem');
+      card.href = actId ? '/?actividadId=' + encodeURIComponent(actId) : '/';
+      card.id = 'reserva-' + escapeHtml(reserva.id || '');
+
+      card.innerHTML = `
+        ${isNew ? '<span class="new-dot" title="Nueva desde tu última visita"></span>' : ''}
+        <div class="reserva-card__icon">${sportIcon(act.tipoDeporte)}</div>
+        <div class="reserva-card__info">
+          <div class="reserva-card__title">${escapeHtml(act.tipoDeporte || 'Actividad')}</div>
+          <div class="reserva-card__meta">
+            ${act.fechaHora ? `<span class="reserva-card__meta-item">📅 ${formatDate(act.fechaHora)}</span>` : ''}
+            ${reserva.fechaReserva ? `<span class="reserva-card__meta-item">🎫 Reservado ${formatDate(reserva.fechaReserva)}</span>` : ''}
+            ${act.lugar   ? `<span class="reserva-card__meta-item">📍 ${escapeHtml(act.lugar)}</span>` : ''}
+          </div>
+        </div>
+        <div class="reserva-card__right">
+          <span class="status-pill ${pillClass(reserva.estado)}">${escapeHtml(reserva.estado || '—')}</span>
+        </div>
+        <span class="reserva-card__chevron">›</span>
+      `;
+      return card;
+    }
+
+    // ── STATS ────────────────────────────────────────────
+    function updateStats(reservas) {
+      const total = reservas.length;
+      const conf  = reservas.filter(r => (r.estado || '').toUpperCase() === 'CONFIRMADA').length;
+      const canc  = reservas.filter(r => (r.estado || '').toUpperCase() === 'CANCELADA').length;
+      document.getElementById('stat-total').textContent       = total;
+      document.getElementById('stat-confirmadas').textContent = conf;
+      document.getElementById('stat-canceladas').textContent  = canc;
+      document.getElementById('badge-count').textContent      = total === 1 ? '1 reserva' : total + ' reservas';
+    }
+
+    // ── LOAD ─────────────────────────────────────────────
+    async function loadReservas() {
+      try {
+        const res = await fetch('/api/reservas/mis-reservas', { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('Error del servidor (' + res.status + ')');
+        const reservas = await res.json();
+
+        document.getElementById('reservas-loading').style.display = 'none';
+
+        if (!reservas || reservas.length === 0) {
+          document.getElementById('reservas-empty').style.display = 'flex';
+          updateStats([]);
+          return;
+        }
+
+        updateStats(reservas);
+        const list = document.getElementById('reservas-list');
+        list.style.display = 'flex';
+        reservas.forEach(r => list.appendChild(renderCard(r)));
+
+      } catch (err) {
+        document.getElementById('reservas-loading').style.display = 'none';
+        document.getElementById('reservas-empty').style.display = 'flex';
+        showToast('❌ Error al cargar reservas: ' + err.message, 'err');
+      }
+    }
+
+    loadReservas();
+  </script>
 </body>
 </html>
