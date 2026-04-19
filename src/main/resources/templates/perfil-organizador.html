@@ -360,7 +360,24 @@
     });
 
     // ── INIT ───────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', loadActividades);
+    async function refreshActividades() {
+      // Record current baseline count to clear dot
+      try {
+        const r = await fetch('/api/notificaciones/count', { credentials: 'same-origin' });
+        if (r.ok) {
+           const d = await r.json();
+           localStorage.setItem('ua_notif_count', String(d.count ?? 0));
+        }
+      } catch(e){}
+
+      document.getElementById('activities-list').innerHTML = '';
+      loadActividades();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshActividades();
+      setInterval(refreshActividades, 20_000);
+    });
 
     // Cerrar modal al hacer clic fuera
     document.getElementById('confirm-modal').addEventListener('click', function(e) {
