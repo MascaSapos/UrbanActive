@@ -558,6 +558,22 @@
           initMap([]);
         });
     }
+
+    // ── URL PARAM CHECK ──────────────────────────────────────
+    var params = new URLSearchParams(window.location.search);
+    var targetId = params.get('actividadId');
+    if (targetId) {
+      setTimeout(function() {
+        if (activitiesData[targetId]) {
+          selectActivity(targetId, 'url');
+        } else {
+          // If not in data yet (async fetch), try again in a bit
+          setTimeout(function() {
+            if (activitiesData[targetId]) selectActivity(targetId, 'url');
+          }, 1000);
+        }
+      }, 600);
+    }
   });
 
   /* ═══════════════════════════════════════════════════════════
