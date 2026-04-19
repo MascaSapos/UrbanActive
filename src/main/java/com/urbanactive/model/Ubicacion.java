@@ -12,8 +12,8 @@ import jakarta.persistence.Table;
 public class Ubicacion {
 
     @Id
-    @Column(name = "Id", length = 10, nullable = false, unique = true)
-    private String Id;
+    @Column(name = "id", length = 10, nullable = false, unique = true)
+    private String id;
 
     @Column(name = "nombre", length = 255)
     private String nombre;
@@ -30,8 +30,8 @@ public class Ubicacion {
     public Ubicacion() {
     }
 
-    public Ubicacion(String Id, String nombre, String tipoEspacio, BigDecimal latitud, BigDecimal longitud) {
-        this.Id = Id;
+    public Ubicacion(String id, String nombre, String tipoEspacio, BigDecimal latitud, BigDecimal longitud) {
+        this.id = id;
         this.nombre = nombre;
         this.tipoEspacio = tipoEspacio;
         this.latitud = latitud;
@@ -39,11 +39,11 @@ public class Ubicacion {
     }
 
     public String getId() {
-        return Id;
+        return id;
     }
 
-    public void setId(String Id) {
-        this.Id = Id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getNombre() {

@@ -35,9 +35,9 @@
           <span class="navbar__bell-dot" aria-hidden="true"></span>
         </button>
         <a th:href="@{/perfil-organizador}" sec:authorize="hasAnyAuthority('ORGANIZADOR', 'ROLE_ORGANIZADOR')" 
-           class="navbar__profile-label" style="text-decoration: none; cursor: pointer;">Mi Perfil</a>
+           class="btn-primary" style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Mi Perfil</a>
         <a th:href="@{/mis-reservas}" sec:authorize="hasAnyAuthority('DEPORTISTA', 'ROLE_DEPORTISTA', 'USER', 'ROLE_USER')" 
-           class="navbar__profile-label" style="text-decoration: none; cursor: pointer;">Mis Reservas</a>
+           class="btn-primary" style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Mis Reservas</a>
       </div>
       <span class="navbar__wordmark">UrbanActive</span>
       <div class="navbar__right" style="display: flex; gap: 15px; align-items: center; padding-right: 20px;">

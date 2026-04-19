@@ -90,8 +90,11 @@ public class ActividadMapRestController {
         
         List<com.urbanactive.model.Actividad> actividades = actividadService.obtenerPorOrganizador(auth.getName());
         List<ActividadMapDto> result = actividades.stream().map(a -> {
+            String aid = a.getId();
+            if (aid == null) return null;
+            
             ActividadMapDto dto = new ActividadMapDto();
-            dto.setId(a.getId());
+            dto.setId(aid);
             dto.setTipoDeporte(a.getTipoDeporte() != null ? a.getTipoDeporte() : "");
             dto.setEstado(a.getEstado());
             dto.setPlazasTotal(a.getPlazasTotal() != null ? a.getPlazasTotal() : 0);
@@ -110,7 +113,8 @@ public class ActividadMapRestController {
                 dto.setFechaHora(a.getFechaHora().toString());
             }
             return dto;
-        }).collect(java.util.stream.Collectors.toList());
+        }).filter(java.util.Objects::nonNull)
+          .collect(java.util.stream.Collectors.toList());
         
         return ResponseEntity.ok(result);
     }

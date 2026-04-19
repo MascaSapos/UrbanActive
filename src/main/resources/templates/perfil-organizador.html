@@ -183,6 +183,12 @@
       const pct       = act.plazasTotal > 0 ? Math.round((act.plazasOcupadas / act.plazasTotal) * 100) : 0;
       const isOpen    = (act.estado || '').toUpperCase() === 'ABIERTA';
       const alertFlag = hasAlert(act);
+      
+      // Si falta el ID, algo va mal en la serialización
+      if (!act.id) {
+        console.error('ERROR: Actividad sin ID detectada:', act);
+        console.log('Keys disponibles:', Object.keys(act));
+      }
 
       const row = document.createElement('div');
       row.className = 'activity-row';
@@ -208,9 +214,9 @@
           ${alertFlag ? `<div class="alert-dot" title="Actividad cerrada/completa — hay cambios pendientes de revisión"><div class="alert-dot__ring"></div></div>` : ''}
           <span class="status-pill ${isOpen ? 'status-pill--abierta' : 'status-pill--cerrada'}">${escapeHtml(act.estado || '—')}</span>
           <button class="btn-danger"
-                  id="btn-delete-${escapeHtml(act.id)}"
-                  aria-label="Eliminar actividad ${escapeHtml(act.tipoDeporte || act.id)}"
-                  onclick="event.stopPropagation(); confirmDelete('${escapeHtml(act.id)}', '${escapeHtml(act.tipoDeporte || 'esta actividad')}')">
+                  id="btn-delete-${escapeHtml(act.id || 'missing')}"
+                  aria-label="Eliminar actividad ${escapeHtml(act.tipoDeporte || act.id || '')}"
+                  onclick="event.stopPropagation(); if(this.parentElement.parentElement.dataset.id && this.parentElement.parentElement.dataset.id !== 'undefined') { confirmDelete(this.parentElement.parentElement.dataset.id, '${escapeHtml(act.tipoDeporte || 'esta actividad')}') } else { alert('Error: No se pudo encontrar el ID de la actividad.'); }">
             🗑 Eliminar
           </button>
         </div>
@@ -240,6 +246,7 @@
         const res = await fetch('/api/actividades/mis-actividades', { credentials: 'same-origin' });
         if (!res.ok) throw new Error('No autorizado o error del servidor (' + res.status + ')');
         const actividades = await res.json();
+        console.log('DEBUG MIS-ACTIVIDADES:', actividades);
 
         document.getElementById('activities-loading').style.display = 'none';
 
@@ -278,8 +285,9 @@
 
     document.getElementById('btn-confirm-ok').addEventListener('click', async function() {
       if (!pendingDeleteId) return;
+      const idToDelete = pendingDeleteId;
       closeConfirmModal();
-      await deleteActividad(pendingDeleteId);
+      await deleteActividad(idToDelete);
     });
 
     async function deleteActividad(actividadId) {

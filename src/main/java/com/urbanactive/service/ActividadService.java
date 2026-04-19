@@ -202,10 +202,25 @@ public class ActividadService {
         return actividadRepository.save(existente);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void borrar(String id) {
-        if (!actividadRepository.existsById(id)) {
+        Actividad actividad = actividadRepository.findById(id).orElse(null);
+        if (actividad == null) {
             throw new IllegalArgumentException("Actividad no encontrada con id: " + id);
         }
-        actividadRepository.deleteById(id);
+        
+        // 1. Borrar informe meteorológico asociado
+        informeMeteorologicoRepository.findByActividadId(id).ifPresent(informe -> {
+            informeMeteorologicoRepository.delete(informe);
+        });
+        
+        // 2. Borrar reservas asociadas
+        java.util.List<com.urbanactive.model.Reserva> reservas = reservaRepository.findByActividad(actividad);
+        if (!reservas.isEmpty()) {
+            reservaRepository.deleteAll(reservas);
+        }
+        
+        // 3. Borrar la actividad
+        actividadRepository.delete(actividad);
     }
 }

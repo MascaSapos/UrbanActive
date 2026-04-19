@@ -1,7 +1,10 @@
 package com.urbanactive.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ActividadMapDto {
 
+    @JsonProperty("id")
     private String id;
     private double lat;
     private double lng;
