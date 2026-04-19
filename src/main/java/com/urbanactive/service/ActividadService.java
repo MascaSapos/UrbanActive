@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import com.urbanactive.dto.ActividadMapDto;
 import com.urbanactive.model.Actividad;
@@ -60,7 +60,10 @@ public class ActividadService {
         return actividadRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
+    public List<Actividad> obtenerPorOrganizador(String email) {
+        return actividadRepository.findByOrganizadorEmailIncludeNulls(email);
+    }
+
     public List<ActividadMapDto> obtenerParaMapa() {
         return actividadRepository.findAll().stream()
                 .map(this::aMapDto)
@@ -125,10 +128,7 @@ public class ActividadService {
                 return null;
             }
             try {
-                // Buffer to respect Open-Meteo's limit (1000 requests/hour, burst limits heavily restricted under multiple queries)
-                Thread.sleep(700);
-
-                com.urbanactive.dto.WeatherDto live = openMeteoClientService.getWeather(
+                 com.urbanactive.dto.WeatherDto live = openMeteoClientService.getWeather(
                         u.getLatitud().doubleValue(), u.getLongitud().doubleValue(), a.getFechaHora());
                 
                 System.out.println("DEBUG WEATHER - Actividad: " + a.getId() + " - Temp: " + live.getTemperatura());
@@ -148,9 +148,6 @@ public class ActividadService {
                 }
 
                 return weather;
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return null;
             } catch (Exception e) {
                 return null;
             }

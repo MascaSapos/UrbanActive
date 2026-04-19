@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrbanActive – Mi Perfil</title>
+  <meta name="description" content="Gestiona tus actividades como organizador en UrbanActive.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" th:href="@{/css/perfil-organizador.css}" href="../static/css/perfil-organizador.css">
+</head>
+
+<body>
+  <div class="page-wrapper">
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <a th:href="@{/}" href="/" class="btn-back" id="btn-volver-mapa">
+        ← Atrás
+      </a>
+      <span class="navbar__wordmark">UrbanActive</span>
+      <div class="navbar__actions">
+        <a th:href="@{/actividades/nueva}" href="/actividades/nueva" class="btn-primary" id="btn-nueva-actividad">
+          + Nueva Actividad
+        </a>
+        <form th:action="@{/logout}" method="post" style="margin: 0;">
+          <button type="submit" class="btn-secondary" id="btn-salir">Salir</button>
+        </form>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="profile-main">
+
+      <!-- BLOQUE SUPERIOR: Datos del organizador -->
+      <section class="profile-hero" aria-label="Datos del organizador">
+        <div class="profile-hero__body">
+          <div class="profile-avatar" id="profile-avatar" th:text="${avatarInicial}">?</div>
+          <div class="profile-info">
+            <h1 class="profile-info__name" id="profile-name" th:text="${usuario != null ? usuario.nombre : 'Organizador'}">Organizador</h1>
+            <p class="profile-info__email" id="profile-email" th:text="${usuario != null ? usuario.email : ''}"></p>
+            <div class="profile-info__badges">
+              <span class="badge badge--organizer">🏅 Organizador</span>
+              <span class="badge badge--count" id="badge-count">… actividades</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-hero__stats">
+          <div class="profile-stat">
+            <div class="profile-stat__value" id="stat-total">—</div>
+            <div class="profile-stat__label">Actividades creadas</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat__value" id="stat-abiertas">—</div>
+            <div class="profile-stat__label">Abiertas</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat__value" id="stat-plazas">—</div>
+            <div class="profile-stat__label">Plazas totales</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat__value" id="stat-ocupacion">—</div>
+            <div class="profile-stat__label">Ocupación media</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LISTADO DE ACTIVIDADES -->
+      <section aria-label="Mis actividades">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Mis Actividades</h2>
+            <p class="section-subtitle">Haz clic en una actividad para ver sus detalles</p>
+          </div>
+        </div>
+
+        <!-- Estado de carga -->
+        <div class="loading-state" id="activities-loading">
+          <div class="spinner"></div>
+          <p class="loading-state__text">Cargando actividades…</p>
+        </div>
+
+        <!-- Estado vacío (oculto por defecto) -->
+        <div class="empty-state" id="activities-empty" style="display:none;">
+          <div class="empty-state__icon">🏃</div>
+          <h3 class="empty-state__title">Aún no has creado ninguna actividad</h3>
+          <p class="empty-state__desc">Crea tu primera actividad deportiva y empieza a reunir participantes</p>
+          <a th:href="@{/actividades/nueva}" href="/actividades/nueva" class="btn-primary" id="btn-crear-primera">
+            + Crear actividad
+          </a>
+        </div>
+
+        <!-- Lista real (oculta hasta cargar) -->
+        <div class="activities-list" id="activities-list" style="display:none;" role="list">
+          <!-- items insertados por JS -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal de confirmación de eliminación -->
+  <div class="modal-overlay" id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="modal-box">
+      <div class="modal-box__icon">🗑️</div>
+      <h3 class="modal-box__title" id="confirm-title">Eliminar actividad</h3>
+      <p class="modal-box__desc" id="confirm-desc">¿Deseas eliminar esta actividad? Esta acción no se puede deshacer y se cancelarán todas las reservas asociadas.</p>
+      <div class="modal-box__actions">
+        <button class="btn-secondary" id="btn-confirm-cancel" onclick="closeConfirmModal()">Cancelar</button>
+        <button class="btn-danger" id="btn-confirm-ok" style="flex:1; justify-content:center;">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- CSRF como atributos de modelo pre-calculados en Java (evita DeferredCsrfToken en Spring Security 6) -->
+  <input type="hidden" id="js-csrf-header" th:value="${csrfHeader}" value="X-CSRF-TOKEN">
+  <input type="hidden" id="js-csrf-token" th:value="${csrfTokenValue}" value="">
+
+  <script th:inline="none">
+
+    const CSRF_HEADER = document.getElementById('js-csrf-header').value;
+    const CSRF_TOKEN  = document.getElementById('js-csrf-token').value;
+
+    // ── SPORT ICONS ──────────────────────────────────────────
+    const SPORT_ICONS = {
+      baloncesto: '🏀',
+      running:    '🏃',
+      ciclismo:   '🚴',
+      futbol:     '⚽',
+      natacion:   '🏊',
+      yoga:       '🧘',
+    };
+    function sportIcon(tipo) {
+      return SPORT_ICONS[(tipo || '').toLowerCase()] || '📍';
+    }
+
+    // ── FORMAT DATE ───────────────────────────────────────────
+    function formatDate(isoStr) {
+      if (!isoStr) return '—';
+      const d = new Date(isoStr);
+      return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+           + ' · ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ── ALERT DOT: actividades con cambios recientes (estado CERRADA/COMPLETA) ──
+    function hasAlert(act) {
+      return act.estado && act.estado.toUpperCase().includes('CERRADA');
+    }
+
+    // ── OCCUPANCY ─────────────────────────────────────────────
+    function occupancyClass(pct) {
+      if (pct >= 100) return 'occupancy-bar__fill--full';
+      if (pct >= 70)  return 'occupancy-bar__fill--warning';
+      return 'occupancy-bar__fill--ok';
+    }
+
+    // ── STATS ─────────────────────────────────────────────────
+    function updateStats(actividades) {
+      const total    = actividades.length;
+      const abiertas = actividades.filter(a => a.estado && a.estado.toUpperCase() === 'ABIERTA').length;
+      const plazas   = actividades.reduce((s, a) => s + (a.plazasTotal || 0), 0);
+      const pctMedia = total > 0
+        ? Math.round(actividades.reduce((s, a) => {
+            const pct = a.plazasTotal > 0 ? (a.plazasOcupadas / a.plazasTotal) * 100 : 0;
+            return s + pct;
+          }, 0) / total)
+        : 0;
+
+      document.getElementById('stat-total').textContent     = total;
+      document.getElementById('stat-abiertas').textContent  = abiertas;
+      document.getElementById('stat-plazas').textContent    = plazas;
+      document.getElementById('stat-ocupacion').textContent = pctMedia + '%';
+      document.getElementById('badge-count').textContent    = total + (total === 1 ? ' actividad' : ' actividades');
+    }
+
+    // ── RENDER ACTIVITY ROW ───────────────────────────────────
+    function renderRow(act) {
+      const pct       = act.plazasTotal > 0 ? Math.round((act.plazasOcupadas / act.plazasTotal) * 100) : 0;
+      const isOpen    = (act.estado || '').toUpperCase() === 'ABIERTA';
+      const alertFlag = hasAlert(act);
+
+      const row = document.createElement('div');
+      row.className = 'activity-row';
+      row.setAttribute('role', 'listitem');
+      row.dataset.id = act.id;
+
+      row.innerHTML = `
+        <div class="activity-row__sport-icon" aria-hidden="true">${sportIcon(act.tipoDeporte)}</div>
+        <div class="activity-row__info">
+          <div class="activity-row__title">${escapeHtml(act.tipoDeporte || 'Actividad')}</div>
+          <div class="activity-row__meta">
+            ${act.fechaHora ? `<span class="activity-row__meta-item">📅 ${formatDate(act.fechaHora)}</span>` : ''}
+            ${act.title ? `<span class="activity-row__meta-item">📍 ${escapeHtml(act.title)}</span>` : ''}
+          </div>
+        </div>
+        <div class="occupancy-wrap" title="Plazas ocupadas: ${act.plazasOcupadas} / ${act.plazasTotal}">
+          <div class="occupancy-bar">
+            <div class="occupancy-bar__fill ${occupancyClass(pct)}" style="width:${pct}%"></div>
+          </div>
+          <span class="occupancy-label">${act.plazasOcupadas}/${act.plazasTotal}</span>
+        </div>
+        <div class="activity-row__status">
+          ${alertFlag ? `<div class="alert-dot" title="Actividad cerrada/completa — hay cambios pendientes de revisión"><div class="alert-dot__ring"></div></div>` : ''}
+          <span class="status-pill ${isOpen ? 'status-pill--abierta' : 'status-pill--cerrada'}">${escapeHtml(act.estado || '—')}</span>
+          <button class="btn-danger"
+                  id="btn-delete-${escapeHtml(act.id)}"
+                  aria-label="Eliminar actividad ${escapeHtml(act.tipoDeporte || act.id)}"
+                  onclick="event.stopPropagation(); confirmDelete('${escapeHtml(act.id)}', '${escapeHtml(act.tipoDeporte || 'esta actividad')}')">
+            🗑 Eliminar
+          </button>
+        </div>
+      `;
+
+      // Click en la fila → navega al detalle (excepto si hace clic en Eliminar)
+      row.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-danger')) return;
+        window.location.href = '/?actividadId=' + encodeURIComponent(act.id);
+      });
+
+      return row;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // ── LOAD ACTIVITIES ───────────────────────────────────────
+    async function loadActividades() {
+      try {
+        const res = await fetch('/api/actividades/mis-actividades', { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('No autorizado o error del servidor (' + res.status + ')');
+        const actividades = await res.json();
+
+        document.getElementById('activities-loading').style.display = 'none';
+
+        if (!actividades || actividades.length === 0) {
+          document.getElementById('activities-empty').style.display = '';
+          return;
+        }
+
+        updateStats(actividades);
+        const list = document.getElementById('activities-list');
+        list.style.display = 'flex';
+        actividades.forEach(act => list.appendChild(renderRow(act)));
+
+      } catch (err) {
+        document.getElementById('activities-loading').style.display = 'none';
+        showToast('❌ Error al cargar actividades: ' + err.message, 'err');
+        document.getElementById('activities-empty').style.display = '';
+      }
+    }
+
+    // ── DELETE ────────────────────────────────────────────────
+    let pendingDeleteId = null;
+
+    function confirmDelete(actividadId, nombre) {
+      pendingDeleteId = actividadId;
+      document.getElementById('confirm-desc').textContent =
+        '¿Deseas eliminar la actividad "' + nombre + '"? Esta acción no se puede deshacer.';
+      document.getElementById('confirm-modal').classList.add('is-open');
+      document.getElementById('btn-confirm-ok').focus();
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirm-modal').classList.remove('is-open');
+      pendingDeleteId = null;
+    }
+
+    document.getElementById('btn-confirm-ok').addEventListener('click', async function() {
+      if (!pendingDeleteId) return;
+      closeConfirmModal();
+      await deleteActividad(pendingDeleteId);
+    });
+
+    async function deleteActividad(actividadId) {
+      try {
+        const res = await fetch('/api/actividades/' + encodeURIComponent(actividadId), {
+          method: 'DELETE',
+          credentials: 'same-origin',
+          headers: { [CSRF_HEADER]: CSRF_TOKEN }
+        });
+        const data = await res.json();
+        if (data.exito) {
+          // Eliminar la fila del DOM
+          const row = document.querySelector(`.activity-row[data-id="${actividadId}"]`);
+          if (row) {
+            row.style.animation = 'slideUp 200ms ease reverse';
+            setTimeout(() => row.remove(), 200);
+          }
+          showToast('✅ ' + (data.mensaje || 'Actividad eliminada.'), 'ok');
+          // Recargar stats tras un breve delay
+          setTimeout(() => recalcStats(), 300);
+        } else {
+          showToast('❌ ' + (data.mensaje || 'No se pudo eliminar.'), 'err');
+        }
+      } catch (err) {
+        showToast('❌ Error de red: ' + err.message, 'err');
+      }
+    }
+
+    function recalcStats() {
+      const rows = Array.from(document.querySelectorAll('.activity-row'));
+      if (rows.length === 0) {
+        document.getElementById('activities-list').style.display = 'none';
+        document.getElementById('activities-empty').style.display = '';
+      }
+      // Recargar conteo del badge
+      document.getElementById('badge-count').textContent = rows.length + (rows.length === 1 ? ' actividad' : ' actividades');
+      document.getElementById('stat-total').textContent   = rows.length;
+    }
+
+    // ── TOAST ─────────────────────────────────────────────────
+    function showToast(msg, type = 'ok') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast toast--' + type;
+      toast.textContent = msg;
+      toast.setAttribute('role', 'status');
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'toastOut 250ms ease forwards';
+        setTimeout(() => toast.remove(), 260);
+      }, 3500);
+    }
+
+    // ── INIT ──────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', loadActividades);
+
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('confirm-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeConfirmModal();
+    });
+  </script>
+
+</body>
+</html>

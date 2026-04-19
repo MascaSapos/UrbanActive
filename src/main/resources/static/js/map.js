@@ -494,6 +494,16 @@
   window.applyFrontendFilters = applyFrontendFilters;
 
   /* ═══════════════════════════════════════════════════════════
+     FULL-CAPACITY CARD STYLING
+  ═══════════════════════════════════════════════════════════ */
+  function updateFullCards() {
+    document.querySelectorAll('.activity-item').forEach(function (item) {
+      var libres = parseInt(item.getAttribute('data-libres'), 10);
+      item.classList.toggle('is-full', !isNaN(libres) && libres <= 0);
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      BOOT
   ═══════════════════════════════════════════════════════════ */
   var CACHE_KEY = 'urbanactive_activities_cache';
@@ -521,6 +531,7 @@
     if (cached && cached.length > 0) {
       // Instant init with cached data
       initMap(cached);
+      updateFullCards();
 
       // Then refresh in background
       fetchActivities()
@@ -540,6 +551,7 @@
         .then(function (activities) {
           setCachedActivities(activities);
           initMap(activities);
+          updateFullCards();
         })
         .catch(function (err) {
           console.warn('No se pudieron cargar actividades del servidor:', err.message);
@@ -649,6 +661,7 @@
           card.setAttribute('data-libres', libres);
           var plazasEl = card.querySelector('.activity-item__plazas');
           if (plazasEl) plazasEl.textContent = libres + ' libres';
+          card.classList.toggle('is-full', libres <= 0);
         }
 
         // Update button to "Plaza reservada"

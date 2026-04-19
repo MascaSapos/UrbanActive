@@ -101,6 +101,10 @@ public class ReservaService {
         return reservaRepository.findByUsuario(usuario);
     }
 
+    public int contarReservasPorActividad(String actividadId) {
+        return reservaRepository.countActivasPorActividad(actividadId);
+    }
+
     public Reserva obtenerPorId(String id) {
         return reservaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no encontrada con id: " + id));

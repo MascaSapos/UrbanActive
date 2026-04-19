@@ -12,6 +12,7 @@ public class ActividadMapDto {
     private int plazasOcupadas;
     private int plazasTotal;
     private String estado;
+    private String fechaHora;
 
     public ActividadMapDto() {
     }
@@ -150,5 +151,13 @@ public class ActividadMapDto {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public String getFechaHora() {
+        return fechaHora;
+    }
+
+    public void setFechaHora(String fechaHora) {
+        this.fechaHora = fechaHora;
     }
 }
