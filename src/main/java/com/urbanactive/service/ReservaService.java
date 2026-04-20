@@ -146,4 +146,18 @@ public class ReservaService {
             actividadRepository.save(actividad);
         }
     }
+
+    public boolean estaUsuarioInscrito(String actividadId, String email) {
+        if (email == null) return false;
+        
+        try {
+            Usuario usuario = usuarioService.obtenerPorEmail(email);
+            if (usuario == null) return false;
+            
+            return reservaRepository.findByUsuario(usuario).stream()
+                    .anyMatch(r -> r.getActividad().getId().equals(actividadId) && !"CANCELADA".equals(r.getEstado()));
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

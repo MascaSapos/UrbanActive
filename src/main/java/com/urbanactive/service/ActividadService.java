@@ -26,7 +26,11 @@ public class ActividadService {
     private static final Map<String, String> ICON_POR_DEPORTE = Map.ofEntries(
             Map.entry("baloncesto", "\uD83C\uDFC0"),
             Map.entry("running", "\uD83C\uDFC3"),
-            Map.entry("ciclismo", "\uD83D\uDEB4"));
+            Map.entry("ciclismo", "\uD83D\uDEB4"),
+            Map.entry("futbol", "\u26bd"),
+            Map.entry("natacion", "\ud83c\udfca\u200d\u2642\ufe0f"),
+            Map.entry("yoga", "\ud83e\uddd8\u200d\u2640\ufe0f"));
+            
 
     private final ActividadRepository actividadRepository;
     private final InformeMeteorologicoRepository informeMeteorologicoRepository;
