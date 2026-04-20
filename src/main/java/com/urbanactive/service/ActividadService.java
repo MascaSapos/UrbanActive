@@ -88,7 +88,7 @@ public class ActividadService {
         return dto;
     }
 
-    private ActividadMapDto.WeatherDto aWeatherDto(Actividad a) {
+    public ActividadMapDto.WeatherDto aWeatherDto(Actividad a) {
         if (a == null || a.getId() == null) {
             return null;
         }

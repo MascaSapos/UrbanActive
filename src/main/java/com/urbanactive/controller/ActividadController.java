@@ -29,8 +29,12 @@ public class ActividadController {
     }
 
     @PostMapping("/actividades/nueva")
-    public String guardarActividad(com.urbanactive.model.Actividad actividad) {
+    public String guardarActividad(com.urbanactive.model.Actividad actividad, 
+                                   @org.springframework.security.core.annotation.AuthenticationPrincipal com.urbanactive.security.CustomUserDetails userDetails) {
         actividad.setId(java.util.UUID.randomUUID().toString().substring(0, 10)); // o logic id
+        if (userDetails != null) {
+            actividad.setOrganizador(userDetails.getUsuario());
+        }
         actividadService.crear(actividad);
         return "redirect:/";
     }

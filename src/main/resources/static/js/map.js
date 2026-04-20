@@ -447,6 +447,17 @@
      BOOT
   ═══════════════════════════════════════════════════════════ */
   document.addEventListener('DOMContentLoaded', function () {
+    // ── Campana de notificaciones ────────────────────────────────────────────
+    fetch('/api/notificaciones/pendientes')
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        var dot = document.getElementById('bell-dot');
+        if (dot && data !== null) {
+          dot.style.display = data.pendiente ? '' : 'none';
+        }
+      })
+      .catch(function () { /* silencioso: la campana queda sin punto */ });
+
     // Init filter dropdowns FIRST (no dependency on map)
     initFilterDropdowns();
 
