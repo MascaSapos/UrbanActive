@@ -47,21 +47,22 @@ public class NotificacionController {
         boolean pendiente = false;
 
         if ("ORGANIZADOR".equals(rol) || "ROLE_ORGANIZADOR".equals(rol)) {
-            // 1. Apuntes / desapuntes en últimas 24h
-            LocalDateTime hace24h = LocalDateTime.now().minusHours(24);
-            long recientes = reservaRepository.countReservasRecientesEnMisActividades(userId, hace24h);
-            if (recientes > 0) {
-                pendiente = true;
-            } else {
-                // 2. Revisión de clima en sus actividades
-                List<Actividad> misActividades = actividadRepository.findByOrganizador_Id(userId);
-                for (Actividad a : misActividades) {
-                    if (!"CANCELADA".equals(a.getEstado())) {
-                        ActividadMapDto.WeatherDto w = actividadService.aWeatherDto(a);
-                        if (w != null && w.getAlerta() != null) {
-                            pendiente = true;
-                            break;
-                        }
+            // Revisión de clima en sus actividades
+            List<Actividad> misActividades = actividadRepository.findByOrganizador_Id(userId);
+            for (Actividad a : misActividades) {
+                if (!"CANCELADA".equals(a.getEstado())) {
+                    // 1. Revisión de Aforo Completo
+                    int ocupadas = reservaRepository.countActivasPorActividad(a.getId());
+                    if (a.getPlazasTotal() != null && ocupadas >= a.getPlazasTotal()) {
+                        pendiente = true;
+                        break;
+                    }
+
+                    // 2. Revisión de clima
+                    ActividadMapDto.WeatherDto w = actividadService.aWeatherDto(a);
+                    if (w != null && w.getAlerta() != null) {
+                        pendiente = true;
+                        break;
                     }
                 }
             }

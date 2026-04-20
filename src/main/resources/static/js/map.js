@@ -2,11 +2,11 @@
   /* ═══════════════════════════════════════════════════════════
      STATE
   ═══════════════════════════════════════════════════════════ */
-  var theMap         = null;
-  var markersMap     = {};   // id → marker Leaflet
-  var markerElems    = {};   // id → .map-marker DOM element
+  var theMap = null;
+  var markersMap = {};   // id → marker Leaflet
+  var markerElems = {};   // id → .map-marker DOM element
   var activitiesData = {};   // id → activity object (from API)
-  var activeId       = null;
+  var activeId = null;
 
   /* ═══════════════════════════════════════════════════════════
      WEATHER PANEL
@@ -18,11 +18,11 @@
     }
 
     function setPanel(icon, clima, temp, lluvia, aire) {
-      var el = document.getElementById('w-clima-icon');  if (el) el.textContent = icon;
-      el = document.getElementById('w-clima-val');       if (el) el.textContent = clima;
-      el = document.getElementById('w-temp-val');        if (el) el.textContent = temp;
-      el = document.getElementById('w-lluvia-val');      if (el) el.textContent = lluvia;
-      el = document.getElementById('w-aire-val');        if (el) el.textContent = aire;
+      var el = document.getElementById('w-clima-icon'); if (el) el.textContent = icon;
+      el = document.getElementById('w-clima-val'); if (el) el.textContent = clima;
+      el = document.getElementById('w-temp-val'); if (el) el.textContent = temp;
+      el = document.getElementById('w-lluvia-val'); if (el) el.textContent = lluvia;
+      el = document.getElementById('w-aire-val'); if (el) el.textContent = aire;
     }
 
     var w = a && a.weather;
@@ -59,15 +59,15 @@
       }
       return;
     }
-    
+
     var activity = activitiesData[id];
     if (!activity) return;
-    
+
     var plazas = typeof activity.plazasTotal === 'number' ? activity.plazasTotal : 0;
     var ocupadas = typeof activity.plazasOcupadas === 'number' ? activity.plazasOcupadas : 0;
     var libres = Math.max(0, plazas - ocupadas);
     var pct = plazas > 0 ? (ocupadas / plazas) * 100 : 0;
-    
+
     var libresEl = document.getElementById('w-aforo-libres');
     if (libresEl) {
       libresEl.textContent = libres + ' libres';
@@ -106,12 +106,12 @@
     // Habilitar botón de reservar y actualizar barra de aforo
     var input = document.getElementById('input-actividad-id');
     if (input) input.value = id;
-    
+
     var btnDetalles = document.getElementById('btn-detalles');
     if (btnDetalles) {
-      btnDetalles.onclick = function(e) { e.preventDefault(); };
+      btnDetalles.onclick = function (e) { e.preventDefault(); };
     }
-    
+
     var btn = document.getElementById('btn-reservar');
     var activity = activitiesData[id];
 
@@ -187,8 +187,8 @@
   ═══════════════════════════════════════════════════════════ */
   function getMarkerHtml(a) {
     var sport = (a.tipoDeporte || a.badge || '').toLowerCase();
-    var icon  = a.icon || '📍';
-    var cls   = 'map-marker';
+    var icon = a.icon || '📍';
+    var cls = 'map-marker';
     if (sport) cls += ' map-marker--' + sport;
     return '<div class="' + cls + '" data-marker-id="' + (a.id || '') + '">' + icon + '</div>';
   }
@@ -242,9 +242,9 @@
 
       marker.bindPopup(
         '<div class="map-popup">' +
-          '<div class="map-popup__badge">' + (a.badge || a.tipoDeporte || 'Actividad') + '</div>' +
-          '<div class="map-popup__title">' + (a.title || '') + '</div>' +
-          '<div class="map-popup__desc">'  + (a.desc  || '') + '</div>' +
+        '<div class="map-popup__badge">' + (a.badge || a.tipoDeporte || 'Actividad') + '</div>' +
+        '<div class="map-popup__title">' + (a.title || '') + '</div>' +
+        '<div class="map-popup__desc">' + (a.desc || '') + '</div>' +
         '</div>',
         { closeButton: false }
       );
@@ -277,14 +277,14 @@
   function initFilterDropdowns() {
     var configs = [
       { btnId: 'btn-deporte', ddId: 'dd-deporte', key: 'deporte', label: 'Deporte' },
-      { btnId: 'btn-fecha',   ddId: 'dd-fecha',   key: 'fecha',   label: 'Fecha'   },
-      { btnId: 'btn-hora',    ddId: 'dd-hora',    key: 'hora',    label: 'Hora'    },
-      { btnId: 'filter-otros', ddId: 'otros-dropdown', key: null,  label: 'Otros'  }
+      { btnId: 'btn-fecha', ddId: 'dd-fecha', key: 'fecha', label: 'Fecha' },
+      { btnId: 'btn-hora', ddId: 'dd-hora', key: 'hora', label: 'Hora' },
+      { btnId: 'filter-otros', ddId: 'otros-dropdown', key: null, label: 'Otros' }
     ];
 
     configs.forEach(function (cfg) {
       var btn = document.getElementById(cfg.btnId);
-      var dd  = document.getElementById(cfg.ddId);
+      var dd = document.getElementById(cfg.ddId);
       if (!btn || !dd) return;
 
       // Toggle dropdown on pill click
@@ -330,7 +330,7 @@
             }
 
             btn.classList.toggle('pill--active', !!val);
-            btn.classList.toggle('pill--idle',   !val);
+            btn.classList.toggle('pill--idle', !val);
 
             dd.classList.remove('is-open');
             btn.setAttribute('aria-expanded', 'false');
@@ -361,21 +361,21 @@
   ═══════════════════════════════════════════════════════════ */
   function applyFrontendFilters() {
     var searchEl = document.getElementById('main-search');
-    var text    = searchEl ? (searchEl.value || '').toLowerCase() : '';
+    var text = searchEl ? (searchEl.value || '').toLowerCase() : '';
     var deporte = (activeFilters.deporte || '').toLowerCase();
-    var fecha   = activeFilters.fecha || '';
-    var hora    = activeFilters.hora  || '';
+    var fecha = activeFilters.fecha || '';
+    var hora = activeFilters.hora || '';
 
-    var now   = new Date();
+    var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     var count = 0;
     document.querySelectorAll('.activity-item').forEach(function (item) {
-      var id      = item.getAttribute('data-id') || '';
-      var sport   = (item.getAttribute('data-deporte') || '').toLowerCase();
+      var id = item.getAttribute('data-id') || '';
+      var sport = (item.getAttribute('data-deporte') || '').toLowerCase();
       var content = item.innerText.toLowerCase();
 
-      var matchText    = !text    || content.includes(text);
+      var matchText = !text || content.includes(text);
       var matchDeporte = !deporte || sport.includes(deporte);
 
       // ── Filtro Fecha ─────────────────────────────────────────
@@ -409,9 +409,9 @@
         var cardDate2 = rawFecha2 ? new Date(rawFecha2) : null;
         if (cardDate2 && !isNaN(cardDate2)) {
           var h = cardDate2.getHours();
-          if (hora === 'manana') { matchHora = h >= 6  && h < 12; }
-          else if (hora === 'tarde')  { matchHora = h >= 12 && h < 18; }
-          else if (hora === 'noche')  { matchHora = h >= 18; }
+          if (hora === 'manana') { matchHora = h >= 6 && h < 12; }
+          else if (hora === 'tarde') { matchHora = h >= 12 && h < 18; }
+          else if (hora === 'noche') { matchHora = h >= 18; }
         } else {
           matchHora = false;
         }
@@ -475,7 +475,7 @@
   /* ═══════════════════════════════════════════════════════════
      AJAX RESERVATION
   ═══════════════════════════════════════════════════════════ */
-  window.submitReservaAjax = function() {
+  window.submitReservaAjax = function () {
     var actividadId = document.getElementById('input-actividad-id').value;
     if (!actividadId) return;
 
@@ -497,51 +497,51 @@
       },
       body: bodyParams
     })
-    .then(function(res) {
-      if (res.status === 401 || res.status === 403 || res.redirected) {
-        window.location.href = res.url || '/login';
-        throw new Error('No autorizado');
-      }
-      return res.json();
-    })
-    .then(function(data) {
-      if (data.exito) {
-        showModal('✅', '¡Reserva exitosa!', data.mensaje);
-        
-        // Update occupancy locally
-        if (activitiesData[actividadId]) {
-          activitiesData[actividadId].plazasOcupadas = (activitiesData[actividadId].plazasOcupadas || 0) + 1;
+      .then(function (res) {
+        if (res.status === 401 || res.status === 403 || res.redirected) {
+          window.location.href = res.url || '/login';
+          throw new Error('No autorizado');
         }
-        setAforo(actividadId);
-      } else {
-        var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
-        showModal('❌', 'Error al reservar', msg);
-      }
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-    })
-    .catch(function(err) {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      showModal('❌', 'Error de red', err.message || "No se ha podido contactar con el servidor");
-      console.error(err);
-    });
+        return res.json();
+      })
+      .then(function (data) {
+        if (data.exito) {
+          showModal('✅', '¡Reserva exitosa!', data.mensaje);
+
+          // Update occupancy locally
+          if (activitiesData[actividadId]) {
+            activitiesData[actividadId].plazasOcupadas = (activitiesData[actividadId].plazasOcupadas || 0) + 1;
+          }
+          setAforo(actividadId);
+        } else {
+          var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
+          showModal('❌', 'Error al reservar', msg);
+        }
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      })
+      .catch(function (err) {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        showModal('❌', 'Error de red', err.message || "No se ha podido contactar con el servidor");
+        console.error(err);
+      });
   };
 
   function showModal(icon, title, msg) {
     document.getElementById('modal-icon').innerText = icon;
     document.getElementById('modal-title').innerText = title;
     document.getElementById('modal-msg').innerText = msg;
-    
+
     var modal = document.getElementById('reserva-modal');
     modal.style.display = 'flex';
-    setTimeout(function() { modal.classList.add('is-visible'); }, 10);
+    setTimeout(function () { modal.classList.add('is-visible'); }, 10);
   }
 
-  window.closeModal = function() {
+  window.closeModal = function () {
     var modal = document.getElementById('reserva-modal');
     modal.classList.remove('is-visible');
-    setTimeout(function() { modal.style.display = 'none'; }, 300);
+    setTimeout(function () { modal.style.display = 'none'; }, 300);
   };
 
 }());

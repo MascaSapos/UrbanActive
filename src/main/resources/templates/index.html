@@ -31,9 +31,10 @@
       </div>
       <span class="navbar__wordmark">UrbanActive</span>
       <div class="navbar__right" style="display: flex; gap: 15px; align-items: center; padding-right: 20px;">
-        <a th:href="@{/actividades/nueva}" sec:authorize="hasAnyAuthority('ORGANIZADOR', 'ROLE_ORGANIZADOR')" class="btn-primary"
-          style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Nueva Actividad</a>
-        <a th:href="@{/mis-reservas}" sec:authorize="hasAnyAuthority('DEPORTISTA', 'ROLE_DEPORTISTA', 'USER', 'ROLE_USER')" class="btn-secondary"
+        <a th:href="@{/actividades/nueva}" sec:authorize="hasAnyAuthority('ORGANIZADOR', 'ROLE_ORGANIZADOR')"
+          class="btn-primary" style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Nueva Actividad</a>
+        <a th:href="@{/mis-reservas}"
+          sec:authorize="hasAnyAuthority('DEPORTISTA', 'ROLE_DEPORTISTA', 'USER', 'ROLE_USER')" class="btn-secondary"
           style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Mis Reservas</a>
         <form th:action="@{/logout}" method="post" style="margin: 0;">
           <button type="submit" class="btn-secondary"
@@ -156,9 +157,8 @@
         <div class="activity-list-scroll">
           <div th:each="a : ${actividades}" class="activity-item" th:data-id="${a.id}"
             th:data-deporte="${a.tipoDeporte}" th:data-fecha="${#temporals.format(a.fechaHora, 'yyyy-MM-dd''T''HH:mm')}"
-            th:data-plazas="${a.plazasTotal}"
-            th:data-libres="${a.plazasLibres}"
-            th:id="'act-' + ${a.id}" onclick="seleccionarActividad(this)">
+            th:data-plazas="${a.plazasTotal}" th:data-libres="${a.plazasLibres}" th:id="'act-' + ${a.id}"
+            onclick="seleccionarActividad(this)">
             <div class="activity-item__sport" th:text="${a.tipoDeporte}">Deporte</div>
             <div class="activity-item__meta">
               <span class="activity-item__fecha"

@@ -34,9 +34,9 @@ public class ActividadService {
     private final ReservaRepository reservaRepository;
 
     public ActividadService(ActividadRepository actividadRepository,
-                            InformeMeteorologicoRepository informeMeteorologicoRepository,
-                            OpenMeteoClientService openMeteoClientService,
-                            ReservaRepository reservaRepository) {
+            InformeMeteorologicoRepository informeMeteorologicoRepository,
+            OpenMeteoClientService openMeteoClientService,
+            ReservaRepository reservaRepository) {
         this.actividadRepository = actividadRepository;
         this.informeMeteorologicoRepository = informeMeteorologicoRepository;
         this.openMeteoClientService = openMeteoClientService;
@@ -92,9 +92,9 @@ public class ActividadService {
         if (a == null || a.getId() == null) {
             return null;
         }
-        
+
         Optional<InformeMeteorologico> optInforme = informeMeteorologicoRepository.findByActividadId(a.getId());
-        
+
         if (optInforme.isPresent()) {
             // Caso BBDD
             InformeMeteorologico informe = optInforme.get();
@@ -105,14 +105,15 @@ public class ActividadService {
             weather.setAire(mapearCalidadAire(informe.getCalidadAire()));
             weather.setClima(mapearClima(lluvia));
             weather.setClimaIcon(iconoClima(lluvia));
-            
+
             // Validador de Advertencia (Caso BBDD)
-            boolean advT = informe.getTemperatura() != null && informe.getTemperatura().compareTo(new java.math.BigDecimal("5")) < 0;
+            boolean advT = informe.getTemperatura() != null
+                    && informe.getTemperatura().compareTo(new java.math.BigDecimal("5")) < 0;
             boolean advAqi = informe.getCalidadAire() != null && informe.getCalidadAire() >= 60;
             if (advT || advAqi) {
                 weather.setAlerta("⚠️ Condiciones adversas");
             }
-            
+
             return weather;
         } else {
             // Caso API Tiempo Real (Fallback dinámico y con caché!)
@@ -121,14 +122,15 @@ public class ActividadService {
                 return null;
             }
             try {
-                // Buffer to respect Open-Meteo's limit (1000 requests/hour, burst limits heavily restricted under multiple queries)
+                // Buffer to respect Open-Meteo's limit (1000 requests/hour, burst limits
+                // heavily restricted under multiple queries)
                 Thread.sleep(700);
 
                 com.urbanactive.dto.WeatherDto live = openMeteoClientService.getWeather(
                         u.getLatitud().doubleValue(), u.getLongitud().doubleValue(), a.getFechaHora());
-                
+
                 System.out.println("DEBUG WEATHER - Actividad: " + a.getId() + " - Temp: " + live.getTemperatura());
-                
+
                 ActividadMapDto.WeatherDto weather = new ActividadMapDto.WeatherDto();
                 weather.setTemp(live.getTemperatura() + "°C");
                 weather.setLluvia(live.getProbabilidadLluvia() + "%");
@@ -137,7 +139,8 @@ public class ActividadService {
                 weather.setClima(live.getTextoClima());
 
                 // Validador de Advertencia
-                boolean advT = live.getTemperatura() != null && live.getTemperatura().compareTo(new java.math.BigDecimal("5")) < 0;
+                boolean advT = live.getTemperatura() != null
+                        && live.getTemperatura().compareTo(new java.math.BigDecimal("5")) < 0;
                 boolean advAqi = live.getAqi() != null && live.getAqi() >= 60;
                 if (advT || advAqi) {
                     weather.setAlerta("⚠️ Condiciones adversas");
