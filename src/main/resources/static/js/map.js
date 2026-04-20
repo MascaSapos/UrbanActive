@@ -6,8 +6,13 @@
   var markersMap = {};   // id → marker Leaflet
   var markerElems = {};   // id → .map-marker DOM element
   var activitiesData = {};   // id → activity object (from API)
+<<<<<<< HEAD
   var activeId = null;
   var currentNotifications = [];
+=======
+  var activeId       = null;
+  var reservedActivities = {}; // id → true if user already reserved
+>>>>>>> 0aa241a5bccf9861c4c6e286fe0e848c38b0f051
 
   /* ═══════════════════════════════════════════════════════════
      WEATHER PANEL
@@ -92,6 +97,33 @@
   }
 
   /* ═══════════════════════════════════════════════════════════
+     BUTTON STYLES
+  ═══════════════════════════════════════════════════════════ */
+  function setBtnReservado(btn) {
+    btn.disabled = false; // Keep clickable so user sees "already registered" message
+    btn.textContent = 'Plaza reservada';
+    btn.style.background = '#ccc';
+    btn.style.color = '#333';
+    btn.style.cursor = 'not-allowed';
+  }
+
+  function setBtnCompleto(btn) {
+    btn.disabled = true;
+    btn.textContent = 'Aforo completo';
+    btn.style.background = '#ccc';
+    btn.style.color = '#333';
+    btn.style.cursor = 'not-allowed';
+  }
+
+  function setBtnNormal(btn) {
+    btn.disabled = false;
+    btn.textContent = 'Reservar plaza';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.cursor = 'pointer';
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      CARD HIGHLIGHTING
   ═══════════════════════════════════════════════════════════ */
   function highlightCard(id) {
@@ -116,27 +148,29 @@
     var btn = document.getElementById('btn-reservar');
     var activity = activitiesData[id];
 
-    if (activity) {
-      if (btn) {
-        if (activity.plazasOcupadas >= activity.plazasTotal || activity.estado === 'CERRADA/COMPLETA') {
-          btn.disabled = true;
-          btn.textContent = 'Aforo completo';
-          btn.style.backgroundColor = '#ccc';
-          btn.style.cursor = 'not-allowed';
-        } else {
-          btn.disabled = false;
-          btn.textContent = 'Reservar plaza';
-          btn.style.backgroundColor = '';
-          btn.style.cursor = 'pointer';
-        }
+    if (activity && btn) {
+      if (activity.plazasOcupadas >= activity.plazasTotal || activity.estado === 'CERRADA/COMPLETA') {
+        setBtnCompleto(btn);
+      } else if (reservedActivities[id]) {
+        setBtnReservado(btn);
+      } else {
+        setBtnNormal(btn);
+        // Check inscription status from server
+        fetch('/api/actividades/' + id + '/check-inscripcion')
+          .then(function(res) { return res.ok ? res.json() : null; })
+          .then(function(data) {
+            if (data && data.inscrito) {
+              reservedActivities[id] = true;
+              // Only update if this activity is still the selected one
+              if (document.getElementById('input-actividad-id').value === String(id)) {
+                setBtnReservado(btn);
+              }
+            }
+          })
+          .catch(function() { /* ignore */ });
       }
-    } else {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = 'Reservar plaza';
-        btn.style.backgroundColor = '';
-        btn.style.cursor = 'pointer';
-      }
+    } else if (btn) {
+      setBtnNormal(btn);
     }
   }
 
@@ -274,13 +308,19 @@
      FILTER DROPDOWNS
   ═══════════════════════════════════════════════════════════ */
   var activeFilters = { deporte: '', fecha: '', hora: '' };
+  var filterPlazasLibres = false;
 
   function initFilterDropdowns() {
     var configs = [
       { btnId: 'btn-deporte', ddId: 'dd-deporte', key: 'deporte', label: 'Deporte' },
+<<<<<<< HEAD
       { btnId: 'btn-fecha', ddId: 'dd-fecha', key: 'fecha', label: 'Fecha' },
       { btnId: 'btn-hora', ddId: 'dd-hora', key: 'hora', label: 'Hora' },
       { btnId: 'filter-otros', ddId: 'otros-dropdown', key: null, label: 'Otros' }
+=======
+      { btnId: 'btn-fecha',   ddId: 'dd-fecha',   key: 'fecha',   label: 'Fecha'   },
+      { btnId: 'btn-hora',    ddId: 'dd-hora',    key: 'hora',    label: 'Hora'    }
+>>>>>>> 0aa241a5bccf9861c4c6e286fe0e848c38b0f051
     ];
 
     configs.forEach(function (cfg) {
@@ -358,6 +398,19 @@
     if (searchInput) {
       searchInput.addEventListener('input', applyFrontendFilters);
     }
+
+    // Toggle "Plazas disponibles"
+    var btnPlazas = document.getElementById('btn-plazas-libres');
+    if (btnPlazas) {
+      btnPlazas.addEventListener('click', function (e) {
+        e.stopPropagation();
+        filterPlazasLibres = !filterPlazasLibres;
+        btnPlazas.classList.toggle('pill--active', filterPlazasLibres);
+        btnPlazas.classList.toggle('pill--idle',  !filterPlazasLibres);
+        btnPlazas.setAttribute('aria-pressed', String(filterPlazasLibres));
+        applyFrontendFilters();
+      });
+    }
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -421,7 +474,14 @@
         }
       }
 
-      var visible = matchText && matchDeporte && matchFecha && matchHora;
+      // ── Filtro Plazas libres ─────────────────────────────────
+      var matchPlazas = true;
+      if (filterPlazasLibres) {
+        var libres = parseInt(item.getAttribute('data-libres'), 10);
+        matchPlazas = !isNaN(libres) && libres > 0;
+      }
+
+      var visible = matchText && matchDeporte && matchFecha && matchHora && matchPlazas;
 
       // ── Tarjeta DOM ──────────────────────────────────────────
       item.style.display = visible ? '' : 'none';
@@ -450,6 +510,22 @@
   /* ═══════════════════════════════════════════════════════════
      BOOT
   ═══════════════════════════════════════════════════════════ */
+  var CACHE_KEY = 'urbanactive_activities_cache';
+
+  function getCachedActivities() {
+    try {
+      var raw = sessionStorage.getItem(CACHE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) { /* ignore */ }
+    return null;
+  }
+
+  function setCachedActivities(data) {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+    } catch (e) { /* ignore quota errors */ }
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     function checkNotifications() {
       fetch('/api/notificaciones/pendientes')
@@ -490,15 +566,36 @@
     // Init filter dropdowns FIRST (no dependency on map)
     initFilterDropdowns();
 
-    // Then load map + markers
-    fetchActivities()
-      .then(function (activities) {
-        initMap(activities);
-      })
-      .catch(function (err) {
-        console.warn('No se pudieron cargar actividades del servidor:', err.message);
-        initMap([]);
-      });
+    var cached = getCachedActivities();
+
+    if (cached && cached.length > 0) {
+      // Instant init with cached data
+      initMap(cached);
+
+      // Then refresh in background
+      fetchActivities()
+        .then(function (fresh) {
+          setCachedActivities(fresh);
+          // Update activitiesData with fresh occupancy numbers
+          fresh.forEach(function (a) {
+            if (a.id != null) activitiesData[a.id] = a;
+          });
+          // Refresh the aforo panel if an activity is selected
+          if (activeId) setAforo(activeId);
+        })
+        .catch(function () { /* keep using cache */ });
+    } else {
+      // First visit: fetch then init
+      fetchActivities()
+        .then(function (activities) {
+          setCachedActivities(activities);
+          initMap(activities);
+        })
+        .catch(function (err) {
+          console.warn('No se pudieron cargar actividades del servidor:', err.message);
+          initMap([]);
+        });
+    }
   });
 
   /* ═══════════════════════════════════════════════════════════
@@ -508,6 +605,54 @@
     var actividadId = document.getElementById('input-actividad-id').value;
     if (!actividadId) return;
 
+    var btn = document.getElementById('btn-reservar');
+    var originalText = btn.innerHTML;
+    btn.innerHTML = 'Verificando...';
+    btn.disabled = true;
+
+    fetch('/api/actividades/' + actividadId + '/check-inscripcion')
+      .then(function(res) {
+          if (!res.ok) throw new Error('Network error');
+          return res.json();
+      })
+      .then(function(data) {
+          // Si el usuario ya está inscrito, mostrar mensaje directamente
+          if (data && data.inscrito) {
+              reservedActivities[actividadId] = true;
+              setBtnReservado(btn);
+              showModal('❌', 'Ya estás inscrito', 'Ya tienes una plaza reservada en esta actividad.');
+              return;
+          }
+
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+
+          // Check for weather alert before reserving
+          var activity = activitiesData[actividadId];
+          if (activity && activity.weather && activity.weather.alerta) {
+            // Build a descriptive warning message
+            var w = activity.weather;
+            var details = 'Temperatura: ' + (w.temp || '—') + '  ·  Aire: ' + (w.aire || '—');
+            document.getElementById('weather-warn-msg').textContent = details;
+
+            var modal = document.getElementById('weather-warn-modal');
+            modal.style.display = 'flex';
+            setTimeout(function() { modal.classList.add('is-visible'); }, 10);
+            return; // Don't reserve yet, wait for user confirmation
+          }
+
+          // No alert → reserve directly
+          doReserva(actividadId);
+      })
+      .catch(function(err) {
+          // Fallback silente en caso de error: intenta la reserva normal
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          doReserva(actividadId);
+      });
+  };
+
+  function doReserva(actividadId) {
     var btn = document.getElementById('btn-reservar');
     var originalText = btn.innerHTML;
     btn.innerHTML = 'Reservando...';
@@ -526,6 +671,7 @@
       },
       body: bodyParams
     })
+<<<<<<< HEAD
       .then(function (res) {
         if (res.status === 401 || res.status === 403 || res.redirected) {
           window.location.href = res.url || '/login';
@@ -555,6 +701,68 @@
         showModal('❌', 'Error de red', err.message || "No se ha podido contactar con el servidor");
         console.error(err);
       });
+=======
+    .then(function(res) {
+      if (res.status === 401 || res.status === 403 || res.redirected) {
+        window.location.href = res.url || '/login';
+        throw new Error('No autorizado');
+      }
+      return res.json();
+    })
+    .then(function(data) {
+      if (data.exito) {
+        showModal('✅', '¡Reserva exitosa!', data.mensaje);
+        
+        // Mark as reserved locally
+        reservedActivities[actividadId] = true;
+
+        // Update occupancy locally
+        if (activitiesData[actividadId]) {
+          activitiesData[actividadId].plazasOcupadas = (activitiesData[actividadId].plazasOcupadas || 0) + 1;
+        }
+        setAforo(actividadId);
+
+        // Update the activity card in the left panel
+        var card = document.getElementById('act-' + actividadId);
+        if (card && activitiesData[actividadId]) {
+          var act = activitiesData[actividadId];
+          var libres = Math.max(0, (act.plazasTotal || 0) - (act.plazasOcupadas || 0));
+          card.setAttribute('data-libres', libres);
+          var plazasEl = card.querySelector('.activity-item__plazas');
+          if (plazasEl) plazasEl.textContent = libres + ' libres';
+        }
+
+        // Update button to "Plaza reservada"
+        setBtnReservado(btn);
+      } else {
+        var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
+        showModal('❌', 'Error al reservar', msg);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    })
+    .catch(function(err) {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      showModal('❌', 'Error de red', err.message || "No se ha podido contactar con el servidor");
+      console.error(err);
+    });
+  }
+
+  window.closeWeatherWarnAndReserve = function() {
+    var modal = document.getElementById('weather-warn-modal');
+    modal.classList.remove('is-visible');
+    setTimeout(function() { modal.style.display = 'none'; }, 300);
+    // User confirmed → proceed with reservation
+    var actividadId = document.getElementById('input-actividad-id').value;
+    if (actividadId) doReserva(actividadId);
+  };
+
+  window.closeWeatherWarn = function() {
+    var modal = document.getElementById('weather-warn-modal');
+    modal.classList.remove('is-visible');
+    setTimeout(function() { modal.style.display = 'none'; }, 300);
+>>>>>>> 0aa241a5bccf9861c4c6e286fe0e848c38b0f051
   };
 
   function showModal(icon, title, msg) {
