@@ -27,42 +27,42 @@ public class NotificacionController {
     private final ActividadService actividadService;
 
     public NotificacionController(ReservaRepository reservaRepository,
-                                  ActividadRepository actividadRepository,
-                                  ActividadService actividadService) {
+            ActividadRepository actividadRepository,
+            ActividadService actividadService) {
         this.reservaRepository = reservaRepository;
         this.actividadRepository = actividadRepository;
         this.actividadService = actividadService;
     }
 
     @GetMapping("/pendientes")
-    public ResponseEntity<Map<String, Boolean>> pendientes(
+    public ResponseEntity<Map<String, Object>> pendientes(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         if (userDetails == null) {
-            return ResponseEntity.ok(Map.of("pendiente", false));
+            return ResponseEntity.ok(Map.of("pendiente", false, "mensajes", List.of()));
         }
 
         String rol = userDetails.getUsuario().getRol().toUpperCase();
         String userId = userDetails.getUsuario().getId();
         boolean pendiente = false;
+        List<String> mensajes = new java.util.ArrayList<>();
 
         if ("ORGANIZADOR".equals(rol) || "ROLE_ORGANIZADOR".equals(rol)) {
-            // Revisión de clima en sus actividades
             List<Actividad> misActividades = actividadRepository.findByOrganizador_Id(userId);
             for (Actividad a : misActividades) {
                 if (!"CANCELADA".equals(a.getEstado())) {
                     // 1. Revisión de Aforo Completo
                     int ocupadas = reservaRepository.countActivasPorActividad(a.getId());
                     if (a.getPlazasTotal() != null && ocupadas >= a.getPlazasTotal()) {
+                        mensajes.add("¡Tu actividad '" + a.getTipoDeporte() + "' está completa!");
                         pendiente = true;
-                        break;
                     }
 
                     // 2. Revisión de clima
                     ActividadMapDto.WeatherDto w = actividadService.aWeatherDto(a);
                     if (w != null && w.getAlerta() != null) {
+                        mensajes.add("Aviso climático en '" + a.getTipoDeporte() + "': " + w.getAlerta());
                         pendiente = true;
-                        break;
                     }
                 }
             }
@@ -71,22 +71,24 @@ public class NotificacionController {
             // 1. Actividad borrada/cancelada
             long canceladas = reservaRepository.countActividadesCanceladasDeportista(userId);
             if (canceladas > 0) {
+                mensajes.add("Tienes " + canceladas + " actividad(es) cancelada(s) recientemente.");
                 pendiente = true;
-            } else {
-                // 2. Revisión de clima en sus reservas activas
-                List<Reserva> misReservas = reservaRepository.findByUsuario(userDetails.getUsuario());
-                for (Reserva r : misReservas) {
-                    if ("CONFIRMADA".equals(r.getEstado()) && !"CANCELADA".equals(r.getActividad().getEstado())) {
-                        ActividadMapDto.WeatherDto w = actividadService.aWeatherDto(r.getActividad());
-                        if (w != null && w.getAlerta() != null) {
-                            pendiente = true;
-                            break;
-                        }
+            }
+
+            // 2. Revisión de clima en sus reservas activas
+            List<Reserva> misReservas = reservaRepository.findByUsuario(userDetails.getUsuario());
+            for (Reserva r : misReservas) {
+                if ("CONFIRMADA".equals(r.getEstado()) && !"CANCELADA".equals(r.getActividad().getEstado())) {
+                    ActividadMapDto.WeatherDto w = actividadService.aWeatherDto(r.getActividad());
+                    if (w != null && w.getAlerta() != null) {
+                        mensajes.add(
+                                "Aviso climático para '" + r.getActividad().getTipoDeporte() + "': " + w.getAlerta());
+                        pendiente = true;
                     }
                 }
             }
         }
 
-        return ResponseEntity.ok(Map.of("pendiente", pendiente));
+        return ResponseEntity.ok(Map.of("pendiente", pendiente, "mensajes", mensajes));
     }
 }

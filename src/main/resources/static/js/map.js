@@ -7,6 +7,7 @@
   var markerElems = {};   // id → .map-marker DOM element
   var activitiesData = {};   // id → activity object (from API)
   var activeId = null;
+  var currentNotifications = [];
 
   /* ═══════════════════════════════════════════════════════════
      WEATHER PANEL
@@ -347,6 +348,9 @@
         var prev = d.previousElementSibling;
         if (prev) prev.setAttribute('aria-expanded', 'false');
       });
+      // Cerrar también la campana si está abierta
+      var bellDD = document.getElementById('notification-dropdown');
+      if (bellDD) bellDD.classList.remove('is-open');
     });
 
     // Search input
@@ -447,16 +451,41 @@
      BOOT
   ═══════════════════════════════════════════════════════════ */
   document.addEventListener('DOMContentLoaded', function () {
-    // ── Campana de notificaciones ────────────────────────────────────────────
-    fetch('/api/notificaciones/pendientes')
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (data) {
-        var dot = document.getElementById('bell-dot');
-        if (dot && data !== null) {
-          dot.style.display = data.pendiente ? '' : 'none';
+    function checkNotifications() {
+      fetch('/api/notificaciones/pendientes')
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (data) {
+          var dot = document.getElementById('bell-dot');
+          if (dot && data !== null) {
+            dot.style.display = data.pendiente ? '' : 'none';
+            currentNotifications = data.mensajes || [];
+          }
+        })
+        .catch(function () { });
+    }
+
+    checkNotifications();
+
+    // ── Lógica de la campana (Desplegable) ──────────────────────────────────
+    var bellBtn = document.getElementById('bell-btn');
+    var bellDD = document.getElementById('notification-dropdown');
+    var bellList = document.getElementById('notification-list');
+
+    if (bellBtn && bellDD && bellList) {
+      bellBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = bellDD.classList.toggle('is-open');
+        if (isOpen) {
+          if (currentNotifications.length === 0) {
+            bellList.innerHTML = '<div class="notification-item notification-item--empty">No hay avisos nuevos</div>';
+          } else {
+            bellList.innerHTML = currentNotifications.map(function (m) {
+              return '<div class="notification-item">' + m + '</div>';
+            }).join('');
+          }
         }
-      })
-      .catch(function () { /* silencioso: la campana queda sin punto */ });
+      });
+    }
 
     // Init filter dropdowns FIRST (no dependency on map)
     initFilterDropdowns();
