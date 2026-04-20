@@ -7,6 +7,8 @@
   var markerElems = {};   // id → .map-marker DOM element
   var activitiesData = {};   // id → activity object (from API)
   var activeId = null;
+  var currentNotifications = [];
+  var reservedActivities = {};
 
   /* ═══════════════════════════════════════════════════════════
      WEATHER PANEL
@@ -705,6 +707,19 @@
     var modal = document.getElementById('reserva-modal');
     modal.classList.remove('is-visible');
     setTimeout(function () { modal.style.display = 'none'; }, 300);
+  };
+
+  // ── Weather Warning Modals ─────────────────────────────────
+  window.closeWeatherWarn = function () {
+    var modal = document.getElementById('weather-warn-modal');
+    modal.classList.remove('is-visible');
+    setTimeout(function () { modal.style.display = 'none'; }, 300);
+  };
+
+  window.closeWeatherWarnAndReserve = function () {
+    var actividadId = document.getElementById('input-actividad-id').value;
+    window.closeWeatherWarn();
+    if (actividadId) doReserva(actividadId);
   };
 
 }());
