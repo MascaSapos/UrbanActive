@@ -21,10 +21,10 @@ public class Ubicacion {
     @Column(name = "tipoEspacio", length = 255)
     private String tipoEspacio;
 
-    @Column(name = "latitud")
+    @Column(name = "latitud", precision = 10, scale = 6)
     private BigDecimal latitud;
 
-    @Column(name = "longitud")
+    @Column(name = "longitud", precision = 10, scale = 6)
     private BigDecimal longitud;
 
     public Ubicacion() {
