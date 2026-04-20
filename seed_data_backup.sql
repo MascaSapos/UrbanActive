@@ -1,6 +1,10 @@
 -- ==========================================================
 -- RESETEO Y SEMILLA COMPLETA - UrbanActive (Final)
 -- ==========================================================
+USE urbanactive;
+
+SET SQL_SAFE_UPDATES = 0;
+
 -- Este archivo limpia la base de datos y añade actividades con los deportes
 -- solicitados (Baloncesto, Running, Ciclismo, Futbol, Natacion, Yoga)
 -- repartidos en diferentes ubicaciones para que se vean todos en el mapa.
@@ -61,3 +65,5 @@ INSERT INTO informe_meteorologico (Id, temperatura, calidad_aire, id_actividad, 
 ('W_NF',  22.0, 30, 'N_FULL', 0, '2026-04-20 17:00:00', '2026-06-01 10:00:00', 'UBI01'),
 ('W_NC',  23.0, 30, 'N_CANC', 0, '2026-04-20 17:00:00', '2026-06-05 18:00:00', 'UBI06'),
 ('W_W01', 1.5, 20, 'N_WEAT', 0, '2026-04-20 17:00:00', '2026-04-21 20:00:00', 'UBI02');
+
+SET SQL_SAFE_UPDATES = 1;
