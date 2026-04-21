@@ -682,11 +682,6 @@
 
         // Update button to "Plaza reservada"
         setBtnReservado(btn);
-
-        // Trigger notification dot immediately (no waiting for polling interval)
-        if (typeof window.checkNotificaciones === 'function') {
-          window.checkNotificaciones();
-        }
       } else {
         var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
         showModal('❌', 'Error al reservar', msg);

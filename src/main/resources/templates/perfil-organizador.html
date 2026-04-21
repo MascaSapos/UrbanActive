@@ -361,15 +361,6 @@
 
     // ── INIT ───────────────────────────────────────────────
     async function refreshActividades() {
-      // Record current baseline count to clear dot
-      try {
-        const r = await fetch('/api/notificaciones/count', { credentials: 'same-origin' });
-        if (r.ok) {
-           const d = await r.json();
-           localStorage.setItem('ua_notif_count', String(d.count ?? 0));
-        }
-      } catch(e){}
-
       document.getElementById('activities-list').innerHTML = '';
       loadActividades();
     }

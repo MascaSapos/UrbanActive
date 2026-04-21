@@ -234,11 +234,6 @@
       list.style.display = 'none';
       document.getElementById('reservas-empty').style.display = 'none';
       await loadReservas();
-      // Also update the notification baseline so dot resets when user is here
-      try {
-        const r = await fetch('/api/notificaciones/count', { credentials: 'same-origin' });
-        if (r.ok) { const d = await r.json(); localStorage.setItem('ua_notif_count', String(d.count ?? 0)); }
-      } catch (_) {}
     }
 
     refreshReservas();
