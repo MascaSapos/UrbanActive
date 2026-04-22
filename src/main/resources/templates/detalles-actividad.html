@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" th:href="@{/css/map.css}">
   <link rel="stylesheet" th:href="@{/css/detalles.css}">
 </head>
@@ -30,69 +31,70 @@
 
     <main class="detalles-content" th:if="${actividad != null}">
       
-      <!-- Información principal -->
-      <section class="card info-card">
-        <div class="info-header">
-          <h1 class="actividad-nombre" th:text="${actividad.tipoDeporte}">Deporte</h1>
-          <span class="actividad-estado" th:text="${actividad.estado}">Estado</span>
-        </div>
-        
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">Fecha y Hora</span>
-            <span class="info-value" th:text="${#temporals.format(actividad.fechaHora, 'dd/MM/yyyy HH:mm')}">--</span>
+      <div class="detalles-col-left">
+        <!-- Información principal -->
+        <section class="card info-card">
+          <div class="info-header">
+            <h1 class="actividad-nombre" th:text="${actividad.tipoDeporte}">Deporte</h1>
+            <span class="actividad-estado" th:text="${actividad.estado}">Estado</span>
           </div>
-          <div class="info-item">
-            <span class="info-label">Ubicación</span>
-            <span class="info-value" th:text="${actividad.id_ubicacion != null ? actividad.id_ubicacion.nombre : 'Ubicación sin nombre'}">--</span>
+          
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label"><i class="fa-regular fa-calendar"></i> Fecha y Hora</span>
+              <span class="info-value" th:text="${#temporals.format(actividad.fechaHora, 'dd/MM/yyyy HH:mm')}">--</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label"><i class="fa-solid fa-location-dot"></i> Ubicación</span>
+              <span class="info-value" th:text="${actividad.id_ubicacion != null ? actividad.id_ubicacion.nombre : 'Ubicación sin nombre'}">--</span>
+            </div>
           </div>
-          <div class="info-item">
-            <span class="info-label">Precio</span>
-            <span class="info-value">10,00 €</span>
+
+          <div class="info-description">
+            <h3>Descripción</h3>
+            <p>Únete a esta emocionante actividad deportiva. Disfruta de un ambiente sano, haz ejercicio y conoce gente nueva. No olvides traer ropa cómoda, hidratación y muchas ganas de pasarlo bien. ¡Te esperamos para compartir nuestra pasión por el deporte en la mejor compañía!</p>
           </div>
-        </div>
+        </section>
 
-        <div class="info-description">
-          <h3>Descripción</h3>
-          <p>Únete a esta emocionante actividad deportiva. Disfruta de un ambiente sano, haz ejercicio y conoce gente nueva. No olvides traer ropa cómoda, hidratación y muchas ganas de pasarlo bien. ¡Te esperamos para compartir nuestra pasión por el deporte en la mejor compañía!</p>
-        </div>
-      </section>
+        <!-- Organizador -->
+        <section class="card organizer-card" th:if="${actividad.organizador != null}">
+          <div class="organizer-avatar">
+            <img th:src="'https://ui-avatars.com/api/?name=' + ${actividad.organizador.nombre} + '&background=random&color=fff&size=64'" alt="Avatar">
+          </div>
+          <div class="organizer-details">
+            <span class="organizer-role">Organizador</span>
+            <h3 class="organizer-name" th:text="${actividad.organizador.nombre}">Nombre</h3>
+            <a class="organizer-contact" th:href="'mailto:' + ${actividad.organizador.email}">
+              Contactar por correo
+            </a>
+          </div>
+        </section>
+      </div>
 
-      <!-- Organizador -->
-      <section class="card organizer-card" th:if="${actividad.organizador != null}">
-        <div class="organizer-avatar">
-          <img th:src="'https://ui-avatars.com/api/?name=' + ${actividad.organizador.nombre} + '&background=random&color=fff&size=64'" alt="Avatar">
-        </div>
-        <div class="organizer-details">
-          <span class="organizer-role">Organizador</span>
-          <h3 class="organizer-name" th:text="${actividad.organizador.nombre}">Nombre</h3>
-          <a class="organizer-contact" th:href="'mailto:' + ${actividad.organizador.email}">
-            Contactar por correo
-          </a>
-        </div>
-      </section>
+      <div class="detalles-col-right">
+        <!-- Ocupación y Reserva -->
+        <section class="card aforo-card-detalles">
 
-      <!-- Ocupación y Reserva -->
-      <section class="card aforo-card-detalles">
-        <div class="aforo-header">
-          <h3>Ocupación</h3>
-          <span th:text="${actividad.plazasLibres + ' plazas libres de ' + actividad.plazasTotal}">0 libres</span>
-        </div>
-        
-        <!-- Cálculo del porcentaje de ocupación -->
-        <div class="progress-bar-container" th:with="porcentaje=${actividad.plazasTotal > 0 ? (actividad.plazasOcupadas * 100 / actividad.plazasTotal) : 0}">
-          <div class="progress-bar-fill" th:style="'width: ' + ${porcentaje} + '%'" th:classappend="${porcentaje >= 100} ? 'full' : ''"></div>
-        </div>
-        
-        <div class="reservation-actions">
-          <form th:action="@{/actividades/{id}/reservar(id=${actividad.id})}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"/>
-            <button type="submit" class="btn-reservar-large" th:disabled="${actividad.plazasLibres <= 0}">
-              <span th:text="${actividad.plazasLibres > 0 ? 'Reservar Plaza' : 'Actividad Completa'}">Reservar Plaza</span>
-            </button>
-          </form>
-        </div>
-      </section>
+          <div class="aforo-header">
+            <h3>Ocupación</h3>
+            <span th:text="${actividad.plazasLibres + ' plazas libres de ' + actividad.plazasTotal}">0 libres</span>
+          </div>
+          
+          <!-- Cálculo del porcentaje de ocupación -->
+          <div class="progress-bar-container" th:with="porcentaje=${actividad.plazasTotal > 0 ? (actividad.plazasOcupadas * 100 / actividad.plazasTotal) : 0}">
+            <div class="progress-bar-fill" th:style="'width: ' + ${porcentaje} + '%'" th:classappend="${porcentaje >= 100} ? 'full' : (${actividad.plazasLibres <= 5} ? 'warning' : '')"></div>
+          </div>
+          
+          <div class="reservation-actions">
+            <form th:action="@{/actividades/{id}/reservar(id=${actividad.id})}" method="post">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf != null}"/>
+              <button type="submit" class="btn-reservar-large" th:disabled="${actividad.plazasLibres <= 0}">
+                <span th:text="${actividad.plazasLibres > 0 ? 'Reservar Plaza' : 'Actividad Completa'}">Reservar Plaza</span>
+              </button>
+            </form>
+          </div>
+        </section>
+      </div>
 
     </main>
   </div>
