@@ -161,6 +161,9 @@
 
   <script th:inline="javascript">
     const AVATAR_INICIAL = /*[[${avatarInicial}]]*/ '?';
+    const USER_EMAIL = /*[[${usuario != null ? usuario.email : ''}]]*/ '';
+    const CACHE_KEY_ACTIVIDADES = 'ua_cache_actividades_' + USER_EMAIL;
+    let lastRenderedJson = '';
     
     function openEditModal() {
       document.getElementById('modal-edit-profile').classList.add('is-open');
@@ -212,6 +215,20 @@
             avatarContainer.innerHTML = `<img src="${fotoUrl}" alt="" onerror="this.parentElement.innerHTML='<span>${AVATAR_INICIAL}</span>'">`;
           } else {
             avatarContainer.innerHTML = `<span>${AVATAR_INICIAL}</span>`;
+          }
+          
+          
+          // Actualizar cache local para que persista al recargar
+          const cached = localStorage.getItem(CACHE_KEY_ACTIVIDADES);
+          if (cached) {
+            try {
+              const activities = JSON.parse(cached);
+              // Como los datos del usuario suelen estar embebidos o relacionados, 
+              // lo más seguro es forzar un refresco del cache en la próxima carga
+              // o simplemente dejar que el background fetch lo haga.
+              // Por ahora, invalidamos para asegurar consistencia:
+              localStorage.removeItem(CACHE_KEY_ACTIVIDADES);
+            } catch(e){}
           }
           
           closeEditModal();
@@ -368,17 +385,18 @@
     }
 
     // ── LOAD ACTIVITIES ───────────────────────────────────────
-    const CACHE_KEY_ACTIVIDADES = 'ua_cache_mis_actividades';
-
     async function loadActividades() {
       // 1. Intentar cargar desde cache
-      const cachedData = localStorage.getItem(CACHE_KEY_ACTIVIDADES);
+      const cachedData = USER_EMAIL ? localStorage.getItem(CACHE_KEY_ACTIVIDADES) : null;
       if (cachedData) {
         try {
-          const actividades = JSON.parse(cachedData);
-          if (actividades && actividades.length > 0) {
-            renderActividadesUI(actividades);
-            document.getElementById('activities-loading').style.display = 'none';
+          if (cachedData !== lastRenderedJson) {
+            const actividades = JSON.parse(cachedData);
+            if (actividades && actividades.length > 0) {
+              renderActividadesUI(actividades);
+              lastRenderedJson = cachedData;
+              document.getElementById('activities-loading').style.display = 'none';
+            }
           }
         } catch (e) { console.error("Error parsing activities cache", e); }
       }
@@ -387,16 +405,20 @@
         const res = await fetch('/api/actividades/mis-actividades', { credentials: 'same-origin' });
         if (!res.ok) throw new Error('No autorizado o error del servidor (' + res.status + ')');
         const actividades = await res.json();
+        const jsonStr = JSON.stringify(actividades);
 
         // 2. Guardar en cache
-        localStorage.setItem(CACHE_KEY_ACTIVIDADES, JSON.stringify(actividades));
+        if (USER_EMAIL) localStorage.setItem(CACHE_KEY_ACTIVIDADES, jsonStr);
 
-        // 3. Renderizar datos frescos
+        // 3. Renderizar datos frescos SOLO si hay cambios
         document.getElementById('activities-loading').style.display = 'none';
-        renderActividadesUI(actividades);
+        if (jsonStr !== lastRenderedJson) {
+          renderActividadesUI(actividades);
+          lastRenderedJson = jsonStr;
+        }
 
       } catch (err) {
-        if (!localStorage.getItem(CACHE_KEY_ACTIVIDADES)) {
+        if (!USER_EMAIL || !localStorage.getItem(CACHE_KEY_ACTIVIDADES)) {
           document.getElementById('activities-loading').style.display = 'none';
           showToast('❌ Error al cargar actividades: ' + err.message, 'err');
           document.getElementById('activities-empty').style.display = '';
@@ -501,7 +523,6 @@
 
     // ── INIT ───────────────────────────────────────────────
     async function refreshActividades() {
-      document.getElementById('activities-list').innerHTML = '';
       loadActividades();
     }
 
