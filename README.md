@@ -44,3 +44,5 @@ Cuando arranquéis la aplicación (`mvn spring-boot:run`) y vayáis a `http://lo
 
 ---
 **Nota para el equipo:** En la raíz se encuentra el archivo `seed_data_backup.sql`. Solo hay que copiar su contenido de arriba a abajo en MySQL para tener el mapa lleno y las notificaciones listas para testear.
+
+⚠️ **Importante:** Al actualizar `integration`, el archivo `application.properties` puede ser sobrescrito por la configuración de otro compañero. Si la app no arranca, revisa siempre que tu contraseña de MySQL local sea la correcta.
