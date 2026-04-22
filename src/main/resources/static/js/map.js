@@ -700,6 +700,7 @@
       .then(function (data) {
         if (data.exito) {
           showModal('✅', '¡Reserva exitosa!', data.mensaje);
+          reservedActivities[actividadId] = true;
 
           // Update occupancy locally
           if (activitiesData[actividadId]) {
@@ -717,12 +718,13 @@
             }
           }
           setAforo(actividadId);
+          setBtnReservado(btn);
         } else {
           var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
           showModal('❌', 'Error al reservar', msg);
+          btn.innerHTML = originalText;
+          btn.disabled = false;
         }
-        btn.innerHTML = originalText;
-        btn.disabled = false;
       })
       .catch(function (err) {
         btn.innerHTML = originalText;
