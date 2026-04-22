@@ -1,6 +1,5 @@
 package com.urbanactive.controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.urbanactive.dto.ActividadMapDto;
 import com.urbanactive.model.Actividad;
 import com.urbanactive.model.Reserva;
 import com.urbanactive.repository.ActividadRepository;
@@ -50,20 +48,10 @@ public class NotificacionController {
         if ("ORGANIZADOR".equals(rol) || "ROLE_ORGANIZADOR".equals(rol)) {
             List<Actividad> misActividades = actividadRepository.findByOrganizador_Id(userId);
             for (Actividad a : misActividades) {
-                if (!"CANCELADA".equals(a.getEstado())) {
-                    // 1. Revisión de Aforo Completo
-                    int ocupadas = reservaRepository.countActivasPorActividad(a.getId());
-                    if (a.getPlazasTotal() != null && ocupadas >= a.getPlazasTotal()) {
-                        mensajes.add("¡Tu actividad '" + a.getTipoDeporte() + "' está completa!");
-                        pendiente = true;
-                    }
-
-                    // 2. Revisión de clima
-                    ActividadMapDto.WeatherDto w = actividadService.aWeatherDto(a);
-                    if (w != null && w.getAlerta() != null) {
-                        mensajes.add("Aviso climático en '" + a.getTipoDeporte() + "': " + w.getAlerta());
-                        pendiente = true;
-                    }
+                String alerta = actividadService.obtenerMensajeAlerta(a);
+                if (alerta != null) {
+                    mensajes.add(alerta + " en '" + a.getTipoDeporte() + "'");
+                    pendiente = true;
                 }
             }
         } else {
@@ -75,14 +63,13 @@ public class NotificacionController {
                 pendiente = true;
             }
 
-            // 2. Revisión de clima en sus reservas activas
+            // 2. Alertas sincronizadas en sus reservas activas
             List<Reserva> misReservas = reservaRepository.findByUsuario(userDetails.getUsuario());
             for (Reserva r : misReservas) {
-                if ("CONFIRMADA".equals(r.getEstado()) && !"CANCELADA".equals(r.getActividad().getEstado())) {
-                    ActividadMapDto.WeatherDto w = actividadService.aWeatherDto(r.getActividad());
-                    if (w != null && w.getAlerta() != null) {
-                        mensajes.add(
-                                "Aviso climático para '" + r.getActividad().getTipoDeporte() + "': " + w.getAlerta());
+                if ("CONFIRMADA".equals(r.getEstado())) {
+                    String alerta = actividadService.obtenerMensajeAlerta(r.getActividad());
+                    if (alerta != null) {
+                        mensajes.add(alerta + " para '" + r.getActividad().getTipoDeporte() + "'");
                         pendiente = true;
                     }
                 }

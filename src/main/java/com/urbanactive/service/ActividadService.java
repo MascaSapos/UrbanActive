@@ -120,12 +120,7 @@ public class ActividadService {
             weather.setClimaIcon(iconoClima(lluvia));
 
             // Validador de Advertencia (Caso BBDD)
-            boolean advT = informe.getTemperatura() != null
-                    && informe.getTemperatura().compareTo(new java.math.BigDecimal("5")) < 0;
-            boolean advAqi = informe.getCalidadAire() != null && informe.getCalidadAire() >= 60;
-            if (advT || advAqi) {
-                weather.setAlerta("⚠️ Condiciones adversas");
-            }
+            weather.setAlerta(verificarCondicionesAdversas(informe.getTemperatura(), informe.getCalidadAire()));
 
             return weather;
         } else {
@@ -142,8 +137,6 @@ public class ActividadService {
                 com.urbanactive.dto.WeatherDto live = openMeteoClientService.getWeather(
                         u.getLatitud().doubleValue(), u.getLongitud().doubleValue(), a.getFechaHora());
 
-                System.out.println("DEBUG WEATHER - Actividad: " + a.getId() + " - Temp: " + live.getTemperatura());
-
                 ActividadMapDto.WeatherDto weather = new ActividadMapDto.WeatherDto();
                 weather.setTemp(live.getTemperatura() + "°C");
                 weather.setLluvia(live.getProbabilidadLluvia() + "%");
@@ -152,18 +145,45 @@ public class ActividadService {
                 weather.setClima(live.getTextoClima());
 
                 // Validador de Advertencia
-                boolean advT = live.getTemperatura() != null
-                        && live.getTemperatura().compareTo(new java.math.BigDecimal("5")) < 0;
-                boolean advAqi = live.getAqi() != null && live.getAqi() >= 60;
-                if (advT || advAqi) {
-                    weather.setAlerta("⚠️ Condiciones adversas");
-                }
+                weather.setAlerta(verificarCondicionesAdversas(live.getTemperatura(), live.getAqi()));
 
                 return weather;
             } catch (Exception e) {
                 return null;
             }
         }
+    }
+
+    private String verificarCondicionesAdversas(java.math.BigDecimal temp, Integer aqi) {
+        boolean advT = temp != null && temp.compareTo(new java.math.BigDecimal("5")) < 0;
+        boolean advAqi = aqi != null && aqi >= 60;
+        return (advT || advAqi) ? "⚠️ Condiciones adversas" : null;
+    }
+
+    /**
+     * Unificado: Comprueba si una actividad tiene alertas (clima, aforo, estado)
+     */
+    public String obtenerMensajeAlerta(Actividad a) {
+        if (a == null) return null;
+        
+        // 1. Clima
+        ActividadMapDto.WeatherDto w = aWeatherDto(a);
+        if (w != null && w.getAlerta() != null) {
+            return w.getAlerta();
+        }
+
+        // 2. Aforo
+        int ocupadas = reservaRepository.countActivasPorActividad(a.getId());
+        if (a.getPlazasTotal() != null && ocupadas >= a.getPlazasTotal() && !"CERRADA".equalsIgnoreCase(a.getEstado())) {
+            return "⚠️ Aforo completo";
+        }
+
+        // 3. Estado (si está cancelada/cerrada pero no por aforo)
+        if ("CANCELADA".equalsIgnoreCase(a.getEstado()) || "CERRADA".equalsIgnoreCase(a.getEstado())) {
+            return "🚫 Actividad no disponible";
+        }
+
+        return null;
     }
 
     private String mapearCalidadAire(Integer calidadAire) {

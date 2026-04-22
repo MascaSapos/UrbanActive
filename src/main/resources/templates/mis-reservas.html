@@ -154,6 +154,7 @@
 
       card.innerHTML = `
         ${isNew ? '<span class="new-dot" title="Nueva desde tu última visita"></span>' : ''}
+        ${act.alerta ? `<span class="alert-dot" title="${escapeHtml(act.alerta)}"><div class="alert-dot__ring"></div></span>` : ''}
         <div class="reserva-card__icon">${sportIcon(act.tipoDeporte)}</div>
         <div class="reserva-card__info">
           <div class="reserva-card__title">${escapeHtml(act.tipoDeporte || 'Actividad')}</div>
@@ -161,6 +162,7 @@
             ${act.fechaHora ? `<span class="reserva-card__meta-item">📅 ${formatDate(act.fechaHora)}</span>` : ''}
             ${reserva.fechaReserva ? `<span class="reserva-card__meta-item">🎫 Reservado ${formatDate(reserva.fechaReserva)}</span>` : ''}
             ${act.lugar   ? `<span class="reserva-card__meta-item">📍 ${escapeHtml(act.lugar)}</span>` : ''}
+            ${act.alerta ? `<div class="reserva-card__warning-msg">⚠️ ${escapeHtml(act.alerta)}</div>` : ''}
           </div>
         </div>
         <div class="reserva-card__right">

@@ -149,6 +149,9 @@
 
     // ── ALERT DOT: actividades con cambios recientes (estado CERRADA/COMPLETA) ──
     function hasAlert(act) {
+      // Prioridad 1: Alerta explícita del backend (clima/aforo)
+      if (act.weather && act.weather.alerta) return true;
+      // Prioridad 2: Estado de la actividad
       return act.estado && act.estado.toUpperCase().includes('CERRADA');
     }
 
@@ -211,7 +214,7 @@
           <span class="occupancy-label">${act.plazasOcupadas}/${act.plazasTotal}</span>
         </div>
         <div class="activity-row__status">
-          ${alertFlag ? `<div class="alert-dot" title="Actividad cerrada/completa — hay cambios pendientes de revisión"><div class="alert-dot__ring"></div></div>` : ''}
+          ${alertFlag ? `<div class="alert-dot" title="${escapeHtml(act.weather?.alerta || 'Actividad cerrada/completa')}"><div class="alert-dot__ring"></div></div>` : ''}
           <span class="status-pill ${isOpen ? 'status-pill--abierta' : 'status-pill--cerrada'}">${escapeHtml(act.estado || '—')}</span>
           <button class="btn-danger"
                   id="btn-delete-${escapeHtml(act.id || 'missing')}"

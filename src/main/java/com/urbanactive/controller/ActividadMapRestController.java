@@ -112,6 +112,14 @@ public class ActividadMapRestController {
             if (a.getFechaHora() != null) {
                 dto.setFechaHora(a.getFechaHora().toString());
             }
+
+            // Sincronización de alertas
+            ActividadMapDto.WeatherDto weather = actividadService.aWeatherDto(a);
+            String alerta = actividadService.obtenerMensajeAlerta(a);
+            if (weather == null) weather = new ActividadMapDto.WeatherDto();
+            if (alerta != null) weather.setAlerta(alerta);
+            dto.setWeather(weather);
+
             return dto;
         }).filter(java.util.Objects::nonNull)
           .collect(java.util.stream.Collectors.toList());

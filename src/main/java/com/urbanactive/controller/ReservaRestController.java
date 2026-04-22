@@ -13,6 +13,7 @@ import com.urbanactive.model.Reserva;
 import com.urbanactive.model.Actividad;
 import com.urbanactive.service.ReservaService;
 import com.urbanactive.service.UsuarioService;
+import com.urbanactive.service.ActividadService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,10 +24,12 @@ public class ReservaRestController {
 
     private final ReservaService reservaService;
     private final UsuarioService usuarioService;
+    private final ActividadService actividadService;
 
-    public ReservaRestController(ReservaService reservaService, UsuarioService usuarioService) {
+    public ReservaRestController(ReservaService reservaService, UsuarioService usuarioService, ActividadService actividadService) {
         this.reservaService = reservaService;
         this.usuarioService = usuarioService;
+        this.actividadService = actividadService;
     }
 
     /**
@@ -61,6 +64,11 @@ public class ReservaRestController {
                     if (act.getId_ubicacion() != null) {
                         actDto.put("lugar", act.getId_ubicacion().getNombre());
                     }
+                    
+                    // Alerta sincronizada
+                    String alerta = actividadService.obtenerMensajeAlerta(act);
+                    actDto.put("alerta", alerta);
+                    
                     dto.put("actividad", actDto);
                 } else {
                     dto.put("actividad", null);
