@@ -1,16 +1,18 @@
 -- ==========================================================
--- RESETEO Y SEMILLA COMPLETA - UrbanActive (Final)
+-- SET UP
 -- ==========================================================
+CREATE DATABASE IF NOT EXISTS urbanactive;
 USE urbanactive;
 
+
+--Para poder resetear de golpe ls tablas.
 SET SQL_SAFE_UPDATES = 0;
 
--- Este archivo limpia la base de datos y añade actividades con los deportes
--- solicitados (Baloncesto, Running, Ciclismo, Futbol, Natacion, Yoga)
--- repartidos en diferentes ubicaciones para que se vean todos en el mapa.
+--No hace falta crear las tablas ya que se crean automaticamente con Spring Boot, simplemente arranca el proyecto y se crean.
+--Una vez arrancado y las tablas creadas ya puedes ir insertando datos en ellas.
 
 -- ----------------------------------------------------------
--- 0. LIMPIEZA TOTAL
+-- 0. LIMPIEZA 
 -- ----------------------------------------------------------
 DELETE FROM reserva;
 DELETE FROM informe_meteorologico;
@@ -48,9 +50,9 @@ INSERT INTO actividad (Id, tipo_deporte, fecha_hora, plazas_total, estado, id_ub
 ('N_WEAT', 'Running',    '2026-04-21 20:00:00', 20, 'ABIERTA',   'UBI02', 'ORG001', NULL);
 
 INSERT INTO reserva (id, fecha_reserva, estado, id_usuario, id_actividad) VALUES 
-('R_F1', '2026-04-20 12:00:00', 'CONFIRMADA', 'US001', 'N_FULL'),
-('R_C1', '2026-04-20 12:00:00', 'CONFIRMADA', 'US001', 'N_CANC'),
-('R_W1', '2026-04-20 12:00:00', 'CONFIRMADA', 'US001', 'N_WEAT');
+('R_F1', '2026-04-20 12:00:00', 'CONFIRMADA', 'USR001', 'N_FULL'),
+('R_C1', '2026-04-20 12:00:00', 'CONFIRMADA', 'USR001', 'N_CANC'),
+('R_W1', '2026-04-20 12:00:00', 'CONFIRMADA', 'USR001', 'N_WEAT');
 
 -- ----------------------------------------------------------
 -- INFORMES METEOROLOGICOS FIJOS DE PRUEBA
@@ -66,4 +68,3 @@ INSERT INTO informe_meteorologico (Id, temperatura, calidad_aire, id_actividad, 
 ('W_NC',  23.0, 30, 'N_CANC', 0, '2026-04-20 17:00:00', '2026-06-05 18:00:00', 'UBI06'),
 ('W_W01', 1.5, 20, 'N_WEAT', 0, '2026-04-20 17:00:00', '2026-04-21 20:00:00', 'UBI02');
 
-SET SQL_SAFE_UPDATES = 1;
