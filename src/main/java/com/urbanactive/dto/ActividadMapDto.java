@@ -16,6 +16,7 @@ public class ActividadMapDto {
     private int plazasTotal;
     private String estado;
     private String fechaHora;
+    private String fechaCancelacion;
 
     public ActividadMapDto() {
     }
@@ -163,5 +164,13 @@ public class ActividadMapDto {
 
     public void setFechaHora(String fechaHora) {
         this.fechaHora = fechaHora;
+    }
+
+    public String getFechaCancelacion() {
+        return fechaCancelacion;
+    }
+
+    public void setFechaCancelacion(String fechaCancelacion) {
+        this.fechaCancelacion = fechaCancelacion;
     }
 }

@@ -593,6 +593,31 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   color: #92400e;
   border: 1px solid rgba(245,158,11,.25);
 }
+.status-pill--info {
+  background: var(--surface-3);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+
+/* ── CANCELLED ROW MODIFIER ──────────────────────── */
+.activity-row--cancelled {
+  opacity: 0.75;
+  background: var(--bg);
+  cursor: default;
+  border-style: dashed;
+}
+.activity-row--cancelled .activity-row__sport-icon {
+  filter: grayscale(1);
+  background: var(--surface-3);
+  opacity: 0.6;
+}
+.activity-row--cancelled::before {
+  display: none;
+}
+.activity-row--cancelled:hover {
+  transform: none;
+  box-shadow: none;
+}
 
 /* ── ALERT DOT (organizador) ──────────────────────── */
 .alert-dot {

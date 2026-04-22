@@ -249,4 +249,39 @@ public class ActividadService {
         // 3. Borrar la actividad
         actividadRepository.deleteById(id);
     }
+
+    /**
+     * Marca una actividad como CANCELADA e inicia el contador de 7 días.
+     */
+    public void cancelar(String id) {
+        Actividad a = obtenerPorId(id);
+        if (a != null) {
+            a.setEstado("CANCELADA");
+            a.setFechaCancelacion(LocalDateTime.now());
+            actividadRepository.save(a);
+        }
+    }
+
+    /**
+     * Limpieza al arrancar: Borra físicamente las actividades canceladas hace más de 7 días.
+     * Se ejecuta una sola vez cuando la aplicación está lista (al "entrar").
+     */
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    public void limpiarActividadesCanceladasAlArrancar() {
+        LocalDateTime limite = LocalDateTime.now().minusDays(7);
+        List<Actividad> todas = actividadRepository.findAll();
+        boolean huboBorrados = false;
+        for (Actividad a : todas) {
+            if ("CANCELADA".equalsIgnoreCase(a.getEstado()) 
+                && a.getFechaCancelacion() != null 
+                && a.getFechaCancelacion().isBefore(limite)) {
+                borrar(a.getId());
+                huboBorrados = true;
+            }
+        }
+        if (huboBorrados) {
+            System.out.println(">>> [UrbanActive] Limpieza de actividades canceladas completada con éxito.");
+        }
+    }
 }

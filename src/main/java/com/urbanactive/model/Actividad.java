@@ -40,6 +40,9 @@ public class Actividad {
     @JoinColumn(name = "organizador_id")
     private Usuario organizador;
 
+    @Column(name = "fechaCancelacion")
+    private LocalDateTime fechaCancelacion;
+
     public Actividad() {
     }
 
@@ -113,6 +116,14 @@ public class Actividad {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public LocalDateTime getFechaCancelacion() {
+        return fechaCancelacion;
+    }
+
+    public void setFechaCancelacion(LocalDateTime fechaCancelacion) {
+        this.fechaCancelacion = fechaCancelacion;
     }
 
     @jakarta.persistence.Transient

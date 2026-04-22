@@ -101,15 +101,15 @@
     </main>
   </div>
 
-  <!-- Modal de confirmación de eliminación -->
+  <!-- Modal de confirmación de cancelación -->
   <div class="modal-overlay" id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
     <div class="modal-box">
-      <div class="modal-box__icon">🗑️</div>
-      <h3 class="modal-box__title" id="confirm-title">Eliminar actividad</h3>
-      <p class="modal-box__desc" id="confirm-desc">¿Deseas eliminar esta actividad? Esta acción no se puede deshacer y se cancelarán todas las reservas asociadas.</p>
+      <div class="modal-box__icon">⚠️</div>
+      <h3 class="modal-box__title" id="confirm-title">Cancelar actividad</h3>
+      <p class="modal-box__desc" id="confirm-desc">¿Deseas cancelar esta actividad? Esta acción es irreversible y los deportistas inscritos recibirán un aviso. La actividad se eliminará definitivamente del historial en 7 días.</p>
       <div class="modal-box__actions">
-        <button class="btn-secondary" id="btn-confirm-cancel" onclick="closeConfirmModal()">Cancelar</button>
-        <button class="btn-danger" id="btn-confirm-ok" style="flex:1; justify-content:center;">Eliminar</button>
+        <button class="btn-secondary" id="btn-confirm-cancel" onclick="closeConfirmModal()">Cerrar</button>
+        <button class="btn-danger" id="btn-confirm-ok" style="flex:1; justify-content:center;">Confirmar Cancelación</button>
       </div>
     </div>
   </div>
@@ -194,7 +194,7 @@
       }
 
       const row = document.createElement('div');
-      row.className = 'activity-row';
+      row.className = 'activity-row' + (act.estado === 'CANCELADA' ? ' activity-row--cancelled' : '');
       row.setAttribute('role', 'listitem');
       row.dataset.id = act.id;
 
@@ -205,6 +205,11 @@
           <div class="activity-row__meta">
             ${act.fechaHora ? `<span class="activity-row__meta-item">📅 ${formatDate(act.fechaHora)}</span>` : ''}
             ${act.title ? `<span class="activity-row__meta-item">📍 ${escapeHtml(act.title)}</span>` : ''}
+            ${act.estado === 'CANCELADA' && act.fechaCancelacion ? `
+              <span class="activity-row__meta-item" style="color:var(--danger); font-weight:600;">
+                ⏳ Borrado en ${Math.max(1, 7 - Math.floor((Date.now() - new Date(act.fechaCancelacion)) / (1000 * 60 * 60 * 24)))} días
+              </span>
+            ` : ''}
           </div>
         </div>
         <div class="occupancy-wrap" title="Plazas ocupadas: ${act.plazasOcupadas} / ${act.plazasTotal}">
@@ -215,13 +220,15 @@
         </div>
         <div class="activity-row__status">
           ${alertFlag ? `<div class="alert-dot" title="${escapeHtml(act.weather?.alerta || 'Actividad cerrada/completa')}"><div class="alert-dot__ring"></div></div>` : ''}
-          <span class="status-pill ${isOpen ? 'status-pill--abierta' : 'status-pill--cerrada'}">${escapeHtml(act.estado || '—')}</span>
+          <span class="status-pill ${isOpen ? 'status-pill--abierta' : (act.estado === 'CANCELADA' ? 'status-pill--cancelada' : 'status-pill--cerrada')}">${escapeHtml(act.estado || '—')}</span>
+          ${act.estado !== 'CANCELADA' ? `
           <button class="btn-danger"
                   id="btn-delete-${escapeHtml(act.id || 'missing')}"
-                  aria-label="Eliminar actividad ${escapeHtml(act.tipoDeporte || act.id || '')}"
+                  aria-label="Cancelar actividad ${escapeHtml(act.tipoDeporte || act.id || '')}"
                   onclick="event.stopPropagation(); if(this.parentElement.parentElement.dataset.id && this.parentElement.parentElement.dataset.id !== 'undefined') { confirmDelete(this.parentElement.parentElement.dataset.id, '${escapeHtml(act.tipoDeporte || 'esta actividad')}') } else { alert('Error: No se pudo encontrar el ID de la actividad.'); }">
-            🗑 Eliminar
+            🚫 Cancelar
           </button>
+          ` : '<span class="status-pill status-pill--info">Solo lectura</span>'}
         </div>
       `;
 
@@ -261,6 +268,15 @@
         updateStats(actividades);
         const list = document.getElementById('activities-list');
         list.style.display = 'flex';
+        list.innerHTML = ''; // Limpiar previo
+        
+        // Ordenar: Activas arriba, Canceladas abajo
+        actividades.sort((a, b) => {
+          if (a.estado === 'CANCELADA' && b.estado !== 'CANCELADA') return 1;
+          if (a.estado !== 'CANCELADA' && b.estado === 'CANCELADA') return -1;
+          return new Date(b.fechaHora || 0) - new Date(a.fechaHora || 0); // Orden cronológico descendente para el resto
+        });
+
         actividades.forEach(act => list.appendChild(renderRow(act)));
 
       } catch (err) {
@@ -302,15 +318,9 @@
         });
         const data = await res.json();
         if (data.exito) {
-          // Eliminar la fila del DOM
-          const row = document.querySelector(`.activity-row[data-id="${actividadId}"]`);
-          if (row) {
-            row.style.animation = 'slideUp 200ms ease reverse';
-            setTimeout(() => row.remove(), 200);
-          }
-          showToast('✅ ' + (data.mensaje || 'Actividad eliminada.'), 'ok');
-          // Recargar stats tras un breve delay
-          setTimeout(() => recalcStats(), 300);
+          showToast('✅ ' + (data.mensaje || 'Actividad cancelada.'), 'ok');
+          // Recargar lista completa para ver el cambio de estado y orden
+          setTimeout(() => refreshActividades(), 500);
         } else {
           showToast('❌ ' + (data.mensaje || 'No se pudo eliminar.'), 'err');
         }

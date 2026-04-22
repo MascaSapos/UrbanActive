@@ -115,10 +115,12 @@ public class ActividadMapRestController {
 
             // Sincronización de alertas
             ActividadMapDto.WeatherDto weather = actividadService.aWeatherDto(a);
-            String alerta = actividadService.obtenerMensajeAlerta(a);
-            if (weather == null) weather = new ActividadMapDto.WeatherDto();
             if (alerta != null) weather.setAlerta(alerta);
             dto.setWeather(weather);
+
+            if (a.getFechaCancelacion() != null) {
+                dto.setFechaCancelacion(a.getFechaCancelacion().toString());
+            }
 
             return dto;
         }).filter(java.util.Objects::nonNull)
@@ -139,12 +141,12 @@ public class ActividadMapRestController {
             com.urbanactive.model.Actividad actividad = actividadService.obtenerPorId(actividadId);
             if (actividad.getOrganizadorEmail() != null && !actividad.getOrganizadorEmail().trim().isEmpty() && !auth.getName().equals(actividad.getOrganizadorEmail())) {
                 response.put("exito", false);
-                response.put("mensaje", "No tienes permiso para eliminar esta actividad.");
+                response.put("mensaje", "No tienes permiso para cancelar esta actividad.");
                 return ResponseEntity.status(403).body(response);
             }
-            actividadService.borrar(actividadId);
+            actividadService.cancelar(actividadId);
             response.put("exito", true);
-            response.put("mensaje", "Actividad eliminada correctamente.");
+            response.put("mensaje", "Actividad cancelada correctamente. Se eliminará definitivamente en 7 días.");
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             response.put("exito", false);
