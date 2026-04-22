@@ -2,12 +2,13 @@
   /* ═══════════════════════════════════════════════════════════
      STATE
   ═══════════════════════════════════════════════════════════ */
-  var theMap         = null;
-  var markersMap     = {};   // id → marker Leaflet
-  var markerElems    = {};   // id → .map-marker DOM element
+  var theMap = null;
+  var markersMap = {};   // id → marker Leaflet
+  var markerElems = {};   // id → .map-marker DOM element
   var activitiesData = {};   // id → activity object (from API)
-  var activeId       = null;
-  var reservedActivities = {}; // id → true if user already reserved
+  var activeId = null;
+  var currentNotifications = [];
+  var reservedActivities = {};
 
   /* ═══════════════════════════════════════════════════════════
      WEATHER PANEL
@@ -19,11 +20,11 @@
     }
 
     function setPanel(icon, clima, temp, lluvia, aire) {
-      var el = document.getElementById('w-clima-icon');  if (el) el.textContent = icon;
-      el = document.getElementById('w-clima-val');       if (el) el.textContent = clima;
-      el = document.getElementById('w-temp-val');        if (el) el.textContent = temp;
-      el = document.getElementById('w-lluvia-val');      if (el) el.textContent = lluvia;
-      el = document.getElementById('w-aire-val');        if (el) el.textContent = aire;
+      var el = document.getElementById('w-clima-icon'); if (el) el.textContent = icon;
+      el = document.getElementById('w-clima-val'); if (el) el.textContent = clima;
+      el = document.getElementById('w-temp-val'); if (el) el.textContent = temp;
+      el = document.getElementById('w-lluvia-val'); if (el) el.textContent = lluvia;
+      el = document.getElementById('w-aire-val'); if (el) el.textContent = aire;
     }
 
     var w = a && a.weather;
@@ -60,15 +61,15 @@
       }
       return;
     }
-    
+
     var activity = activitiesData[id];
     if (!activity) return;
-    
+
     var plazas = typeof activity.plazasTotal === 'number' ? activity.plazasTotal : 0;
     var ocupadas = typeof activity.plazasOcupadas === 'number' ? activity.plazasOcupadas : 0;
     var libres = Math.max(0, plazas - ocupadas);
     var pct = plazas > 0 ? (ocupadas / plazas) * 100 : 0;
-    
+
     var libresEl = document.getElementById('w-aforo-libres');
     if (libresEl) {
       libresEl.textContent = libres + ' libres';
@@ -134,12 +135,12 @@
     // Habilitar botón de reservar y actualizar barra de aforo
     var input = document.getElementById('input-actividad-id');
     if (input) input.value = id;
-    
+
     var btnDetalles = document.getElementById('btn-detalles');
     if (btnDetalles) {
-      btnDetalles.onclick = function(e) { e.preventDefault(); };
+      btnDetalles.onclick = function (e) { e.preventDefault(); };
     }
-    
+
     var btn = document.getElementById('btn-reservar');
     var activity = activitiesData[id];
 
@@ -152,8 +153,8 @@
         setBtnNormal(btn);
         // Check inscription status from server
         fetch('/api/actividades/' + id + '/check-inscripcion')
-          .then(function(res) { return res.ok ? res.json() : null; })
-          .then(function(data) {
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (data) {
             if (data && data.inscrito) {
               reservedActivities[id] = true;
               // Only update if this activity is still the selected one
@@ -162,7 +163,7 @@
               }
             }
           })
-          .catch(function() { /* ignore */ });
+          .catch(function () { /* ignore */ });
       }
     } else if (btn) {
       setBtnNormal(btn);
@@ -217,8 +218,8 @@
   ═══════════════════════════════════════════════════════════ */
   function getMarkerHtml(a) {
     var sport = (a.tipoDeporte || a.badge || '').toLowerCase();
-    var icon  = a.icon || '📍';
-    var cls   = 'map-marker';
+    var icon = a.icon || '📍';
+    var cls = 'map-marker';
     if (sport) cls += ' map-marker--' + sport;
     return '<div class="' + cls + '" data-marker-id="' + (a.id || '') + '">' + icon + '</div>';
   }
@@ -272,9 +273,9 @@
 
       marker.bindPopup(
         '<div class="map-popup">' +
-          '<div class="map-popup__badge">' + (a.badge || a.tipoDeporte || 'Actividad') + '</div>' +
-          '<div class="map-popup__title">' + (a.title || '') + '</div>' +
-          '<div class="map-popup__desc">'  + (a.desc  || '') + '</div>' +
+        '<div class="map-popup__badge">' + (a.badge || a.tipoDeporte || 'Actividad') + '</div>' +
+        '<div class="map-popup__title">' + (a.title || '') + '</div>' +
+        '<div class="map-popup__desc">' + (a.desc || '') + '</div>' +
         '</div>',
         { closeButton: false }
       );
@@ -308,13 +309,14 @@
   function initFilterDropdowns() {
     var configs = [
       { btnId: 'btn-deporte', ddId: 'dd-deporte', key: 'deporte', label: 'Deporte' },
-      { btnId: 'btn-fecha',   ddId: 'dd-fecha',   key: 'fecha',   label: 'Fecha'   },
-      { btnId: 'btn-hora',    ddId: 'dd-hora',    key: 'hora',    label: 'Hora'    }
+      { btnId: 'btn-fecha', ddId: 'dd-fecha', key: 'fecha', label: 'Fecha' },
+      { btnId: 'btn-hora', ddId: 'dd-hora', key: 'hora', label: 'Hora' },
+      { btnId: 'filter-otros', ddId: 'otros-dropdown', key: null, label: 'Otros' }
     ];
 
     configs.forEach(function (cfg) {
       var btn = document.getElementById(cfg.btnId);
-      var dd  = document.getElementById(cfg.ddId);
+      var dd = document.getElementById(cfg.ddId);
       if (!btn || !dd) return;
 
       // Toggle dropdown on pill click
@@ -360,7 +362,7 @@
             }
 
             btn.classList.toggle('pill--active', !!val);
-            btn.classList.toggle('pill--idle',   !val);
+            btn.classList.toggle('pill--idle', !val);
 
             dd.classList.remove('is-open');
             btn.setAttribute('aria-expanded', 'false');
@@ -377,6 +379,9 @@
         var prev = d.previousElementSibling;
         if (prev) prev.setAttribute('aria-expanded', 'false');
       });
+      // Cerrar también la campana si está abierta
+      var bellDD = document.getElementById('notification-dropdown');
+      if (bellDD) bellDD.classList.remove('is-open');
     });
 
     // Search input
@@ -392,7 +397,7 @@
         e.stopPropagation();
         filterPlazasLibres = !filterPlazasLibres;
         btnPlazas.classList.toggle('pill--active', filterPlazasLibres);
-        btnPlazas.classList.toggle('pill--idle',  !filterPlazasLibres);
+        btnPlazas.classList.toggle('pill--idle', !filterPlazasLibres);
         btnPlazas.setAttribute('aria-pressed', String(filterPlazasLibres));
         applyFrontendFilters();
       });
@@ -404,21 +409,21 @@
   ═══════════════════════════════════════════════════════════ */
   function applyFrontendFilters() {
     var searchEl = document.getElementById('main-search');
-    var text    = searchEl ? (searchEl.value || '').toLowerCase() : '';
+    var text = searchEl ? (searchEl.value || '').toLowerCase() : '';
     var deporte = (activeFilters.deporte || '').toLowerCase();
-    var fecha   = activeFilters.fecha || '';
-    var hora    = activeFilters.hora  || '';
+    var fecha = activeFilters.fecha || '';
+    var hora = activeFilters.hora || '';
 
-    var now   = new Date();
+    var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     var count = 0;
     document.querySelectorAll('.activity-item').forEach(function (item) {
-      var id      = item.getAttribute('data-id') || '';
-      var sport   = (item.getAttribute('data-deporte') || '').toLowerCase();
+      var id = item.getAttribute('data-id') || '';
+      var sport = (item.getAttribute('data-deporte') || '').toLowerCase();
       var content = item.innerText.toLowerCase();
 
-      var matchText    = !text    || content.includes(text);
+      var matchText = !text || content.includes(text);
       var matchDeporte = !deporte || sport.includes(deporte);
 
       // ── Filtro Fecha ─────────────────────────────────────────
@@ -452,9 +457,9 @@
         var cardDate2 = rawFecha2 ? new Date(rawFecha2) : null;
         if (cardDate2 && !isNaN(cardDate2)) {
           var h = cardDate2.getHours();
-          if (hora === 'manana') { matchHora = h >= 6  && h < 12; }
-          else if (hora === 'tarde')  { matchHora = h >= 12 && h < 18; }
-          else if (hora === 'noche')  { matchHora = h >= 18; }
+          if (hora === 'manana') { matchHora = h >= 6 && h < 12; }
+          else if (hora === 'tarde') { matchHora = h >= 12 && h < 18; }
+          else if (hora === 'noche') { matchHora = h >= 18; }
         } else {
           matchHora = false;
         }
@@ -523,6 +528,42 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    function checkNotifications() {
+      fetch('/api/notificaciones/pendientes')
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (data) {
+          var dot = document.getElementById('bell-dot');
+          if (dot && data !== null) {
+            dot.style.display = data.pendiente ? '' : 'none';
+            currentNotifications = data.mensajes || [];
+          }
+        })
+        .catch(function () { });
+    }
+
+    checkNotifications();
+
+    // ── Lógica de la campana (Desplegable) ──────────────────────────────────
+    var bellBtn = document.getElementById('bell-btn');
+    var bellDD = document.getElementById('notification-dropdown');
+    var bellList = document.getElementById('notification-list');
+
+    if (bellBtn && bellDD && bellList) {
+      bellBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var isOpen = bellDD.classList.toggle('is-open');
+        if (isOpen) {
+          if (currentNotifications.length === 0) {
+            bellList.innerHTML = '<div class="notification-item notification-item--empty">No hay avisos nuevos</div>';
+          } else {
+            bellList.innerHTML = currentNotifications.map(function (m) {
+              return '<div class="notification-item">' + m + '</div>';
+            }).join('');
+          }
+        }
+      });
+    }
+
     // Init filter dropdowns FIRST (no dependency on map)
     initFilterDropdowns();
 
@@ -579,7 +620,7 @@
   /* ═══════════════════════════════════════════════════════════
      AJAX RESERVATION
   ═══════════════════════════════════════════════════════════ */
-  window.submitReservaAjax = function() {
+  window.submitReservaAjax = function () {
     var actividadId = document.getElementById('input-actividad-id').value;
     if (!actividadId) return;
 
@@ -589,44 +630,44 @@
     btn.disabled = true;
 
     fetch('/api/actividades/' + actividadId + '/check-inscripcion')
-      .then(function(res) {
-          if (!res.ok) throw new Error('Network error');
-          return res.json();
+      .then(function (res) {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
       })
-      .then(function(data) {
-          // Si el usuario ya está inscrito, mostrar mensaje directamente
-          if (data && data.inscrito) {
-              reservedActivities[actividadId] = true;
-              setBtnReservado(btn);
-              showModal('❌', 'Ya estás inscrito', 'Ya tienes una plaza reservada en esta actividad.');
-              return;
-          }
+      .then(function (data) {
+        // Si el usuario ya está inscrito, mostrar mensaje directamente
+        if (data && data.inscrito) {
+          reservedActivities[actividadId] = true;
+          setBtnReservado(btn);
+          showModal('❌', 'Ya estás inscrito', 'Ya tienes una plaza reservada en esta actividad.');
+          return;
+        }
 
-          btn.innerHTML = originalText;
-          btn.disabled = false;
+        btn.innerHTML = originalText;
+        btn.disabled = false;
 
-          // Check for weather alert before reserving
-          var activity = activitiesData[actividadId];
-          if (activity && activity.weather && activity.weather.alerta) {
-            // Build a descriptive warning message
-            var w = activity.weather;
-            var details = 'Temperatura: ' + (w.temp || '—') + '  ·  Aire: ' + (w.aire || '—');
-            document.getElementById('weather-warn-msg').textContent = details;
+        // Check for weather alert before reserving
+        var activity = activitiesData[actividadId];
+        if (activity && activity.weather && activity.weather.alerta) {
+          // Build a descriptive warning message
+          var w = activity.weather;
+          var details = 'Temperatura: ' + (w.temp || '—') + '  ·  Aire: ' + (w.aire || '—');
+          document.getElementById('weather-warn-msg').textContent = details;
 
-            var modal = document.getElementById('weather-warn-modal');
-            modal.style.display = 'flex';
-            setTimeout(function() { modal.classList.add('is-visible'); }, 10);
-            return; // Don't reserve yet, wait for user confirmation
-          }
+          var modal = document.getElementById('weather-warn-modal');
+          modal.style.display = 'flex';
+          setTimeout(function () { modal.classList.add('is-visible'); }, 10);
+          return; // Don't reserve yet, wait for user confirmation
+        }
 
-          // No alert → reserve directly
-          doReserva(actividadId);
+        // No alert → reserve directly
+        doReserva(actividadId);
       })
-      .catch(function(err) {
-          // Fallback silente en caso de error: intenta la reserva normal
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-          doReserva(actividadId);
+      .catch(function (err) {
+        // Fallback silente en caso de error: intenta la reserva normal
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        doReserva(actividadId);
       });
   };
 
@@ -649,83 +690,75 @@
       },
       body: bodyParams
     })
-    .then(function(res) {
-      if (res.status === 401 || res.status === 403 || res.redirected) {
-        window.location.href = res.url || '/login';
-        throw new Error('No autorizado');
-      }
-      return res.json();
-    })
-    .then(function(data) {
-      if (data.exito) {
-        showModal('✅', '¡Reserva exitosa!', data.mensaje);
-        
-        // Mark as reserved locally
-        reservedActivities[actividadId] = true;
-
-        // Update occupancy locally
-        if (activitiesData[actividadId]) {
-          activitiesData[actividadId].plazasOcupadas = (activitiesData[actividadId].plazasOcupadas || 0) + 1;
+      .then(function (res) {
+        if (res.status === 401 || res.status === 403 || res.redirected) {
+          window.location.href = res.url || '/login';
+          throw new Error('No autorizado');
         }
-        setAforo(actividadId);
+        return res.json();
+      })
+      .then(function (data) {
+        if (data.exito) {
+          showModal('✅', '¡Reserva exitosa!', data.mensaje);
 
-        // Update the activity card in the left panel
-        var card = document.getElementById('act-' + actividadId);
-        if (card && activitiesData[actividadId]) {
-          var act = activitiesData[actividadId];
-          var libres = Math.max(0, (act.plazasTotal || 0) - (act.plazasOcupadas || 0));
-          card.setAttribute('data-libres', libres);
-          var plazasEl = card.querySelector('.activity-item__plazas');
-          if (plazasEl) plazasEl.textContent = libres + ' libres';
-          card.classList.toggle('is-full', libres <= 0);
+          // Update occupancy locally
+          if (activitiesData[actividadId]) {
+            activitiesData[actividadId].plazasOcupadas = (activitiesData[actividadId].plazasOcupadas || 0) + 1;
+            
+            // Update the activity card in the left panel
+            var card = document.getElementById('act-' + actividadId);
+            if (card) {
+              var act = activitiesData[actividadId];
+              var libres = Math.max(0, (act.plazasTotal || 0) - (act.plazasOcupadas || 0));
+              card.setAttribute('data-libres', libres);
+              var plazasEl = card.querySelector('.activity-item__plazas');
+              if (plazasEl) plazasEl.textContent = libres + ' libres';
+              card.classList.toggle('is-full', libres <= 0);
+            }
+          }
+          setAforo(actividadId);
+        } else {
+          var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
+          showModal('❌', 'Error al reservar', msg);
         }
-
-        // Update button to "Plaza reservada"
-        setBtnReservado(btn);
-      } else {
-        var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
-        showModal('❌', 'Error al reservar', msg);
         btn.innerHTML = originalText;
         btn.disabled = false;
-      }
-    })
-    .catch(function(err) {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      showModal('❌', 'Error de red', err.message || "No se ha podido contactar con el servidor");
-      console.error(err);
-    });
-  }
-
-  window.closeWeatherWarnAndReserve = function() {
-    var modal = document.getElementById('weather-warn-modal');
-    modal.classList.remove('is-visible');
-    setTimeout(function() { modal.style.display = 'none'; }, 300);
-    // User confirmed → proceed with reservation
-    var actividadId = document.getElementById('input-actividad-id').value;
-    if (actividadId) doReserva(actividadId);
-  };
-
-  window.closeWeatherWarn = function() {
-    var modal = document.getElementById('weather-warn-modal');
-    modal.classList.remove('is-visible');
-    setTimeout(function() { modal.style.display = 'none'; }, 300);
+      })
+      .catch(function (err) {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        showModal('❌', 'Error de red', err.message || "No se ha podido contactar con el servidor");
+        console.error(err);
+      });
   };
 
   function showModal(icon, title, msg) {
     document.getElementById('modal-icon').innerText = icon;
     document.getElementById('modal-title').innerText = title;
     document.getElementById('modal-msg').innerText = msg;
-    
+
     var modal = document.getElementById('reserva-modal');
     modal.style.display = 'flex';
-    setTimeout(function() { modal.classList.add('is-visible'); }, 10);
+    setTimeout(function () { modal.classList.add('is-visible'); }, 10);
   }
 
-  window.closeModal = function() {
+  window.closeModal = function () {
     var modal = document.getElementById('reserva-modal');
     modal.classList.remove('is-visible');
-    setTimeout(function() { modal.style.display = 'none'; }, 300);
+    setTimeout(function () { modal.style.display = 'none'; }, 300);
+  };
+
+  // ── Weather Warning Modals ─────────────────────────────────
+  window.closeWeatherWarn = function () {
+    var modal = document.getElementById('weather-warn-modal');
+    modal.classList.remove('is-visible');
+    setTimeout(function () { modal.style.display = 'none'; }, 300);
+  };
+
+  window.closeWeatherWarnAndReserve = function () {
+    var actividadId = document.getElementById('input-actividad-id').value;
+    window.closeWeatherWarn();
+    if (actividadId) doReserva(actividadId);
   };
 
 }());

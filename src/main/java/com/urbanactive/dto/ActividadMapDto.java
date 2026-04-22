@@ -67,6 +67,7 @@ public class ActividadMapDto {
     public void setTipoDeporte(String tipoDeporte) {
         this.tipoDeporte = tipoDeporte;
     }
+
     public WeatherDto getWeather() {
         return weather;
     }

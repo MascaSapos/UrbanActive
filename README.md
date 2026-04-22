@@ -41,3 +41,6 @@ Cuando arranquéis la aplicación (`mvn spring-boot:run`) y vayáis a `http://lo
 **Para entrar como Organizador:**
 * **Correo electrónico:** `admin@test.com`
 * **Contraseña:** `123456`
+
+---
+**Nota para el equipo:** En la raíz se encuentra el archivo `seed_data_backup.sql`. Solo hay que copiar su contenido de arriba a abajo en MySQL para tener el mapa lleno y las notificaciones listas para testear.

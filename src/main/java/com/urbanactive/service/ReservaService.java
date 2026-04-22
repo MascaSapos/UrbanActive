@@ -47,6 +47,10 @@ public class ReservaService {
             throw new IllegalArgumentException("Ya tienes una plaza confirmada en esta actividad.");
         }
 
+        if (actividad.getOrganizador() != null && actividad.getOrganizador().getId().equals(usuario.getId())) {
+            throw new IllegalArgumentException("No puedes unirte a una actividad organizada por ti mismo.");
+        }
+
         // ID único de 10 chars, letras y números
         String nuevaId = UUID.randomUUID().toString().replace("-", "").substring(0, 10).toUpperCase();
 

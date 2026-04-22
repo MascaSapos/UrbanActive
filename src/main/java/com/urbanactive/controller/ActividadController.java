@@ -4,7 +4,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.security.core.Authentication;
 
 import com.urbanactive.service.ActividadService;
 
@@ -30,10 +29,12 @@ public class ActividadController {
     }
 
     @PostMapping("/actividades/nueva")
-    public String guardarActividad(com.urbanactive.model.Actividad actividad, Authentication auth) {
+    public String guardarActividad(com.urbanactive.model.Actividad actividad, 
+                                   @org.springframework.security.core.annotation.AuthenticationPrincipal com.urbanactive.security.CustomUserDetails userDetails) {
         actividad.setId(java.util.UUID.randomUUID().toString().substring(0, 10));
-        if (auth != null && auth.isAuthenticated()) {
-            actividad.setOrganizadorEmail(auth.getName());
+        if (userDetails != null) {
+            actividad.setOrganizador(userDetails.getUsuario());
+            actividad.setOrganizadorEmail(userDetails.getUsuario().getEmail());
         }
         actividadService.crear(actividad);
         return "redirect:/";

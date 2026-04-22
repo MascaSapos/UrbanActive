@@ -9,6 +9,7 @@ No hay restricciones de integrantes para las ramas (puede haber 1 o 4 a la vez).
 ### Como trabajar con git de forma ordenada
 
 1. Crea una nueva rama desde `integration` para desarrollar de forma aisla tu funcionalidad.
+2. Haz **git pull origin integration** cada vez que empieces a programar para traer los cambios del resto a tu rama y evitar conflictos
 2. Haz los cambios que requieras en tu rama.
 3. Cada cambio que hagas, subelo a tu rama del repositorio (push) mediante un commit (descripcion breve).
 4. Cuando hayas terminado de implementar tu funcionalidad, haz un **Pull Request** hacia `integration` para que otro lo revise.

@@ -36,6 +36,10 @@ public class Actividad {
     @JoinColumn(name = "id_ubicacion", nullable = false)
     private Ubicacion id_ubicacion;
 
+    @ManyToOne
+    @JoinColumn(name = "organizador_id")
+    private Usuario organizador;
+
     public Actividad() {
     }
 
@@ -93,6 +97,14 @@ public class Actividad {
 
     public void setOrganizadorEmail(String organizadorEmail) {
         this.organizadorEmail = organizadorEmail;
+    }
+
+    public Usuario getOrganizador() {
+        return organizador;
+    }
+
+    public void setOrganizador(Usuario organizador) {
+        this.organizador = organizador;
     }
 
     public String getEstado() {
