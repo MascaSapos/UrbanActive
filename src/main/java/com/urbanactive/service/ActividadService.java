@@ -56,6 +56,12 @@ public class ActividadService {
                 .orElseThrow(() -> new IllegalArgumentException("Actividad no encontrada con id: " + id));
     }
 
+    public Actividad obtenerConDetalles(String id) {
+        Actividad actividad = obtenerPorId(id);
+        actividad.setPlazasOcupadas(reservaRepository.countActivasPorActividad(id));
+        return actividad;
+    }
+
     public List<Actividad> obtenerTodas() {
         return actividadRepository.findAll();
     }

@@ -3,6 +3,7 @@ package com.urbanactive.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.urbanactive.service.ActividadService;
@@ -20,6 +21,12 @@ public class ActividadController {
     public String verActividadesLeaflet(Model model) {
         model.addAttribute("actividades", actividadService.obtenerTodas());
         return "index";
+    }
+
+    @GetMapping("/actividades/{id}")
+    public String verDetallesActividad(@PathVariable("id") String id, Model model) {
+        model.addAttribute("actividad", actividadService.obtenerConDetalles(id));
+        return "detalles-actividad";
     }
 
     @GetMapping("/actividades/nueva")
