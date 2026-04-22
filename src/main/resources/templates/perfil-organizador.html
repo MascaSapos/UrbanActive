@@ -219,8 +219,10 @@
           <span class="occupancy-label">${act.plazasOcupadas}/${act.plazasTotal}</span>
         </div>
         <div class="activity-row__status">
-          ${alertFlag ? `<div class="alert-dot" title="${escapeHtml(act.weather?.alerta || 'Actividad cerrada/completa')}"><div class="alert-dot__ring"></div></div>` : ''}
-          <span class="status-pill ${isOpen ? 'status-pill--abierta' : (act.estado === 'CANCELADA' ? 'status-pill--cancelada' : 'status-pill--cerrada')}">${escapeHtml(act.estado || '—')}</span>
+          ${alertFlag ? `<div class="alert-dot" title="${escapeHtml(act.weather?.alerta || 'Actividad completa')}"><div class="alert-dot__ring"></div></div>` : ''}
+          <span class="status-pill ${isOpen ? 'status-pill--abierta' : (act.estado === 'CANCELADA' ? 'status-pill--cancelada' : 'status-pill--cerrada')}">
+            ${(act.estado === 'CERRADA' || act.estado === 'CERRADA/COMPLETA' || act.estado === 'COMPLETA') ? 'COMPLETA' : escapeHtml(act.estado || '—')}
+          </span>
           ${act.estado !== 'CANCELADA' ? `
           <button class="btn-danger"
                   id="btn-delete-${escapeHtml(act.id || 'missing')}"

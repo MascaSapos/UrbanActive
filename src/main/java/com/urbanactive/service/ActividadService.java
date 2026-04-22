@@ -175,12 +175,12 @@ public class ActividadService {
 
         // 2. Aforo
         int ocupadas = reservaRepository.countActivasPorActividad(a.getId());
-        if (a.getPlazasTotal() != null && ocupadas >= a.getPlazasTotal() && !"CERRADA".equalsIgnoreCase(a.getEstado())) {
+        if (a.getPlazasTotal() != null && ocupadas >= a.getPlazasTotal() && !"CERRADA".equalsIgnoreCase(a.getEstado()) && !"COMPLETA".equalsIgnoreCase(a.getEstado())) {
             return "⚠️ Aforo completo";
         }
 
         // 3. Estado (si está cancelada/cerrada pero no por aforo)
-        if ("CANCELADA".equalsIgnoreCase(a.getEstado()) || "CERRADA".equalsIgnoreCase(a.getEstado())) {
+        if ("CANCELADA".equalsIgnoreCase(a.getEstado()) || "CERRADA".equalsIgnoreCase(a.getEstado()) || "COMPLETA".equalsIgnoreCase(a.getEstado())) {
             return "🚫 Actividad no disponible";
         }
 

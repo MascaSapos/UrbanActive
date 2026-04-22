@@ -69,7 +69,7 @@ public class ReservaService {
         Reserva reservaGuardada = reservaRepository.save(reserva);
 
         if (plazasOcupadas + 1 >= actividad.getPlazasTotal()) {
-            actividad.setEstado("CERRADA/COMPLETA");
+            actividad.setEstado("COMPLETA");
             actividadRepository.save(actividad);
         }
 
@@ -94,7 +94,7 @@ public class ReservaService {
         Reserva reservaGuardada = reservaRepository.save(reserva);
 
         if (plazasOcupadas + 1 >= actividad.getPlazasTotal()) {
-            actividad.setEstado("CERRADA/COMPLETA");
+            actividad.setEstado("COMPLETA");
             actividadRepository.save(actividad);
         }
 
@@ -149,7 +149,7 @@ public class ReservaService {
         reserva.setEstado("CANCELADA");
         reservaRepository.save(reserva);
 
-        if ("CERRADA/COMPLETA".equals(actividad.getEstado())) {
+        if ("COMPLETA".equals(actividad.getEstado())) {
             actividad.setEstado("ABIERTA");
             actividadRepository.save(actividad);
         }
