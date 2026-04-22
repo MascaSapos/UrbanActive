@@ -31,17 +31,23 @@
       <!-- BLOQUE SUPERIOR: Datos del deportista -->
       <section class="profile-hero" aria-label="Datos del deportista">
         <div class="profile-hero__body">
-          <div class="profile-avatar profile-avatar--athlete" id="profile-avatar"
-               th:text="${avatarInicial}">?</div>
+          <div class="profile-avatar profile-avatar--athlete" id="profile-avatar">
+            <img th:if="${usuario != null && usuario.fotoUrl != null && !usuario.fotoUrl.empty}" th:src="${usuario.fotoUrl}" alt="Avatar">
+            <span th:if="${usuario == null || usuario.fotoUrl == null || usuario.fotoUrl.empty}" th:text="${avatarInicial}">?</span>
+          </div>
           <div class="profile-info">
-            <h1 class="profile-info__name" id="profile-name"
-                th:text="${usuario != null ? usuario.nombre : 'Deportista'}">Deportista</h1>
-            <p class="profile-info__email" id="profile-email"
-               th:text="${usuario != null ? usuario.email : ''}"></p>
+            <div class="profile-info__header">
+              <h1 class="profile-info__name" id="profile-name" th:text="${usuario != null ? usuario.nombre : 'Deportista'}">Deportista</h1>
+              <button class="btn-edit-profile" onclick="openEditModal()">⚙️ Editar Perfil</button>
+            </div>
+            <p class="profile-info__email" id="profile-email" th:text="${usuario != null ? usuario.email : ''}"></p>
             <div class="profile-info__badges">
               <span class="badge badge--athlete">🏃 Deportista</span>
               <span class="badge badge--count" id="badge-count">… reservas</span>
             </div>
+            <p class="profile-info__description" id="profile-desc" th:text="${usuario != null && usuario.descripcion != null && !usuario.descripcion.empty ? usuario.descripcion : 'Sin descripción todavía.'}">
+              Breve descripción sobre el deportista...
+            </p>
           </div>
         </div>
 
@@ -87,8 +93,124 @@
     </main>
   </div>
 
+  <!-- MODAL EDITAR PERFIL -->
+  <div class="modal-overlay" id="modal-edit-profile">
+    <div class="modal-box">
+      <div class="modal-box__icon">👤</div>
+      <h3 class="modal-box__title">Editar Perfil</h3>
+      <p class="modal-box__desc">Actualiza tu información pública</p>
+      
+      <div class="photo-preview-wrap">
+        <div class="photo-preview" id="edit-photo-preview">
+          <img th:if="${usuario != null && usuario.fotoUrl != null && !usuario.fotoUrl.empty}" th:src="${usuario.fotoUrl}" alt="Preview">
+          <span th:if="${usuario == null || usuario.fotoUrl == null || usuario.fotoUrl.empty}" th:text="${avatarInicial}">?</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="edit-nombre">Nombre</label>
+        <input type="text" id="edit-nombre" th:value="${usuario != null ? usuario.nombre : ''}" placeholder="Tu nombre">
+      </div>
+
+      <div class="form-group">
+        <label for="edit-foto">URL de la foto de perfil</label>
+        <input type="url" id="edit-foto" th:value="${usuario != null ? usuario.fotoUrl : ''}" placeholder="https://..." oninput="updatePhotoPreview(this.value)">
+      </div>
+
+      <div class="form-group">
+        <label for="edit-descripcion">Breve descripción (Detalles)</label>
+        <textarea id="edit-descripcion" th:text="${usuario != null ? usuario.descripcion : ''}" placeholder="Cuéntanos algo sobre ti..."></textarea>
+      </div>
+
+      <div class="modal-box__actions">
+        <button class="btn-secondary" onclick="closeEditModal()">Cancelar</button>
+        <button class="btn-primary" onclick="saveProfile()" id="btn-save-profile">Guardar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast container -->
   <div id="toast-container" aria-live="polite"></div>
+
+  <!-- CSRF tokens -->
+  <input type="hidden" id="js-csrf-header" th:value="${csrfHeader}" value="X-CSRF-TOKEN">
+  <input type="hidden" id="js-csrf-token" th:value="${csrfTokenValue}" value="">
+
+  <script th:inline="javascript">
+    const AVATAR_INICIAL = [[${avatarInicial}]];
+    
+    function openEditModal() {
+      document.getElementById('modal-edit-profile').classList.add('is-open');
+    }
+    
+    function closeEditModal() {
+      document.getElementById('modal-edit-profile').classList.remove('is-open');
+    }
+
+    function updatePhotoPreview(url) {
+      const container = document.getElementById('edit-photo-preview');
+      if (url && url.trim() !== "") {
+        container.innerHTML = `<img src="${url}" onerror="this.parentElement.innerHTML='<span>${AVATAR_INICIAL}</span>'">`;
+      } else {
+        container.innerHTML = `<span>${AVATAR_INICIAL}</span>`;
+      }
+    }
+
+    async function saveProfile() {
+      const btn = document.getElementById('btn-save-profile');
+      const nombre = document.getElementById('edit-nombre').value;
+      const fotoUrl = document.getElementById('edit-foto').value;
+      const descripcion = document.getElementById('edit-descripcion').value;
+
+      btn.disabled = true;
+      btn.innerText = "Guardando...";
+
+      try {
+        const csrfHeader = document.getElementById('js-csrf-header').value;
+        const csrfToken = document.getElementById('js-csrf-token').value;
+
+        const res = await fetch('/api/usuarios/perfil', {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken
+          },
+          body: JSON.stringify({ nombre, fotoUrl, descripcion })
+        });
+
+        if (res.ok) {
+          showToast("✅ Perfil actualizado", "ok");
+          document.getElementById('profile-name').innerText = nombre;
+          document.getElementById('profile-desc').innerText = descripcion || "Sin descripción todavía.";
+          
+          const avatarContainer = document.getElementById('profile-avatar');
+          if (fotoUrl && fotoUrl.trim() !== "") {
+            avatarContainer.innerHTML = `<img src="${fotoUrl}" alt="" onerror="this.parentElement.innerHTML='<span>${AVATAR_INICIAL}</span>'">`;
+          } else {
+            avatarContainer.innerHTML = `<span>${AVATAR_INICIAL}</span>`;
+          }
+          
+          closeEditModal();
+        } else {
+          showToast("❌ Error al guardar el perfil", "err");
+        }
+      } catch (e) {
+        showToast("❌ Error de conexión", "err");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Guardar";
+      }
+    }
+
+    function showToast(msg, type = 'ok') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast toast--${type}`;
+      toast.innerText = msg;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 4000);
+    }
+  </script>
 
   <script th:inline="none">
 
@@ -96,16 +218,6 @@
     const LAST_VISIT_KEY = 'ua_reservas_last_visit';
     const lastVisit = parseInt(localStorage.getItem(LAST_VISIT_KEY) || '0', 10);
     localStorage.setItem(LAST_VISIT_KEY, Date.now().toString());
-
-    // ── UTILS ────────────────────────────────────────────
-    function showToast(msg, type) {
-      const c = document.getElementById('toast-container');
-      const t = document.createElement('div');
-      t.className = 'toast toast--' + (type || 'ok');
-      t.textContent = msg;
-      c.appendChild(t);
-      setTimeout(() => t.remove(), 4000);
-    }
 
     function escapeHtml(str) {
       return String(str ?? '')

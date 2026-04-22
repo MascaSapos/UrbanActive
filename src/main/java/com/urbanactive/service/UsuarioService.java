@@ -43,6 +43,16 @@ public class UsuarioService {
         existente.setNombre(cambios.getNombre());
         existente.setEmail(cambios.getEmail());
         existente.setRol(cambios.getRol());
+        existente.setFotoUrl(cambios.getFotoUrl());
+        existente.setDescripcion(cambios.getDescripcion());
+        return usuarioRepository.save(existente);
+    }
+
+    public Usuario actualizarPerfil(String email, String nombre, String fotoUrl, String descripcion) {
+        Usuario existente = obtenerPorEmail(email);
+        existente.setNombre(nombre);
+        existente.setFotoUrl(fotoUrl);
+        existente.setDescripcion(descripcion);
         return usuarioRepository.save(existente);
     }
 

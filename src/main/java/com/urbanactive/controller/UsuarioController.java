@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.urbanactive.model.Usuario;
@@ -40,5 +41,19 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public Usuario buscarPorId(@PathVariable("id") String id) {
         return usuarioService.obtenerPorId(id);
+    }
+
+    @PutMapping("/perfil")
+    public ResponseEntity<?> actualizarPerfil(@RequestBody java.util.Map<String, String> datos, org.springframework.security.core.Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body("No autenticado");
+        }
+        String email = auth.getName();
+        String nombre = datos.get("nombre");
+        String fotoUrl = datos.get("fotoUrl");
+        String descripcion = datos.get("descripcion");
+
+        usuarioService.actualizarPerfil(email, nombre, fotoUrl, descripcion);
+        return ResponseEntity.ok("Perfil actualizado correctamente");
     }
 }

@@ -25,6 +25,12 @@ public class Usuario {
     @Column(name = "password", length = 255, nullable = false)
     private String password;
 
+    @Column(name = "foto_url", length = 500)
+    private String fotoUrl;
+
+    @Column(name = "descripcion", length = 500)
+    private String descripcion;
+
     public Usuario() {
     }
 
@@ -74,5 +80,21 @@ public class Usuario {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 }

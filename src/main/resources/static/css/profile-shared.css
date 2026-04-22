@@ -210,20 +210,26 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 
 .profile-avatar {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   background: var(--accent-grad);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
   box-shadow: 0 4px 18px rgba(37,99,235,.3);
   letter-spacing: -1px;
   transition: box-shadow var(--t);
+  overflow: hidden;
+}
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .profile-avatar--athlete {
@@ -231,7 +237,15 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   box-shadow: 0 4px 18px rgba(34,197,94,.3);
 }
 
-.profile-info { flex: 1; }
+.profile-info { flex: 1; min-width: 0; }
+
+.profile-info__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 2px;
+}
 
 .profile-info__name {
   font-size: 1.5rem;
@@ -250,8 +264,35 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .profile-info__badges {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 12px;
+  margin-top: 8px;
+}
+.profile-info__description {
+  margin-top: 14px;
+  font-size: .88rem;
+  color: var(--text-2);
+  line-height: 1.5;
+  max-width: 600px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.btn-edit-profile {
+  font-size: .75rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  transition: all var(--t);
+  cursor: pointer;
+}
+.btn-edit-profile:hover {
+  background: var(--surface-3);
+  color: var(--text);
+  border-color: var(--text-3);
 }
 
 /* ── BADGES ───────────────────────────────────────── */
@@ -804,6 +845,62 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 .modal-box__actions { display: flex; gap: 10px; }
 .modal-box__actions button { flex: 1; justify-content: center; }
+
+/* ── FORM ELEMENTS (MODAL) ────────────────────────── */
+.form-group {
+    margin-bottom: 16px;
+    text-align: left;
+}
+.form-group label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.form-group input, 
+.form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: .9rem;
+    transition: border-color var(--t), box-shadow var(--t);
+}
+.form-group input:focus, 
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+}
+.form-group textarea {
+    resize: none;
+    min-height: 80px;
+}
+.photo-preview-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.photo-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    overflow: hidden;
+    border: 3px solid var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
 /* ── RESPONSIVE ───────────────────────────────────── */
 @media (max-width: 640px) {
