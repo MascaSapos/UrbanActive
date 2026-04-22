@@ -115,6 +115,8 @@ public class ActividadMapRestController {
 
             // Sincronización de alertas
             ActividadMapDto.WeatherDto weather = actividadService.aWeatherDto(a);
+            String alerta = actividadService.obtenerMensajeAlerta(a);
+            if (weather == null) weather = new ActividadMapDto.WeatherDto();
             if (alerta != null) weather.setAlerta(alerta);
             dto.setWeather(weather);
 
