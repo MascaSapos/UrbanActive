@@ -31,21 +31,21 @@ INSERT INTO ubicacion (Id, nombre, latitud, longitud, tipo_espacio) VALUES
 -- ----------------------------------------------------------
 -- 2. ACTIVIDADES (Deportes: Baloncesto, Running, Ciclismo, Futbol, Natacion, Yoga)
 -- ----------------------------------------------------------
-INSERT INTO actividad (Id, tipo_deporte, fecha_hora, plazas_total, estado, id_ubicacion, organizador_id) VALUES 
-('A01', 'Baloncesto', '2026-05-10 18:00:00', 12, 'ABIERTA', 'UBI01', 'ORG001'),
-('A02', 'Running',    '2026-05-12 17:30:00', 20, 'ABIERTA', 'UBI02', 'ORG001'),
-('A03', 'Ciclismo',   '2026-05-14 09:00:00', 10, 'ABIERTA', 'UBI03', 'ORG001'),
-('A04', 'Futbol',     '2026-05-15 11:00:00', 22, 'ABIERTA', 'UBI04', 'ORG001'),
-('A05', 'Natacion',   '2026-05-20 10:00:00', 8,  'ABIERTA', 'UBI05', 'ORG001'),
-('A06', 'Yoga',       '2026-05-22 20:00:00', 15, 'ABIERTA', 'UBI06', 'ORG001');
+INSERT INTO actividad (Id, tipo_deporte, fecha_hora, plazas_total, estado, id_ubicacion, organizador_id, fecha_cancelacion) VALUES 
+('A01', 'Baloncesto', '2026-05-10 18:00:00', 12, 'ABIERTA', 'UBI01', 'ORG001', NULL),
+('A02', 'Running',    '2026-05-12 17:30:00', 20, 'ABIERTA', 'UBI02', 'ORG001', NULL),
+('A03', 'Ciclismo',   '2026-05-14 09:00:00', 10, 'ABIERTA', 'UBI03', 'ORG001', NULL),
+('A04', 'Futbol',     '2026-05-15 11:00:00', 22, 'ABIERTA', 'UBI04', 'ORG001', NULL),
+('A05', 'Natacion',   '2026-05-20 10:00:00', 8,  'ABIERTA', 'UBI05', 'ORG001', NULL),
+('A06', 'Yoga',       '2026-05-22 20:00:00', 15, 'ABIERTA', 'UBI06', 'ORG001', NULL);
 
 -- ----------------------------------------------------------
 -- ESCENARIOS ADICIONALES (Notificaciones)
 -- ----------------------------------------------------------
-INSERT INTO actividad (Id, tipo_deporte, fecha_hora, plazas_total, estado, id_ubicacion, organizador_id) VALUES 
-('N_FULL', 'Baloncesto', '2026-06-01 10:00:00', 1, 'ABIERTA', 'UBI01', 'ORG001'),
-('N_CANC', 'Yoga',       '2026-06-05 18:00:00', 10, 'CANCELADA', 'UBI06', 'ORG001'),
-('N_WEAT', 'Running',    '2026-04-21 20:00:00', 20, 'ABIERTA', 'UBI02', 'ORG001');
+INSERT INTO actividad (Id, tipo_deporte, fecha_hora, plazas_total, estado, id_ubicacion, organizador_id, fecha_cancelacion) VALUES 
+('N_FULL', 'Baloncesto', '2026-06-01 10:00:00', 1,  'COMPLETA', 'UBI01', 'ORG001', NULL),
+('N_CANC', 'Yoga',       '2026-06-05 18:00:00', 10, 'CANCELADA', 'UBI06', 'ORG001', '2026-04-20 12:00:00'),
+('N_WEAT', 'Running',    '2026-04-21 20:00:00', 20, 'ABIERTA',   'UBI02', 'ORG001', NULL);
 
 INSERT INTO reserva (id, fecha_reserva, estado, id_usuario, id_actividad) VALUES 
 ('R_F1', '2026-04-20 12:00:00', 'CONFIRMADA', 'US001', 'N_FULL'),
