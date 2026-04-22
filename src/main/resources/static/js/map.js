@@ -138,7 +138,9 @@
 
     var btnDetalles = document.getElementById('btn-detalles');
     if (btnDetalles) {
-      btnDetalles.onclick = function (e) { e.preventDefault(); };
+      btnDetalles.onclick = function () {
+        window.location.href = '/actividades/' + id;
+      };
     }
 
     var btn = document.getElementById('btn-reservar');

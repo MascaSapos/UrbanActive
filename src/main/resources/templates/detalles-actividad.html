@@ -59,14 +59,17 @@
         <!-- Organizador -->
         <section class="card organizer-card" th:if="${actividad.organizador != null}">
           <div class="organizer-avatar">
-            <img th:src="'https://ui-avatars.com/api/?name=' + ${actividad.organizador.nombre} + '&background=random&color=fff&size=64'" alt="Avatar">
+            <img th:if="${actividad.organizador.fotoUrl != null && !actividad.organizador.fotoUrl.empty}" 
+                 th:src="${actividad.organizador.fotoUrl}" alt="Organizador">
+            <span th:if="${actividad.organizador.fotoUrl == null || actividad.organizador.fotoUrl.empty}" 
+                  th:text="${#strings.substring(actividad.organizador.nombre,0,1).toUpperCase()}">?</span>
           </div>
           <div class="organizer-details">
             <span class="organizer-role">Organizador</span>
             <h3 class="organizer-name" th:text="${actividad.organizador.nombre}">Nombre</h3>
-            <a class="organizer-contact" th:href="'mailto:' + ${actividad.organizador.email}">
-              Contactar por correo
-            </a>
+            <p class="organizer-bio" th:text="${actividad.organizador.descripcion != null && !actividad.organizador.descripcion.empty ? actividad.organizador.descripcion : 'Este organizador aún no ha añadido una descripción.'}">
+              Bio del organizador...
+            </p>
           </div>
         </section>
       </div>
