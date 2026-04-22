@@ -160,7 +160,7 @@
   </div>
 
   <script th:inline="javascript">
-    const AVATAR_INICIAL = [[${avatarInicial}]];
+    const AVATAR_INICIAL = /*[[${avatarInicial}]]*/ '?';
     
     function openEditModal() {
       document.getElementById('modal-edit-profile').classList.add('is-open');
@@ -368,39 +368,67 @@
     }
 
     // ── LOAD ACTIVITIES ───────────────────────────────────────
+    const CACHE_KEY_ACTIVIDADES = 'ua_cache_mis_actividades';
+
     async function loadActividades() {
+      // 1. Intentar cargar desde cache
+      const cachedData = localStorage.getItem(CACHE_KEY_ACTIVIDADES);
+      if (cachedData) {
+        try {
+          const actividades = JSON.parse(cachedData);
+          if (actividades && actividades.length > 0) {
+            renderActividadesUI(actividades);
+            document.getElementById('activities-loading').style.display = 'none';
+          }
+        } catch (e) { console.error("Error parsing activities cache", e); }
+      }
+
       try {
         const res = await fetch('/api/actividades/mis-actividades', { credentials: 'same-origin' });
         if (!res.ok) throw new Error('No autorizado o error del servidor (' + res.status + ')');
         const actividades = await res.json();
-        console.log('DEBUG MIS-ACTIVIDADES:', actividades);
 
+        // 2. Guardar en cache
+        localStorage.setItem(CACHE_KEY_ACTIVIDADES, JSON.stringify(actividades));
+
+        // 3. Renderizar datos frescos
         document.getElementById('activities-loading').style.display = 'none';
-
-        if (!actividades || actividades.length === 0) {
-          document.getElementById('activities-empty').style.display = '';
-          return;
-        }
-
-        updateStats(actividades);
-        const list = document.getElementById('activities-list');
-        list.style.display = 'flex';
-        list.innerHTML = ''; // Limpiar previo
-        
-        // Ordenar: Activas arriba, Canceladas abajo
-        actividades.sort((a, b) => {
-          if (a.estado === 'CANCELADA' && b.estado !== 'CANCELADA') return 1;
-          if (a.estado !== 'CANCELADA' && b.estado === 'CANCELADA') return -1;
-          return new Date(b.fechaHora || 0) - new Date(a.fechaHora || 0); // Orden cronológico descendente para el resto
-        });
-
-        actividades.forEach(act => list.appendChild(renderRow(act)));
+        renderActividadesUI(actividades);
 
       } catch (err) {
-        document.getElementById('activities-loading').style.display = 'none';
-        showToast('❌ Error al cargar actividades: ' + err.message, 'err');
-        document.getElementById('activities-empty').style.display = '';
+        if (!localStorage.getItem(CACHE_KEY_ACTIVIDADES)) {
+          document.getElementById('activities-loading').style.display = 'none';
+          showToast('❌ Error al cargar actividades: ' + err.message, 'err');
+          document.getElementById('activities-empty').style.display = '';
+        }
       }
+    }
+
+    function renderActividadesUI(actividades) {
+      const list = document.getElementById('activities-list');
+      const emptyState = document.getElementById('activities-empty');
+
+      if (!actividades || actividades.length === 0) {
+        emptyState.style.display = '';
+        list.style.display = 'none';
+        updateStats([]);
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      list.style.display = 'flex';
+      list.innerHTML = ''; // Limpiar previo
+      
+      updateStats(actividades);
+
+      // Ordenar: Activas arriba, Canceladas abajo
+      const sorted = [...actividades].sort((a, b) => {
+        if (a.estado === 'CANCELADA' && b.estado !== 'CANCELADA') return 1;
+        if (a.estado !== 'CANCELADA' && b.estado === 'CANCELADA') return -1;
+        return new Date(b.fechaHora || 0) - new Date(a.fechaHora || 0);
+      });
+
+      sorted.forEach(act => list.appendChild(renderRow(act)));
     }
 
     // ── DELETE ────────────────────────────────────────────────

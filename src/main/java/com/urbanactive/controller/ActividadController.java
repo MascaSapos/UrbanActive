@@ -12,9 +12,11 @@ import com.urbanactive.service.ActividadService;
 public class ActividadController {
 
     private final ActividadService actividadService;
+    private final com.urbanactive.service.ReservaService reservaService;
 
-    public ActividadController(ActividadService actividadService) {
+    public ActividadController(ActividadService actividadService, com.urbanactive.service.ReservaService reservaService) {
         this.actividadService = actividadService;
+        this.reservaService = reservaService;
     }
 
     @GetMapping("/actividades/mapa")
@@ -24,8 +26,15 @@ public class ActividadController {
     }
 
     @GetMapping("/actividades/{id}")
-    public String verDetallesActividad(@PathVariable("id") String id, Model model) {
+    public String verDetallesActividad(@PathVariable("id") String id, 
+                                       Model model, 
+                                       @org.springframework.security.core.annotation.AuthenticationPrincipal com.urbanactive.security.CustomUserDetails userDetails) {
         model.addAttribute("actividad", actividadService.obtenerConDetalles(id));
+        boolean yaInscrito = false;
+        if (userDetails != null) {
+            yaInscrito = reservaService.estaUsuarioInscrito(id, userDetails.getUsername());
+        }
+        model.addAttribute("yaInscrito", yaInscrito);
         return "detalles-actividad";
     }
 

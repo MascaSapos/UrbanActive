@@ -244,10 +244,22 @@
      INIT LEAFLET MAP
   ═══════════════════════════════════════════════════════════ */
   function initMap(activities) {
+    var savedCenter = localStorage.getItem('ua_map_center');
+    var savedZoom   = localStorage.getItem('ua_map_zoom');
+    
+    var initialCenter = savedCenter ? JSON.parse(savedCenter) : [40.420, -3.700];
+    var initialZoom   = savedZoom ? parseInt(savedZoom, 10) : 14;
+
     theMap = L.map('map', {
       zoomControl: false,
       attributionControl: true
-    }).setView([40.420, -3.700], 14);
+    }).setView(initialCenter, initialZoom);
+
+    // Guardar estado del mapa cuando cambie
+    theMap.on('moveend', function() {
+      localStorage.setItem('ua_map_center', JSON.stringify([theMap.getCenter().lat, theMap.getCenter().lng]));
+      localStorage.setItem('ua_map_zoom', theMap.getZoom().toString());
+    });
 
     L.control.zoom({ position: 'topright' }).addTo(theMap);
 
@@ -517,7 +529,7 @@
 
   function getCachedActivities() {
     try {
-      var raw = sessionStorage.getItem(CACHE_KEY);
+      var raw = localStorage.getItem(CACHE_KEY);
       if (raw) return JSON.parse(raw);
     } catch (e) { /* ignore */ }
     return null;
@@ -525,7 +537,7 @@
 
   function setCachedActivities(data) {
     try {
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data));
     } catch (e) { /* ignore quota errors */ }
   }
 

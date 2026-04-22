@@ -295,8 +295,7 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: block; 
-  text-align: center;
-  width: 100%;
+  flex-shrink: 0;
 }
 
 /* ── SEARCH BAR (full width row) ─────────────────────────── */

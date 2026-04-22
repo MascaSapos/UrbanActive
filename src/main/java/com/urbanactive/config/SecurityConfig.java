@@ -24,7 +24,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/actividades/nueva").hasRole("ORGANIZADOR")
                         .requestMatchers("/perfil-organizador").hasRole("ORGANIZADOR")
-                        .requestMatchers("/mis-reservas", "/actividades/*/reservar").hasAnyRole("DEPORTISTA", "USER")
+                        .requestMatchers("/mis-reservas", "/actividades/*/reservar").hasAnyRole("DEPORTISTA", "USER", "USUARIO")
                         // El resto debe estar autenticado
                         .anyRequest().authenticated())
                 // Configuración del login propio

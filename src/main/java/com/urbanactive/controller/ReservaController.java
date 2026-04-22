@@ -49,7 +49,7 @@ public class ReservaController {
     }
 
     @GetMapping("/mis-reservas")
-    public String verMisReservas(Model model, Authentication auth) {
+    public String verMisReservas(Model model, Authentication auth, jakarta.servlet.http.HttpServletRequest request) {
         if (auth == null || !auth.isAuthenticated()) {
             return "redirect:/login";
         }
@@ -60,6 +60,22 @@ public class ReservaController {
                     ? String.valueOf(usuario.getNombre().charAt(0)).toUpperCase()
                     : "?";
             model.addAttribute("avatarInicial", inicial);
+            
+            // Resolve CSRF token safely in Java (avoids DeferredCsrfToken issues in Thymeleaf Spring Security 6)
+            try {
+                org.springframework.security.web.csrf.CsrfToken csrfToken = (org.springframework.security.web.csrf.CsrfToken) request.getAttribute(org.springframework.security.web.csrf.CsrfToken.class.getName());
+                if (csrfToken == null) {
+                    Object raw = request.getAttribute("_csrf");
+                    if (raw instanceof org.springframework.security.web.csrf.CsrfToken ct) {
+                        csrfToken = ct;
+                    }
+                }
+                model.addAttribute("csrfHeader", csrfToken != null ? csrfToken.getHeaderName() : "X-CSRF-TOKEN");
+                model.addAttribute("csrfTokenValue", csrfToken != null ? csrfToken.getToken() : "");
+            } catch (Exception e) {
+                model.addAttribute("csrfHeader", "X-CSRF-TOKEN");
+                model.addAttribute("csrfTokenValue", "");
+            }
         } catch (Exception e) {
             model.addAttribute("usuario", null);
             model.addAttribute("avatarInicial", "?");

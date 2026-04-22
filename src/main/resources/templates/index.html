@@ -40,7 +40,8 @@
            sec:authorize="hasAnyAuthority('ORGANIZADOR', 'ROLE_ORGANIZADOR')"
            class="btn-primary navbar__perfil-btn"
            id="btn-perfil-organizador"
-           style="padding: 8px 16px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+           onclick="window.location.href='/perfil-organizador'"
+           style="padding: 8px 16px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; position: relative; z-index: 10;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
           </svg>
@@ -49,10 +50,11 @@
 
         <!-- Botón Mi Perfil: Deportista (vuelve a la izquierda) -->
         <a th:href="@{/mis-reservas}"
-           sec:authorize="hasAnyAuthority('DEPORTISTA', 'ROLE_DEPORTISTA', 'USER', 'ROLE_USER')"
+           sec:authorize="hasAnyAuthority('DEPORTISTA', 'ROLE_DEPORTISTA', 'USER', 'ROLE_USER', 'USUARIO', 'ROLE_USUARIO')"
            class="btn-primary navbar__perfil-btn"
            id="btn-perfil-deportista-left"
-           style="padding: 8px 16px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+           onclick="window.location.href='/mis-reservas'"
+           style="padding: 8px 16px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; position: relative; z-index: 10;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
           </svg>
@@ -60,16 +62,18 @@
         </a>
       </div>
       <span class="navbar__wordmark">UrbanActive</span>
-      <div class="navbar__right" style="display: flex; gap: 15px; align-items: center; padding-right: 20px;">
+      <div class="navbar__right" style="display: flex; gap: 15px; align-items: center; padding-right: 20px; flex: 1; justify-content: flex-end;">
         <!-- Botón Ver mis reservas: Deportista (Nuevo en la derecha) -->
         <a th:href="@{/mis-reservas}"
-           sec:authorize="hasAnyAuthority('DEPORTISTA', 'ROLE_DEPORTISTA', 'USER', 'ROLE_USER')"
+           sec:authorize="hasAnyAuthority('DEPORTISTA', 'ROLE_DEPORTISTA', 'USER', 'ROLE_USER', 'USUARIO', 'ROLE_USUARIO')"
            class="btn-primary"
            id="btn-ver-reservas-right"
-           style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Ver mis reservas</a>
+           onclick="window.location.href='/mis-reservas'"
+           style="padding: 8px 16px; border-radius: 8px; text-decoration: none; position: relative; z-index: 10;">Ver mis reservas</a>
 
         <a th:href="@{/actividades/nueva}" sec:authorize="hasAnyAuthority('ORGANIZADOR', 'ROLE_ORGANIZADOR')" class="btn-primary"
-          style="padding: 8px 16px; border-radius: 8px; text-decoration: none;">Nueva Actividad</a>
+           onclick="window.location.href='/actividades/nueva'"
+           style="padding: 8px 16px; border-radius: 8px; text-decoration: none; position: relative; z-index: 10;">Nueva Actividad</a>
         <form th:action="@{/logout}" method="post" style="margin: 0;">
           <button type="submit" class="btn-secondary"
             style="padding: 8px 16px; border-radius: 8px; border: 1px solid #ccc; background: white; cursor: pointer;">Salir</button>

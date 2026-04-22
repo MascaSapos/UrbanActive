@@ -137,7 +137,7 @@
   <input type="hidden" id="js-csrf-token" th:value="${csrfTokenValue}" value="">
 
   <script th:inline="javascript">
-    const AVATAR_INICIAL = [[${avatarInicial}]];
+    const AVATAR_INICIAL = /*[[${avatarInicial}]]*/ '?';
     
     function openEditModal() {
       document.getElementById('modal-edit-profile').classList.add('is-open');
@@ -297,30 +297,60 @@
     }
 
     // ── LOAD ─────────────────────────────────────────────
+    const CACHE_KEY_RESERVAS = 'ua_cache_mis_reservas';
+
     async function loadReservas() {
+      // 1. Intentar cargar desde cache para velocidad instantánea
+      const cachedData = localStorage.getItem(CACHE_KEY_RESERVAS);
+      if (cachedData) {
+        try {
+          const reservas = JSON.parse(cachedData);
+          if (reservas && reservas.length > 0) {
+            renderReservasUI(reservas);
+            document.getElementById('reservas-loading').style.display = 'none';
+          }
+        } catch (e) { console.error("Error parsing cache", e); }
+      }
+
       try {
         const res = await fetch('/api/reservas/mis-reservas', { credentials: 'same-origin' });
         if (!res.ok) throw new Error('Error del servidor (' + res.status + ')');
         const reservas = await res.json();
 
+        // 2. Guardar en cache para la próxima vez
+        localStorage.setItem(CACHE_KEY_RESERVAS, JSON.stringify(reservas));
+
+        // 3. Actualizar la UI con datos frescos
         document.getElementById('reservas-loading').style.display = 'none';
-
-        if (!reservas || reservas.length === 0) {
-          document.getElementById('reservas-empty').style.display = 'flex';
-          updateStats([]);
-          return;
-        }
-
-        updateStats(reservas);
-        const list = document.getElementById('reservas-list');
-        list.style.display = 'flex';
-        reservas.forEach(r => list.appendChild(renderCard(r)));
+        renderReservasUI(reservas);
 
       } catch (err) {
-        document.getElementById('reservas-loading').style.display = 'none';
-        document.getElementById('reservas-empty').style.display = 'flex';
-        showToast('❌ Error al cargar reservas: ' + err.message, 'err');
+        if (!localStorage.getItem(CACHE_KEY_RESERVAS)) {
+          document.getElementById('reservas-loading').style.display = 'none';
+          document.getElementById('reservas-empty').style.display = 'flex';
+          showToast('❌ Error al cargar reservas: ' + err.message, 'err');
+        }
       }
+    }
+
+    function renderReservasUI(reservas) {
+      const list = document.getElementById('reservas-list');
+      const emptyState = document.getElementById('reservas-empty');
+      
+      // Limpiar lista antes de re-renderizar (evitar duplicados si ya se cargó de cache)
+      list.innerHTML = '';
+
+      if (!reservas || reservas.length === 0) {
+        emptyState.style.display = 'flex';
+        list.style.display = 'none';
+        updateStats([]);
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      list.style.display = 'flex';
+      updateStats(reservas);
+      reservas.forEach(r => list.appendChild(renderCard(r)));
     }
 
     // ── INIT: carga inmediata + auto-refresh cada 20 s ───
