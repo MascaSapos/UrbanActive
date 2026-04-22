@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.urbanactive.dto.ActividadMapDto;
 import com.urbanactive.service.ActividadService;
@@ -78,6 +79,73 @@ public class ActividadMapRestController {
         } catch (Exception e) {
             response.put("inscrito", false);
             return ResponseEntity.ok(response);
+        }
+    }
+
+    @GetMapping("/mis-actividades")
+    public ResponseEntity<List<ActividadMapDto>> misActividades(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        List<com.urbanactive.model.Actividad> actividades = actividadService.obtenerPorOrganizador(auth.getName());
+        List<ActividadMapDto> result = actividades.stream().map(a -> {
+            String aid = a.getId();
+            if (aid == null) return null;
+            
+            ActividadMapDto dto = new ActividadMapDto();
+            dto.setId(aid);
+            dto.setTipoDeporte(a.getTipoDeporte() != null ? a.getTipoDeporte() : "");
+            dto.setEstado(a.getEstado());
+            dto.setPlazasTotal(a.getPlazasTotal() != null ? a.getPlazasTotal() : 0);
+            dto.setPlazasOcupadas(reservaService.contarReservasPorActividad(a.getId()));
+            
+            if (a.getId_ubicacion() != null) {
+                String lugar = a.getId_ubicacion().getNombre() != null ? a.getId_ubicacion().getNombre() : "";
+                dto.setTitle(dto.getTipoDeporte() + " · " + lugar);
+                dto.setLat(a.getId_ubicacion().getLatitud() != null ? a.getId_ubicacion().getLatitud().doubleValue() : 0);
+                dto.setLng(a.getId_ubicacion().getLongitud() != null ? a.getId_ubicacion().getLongitud().doubleValue() : 0);
+            } else {
+                dto.setTitle(dto.getTipoDeporte());
+            }
+            
+            if (a.getFechaHora() != null) {
+                dto.setFechaHora(a.getFechaHora().toString());
+            }
+            return dto;
+        }).filter(java.util.Objects::nonNull)
+          .collect(java.util.stream.Collectors.toList());
+        
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/{actividadId}")
+    public ResponseEntity<Map<String, Object>> eliminarActividad(@PathVariable String actividadId, Authentication auth) {
+        Map<String, Object> response = new HashMap<>();
+        if (auth == null || !auth.isAuthenticated()) {
+            response.put("exito", false);
+            response.put("mensaje", "No estás autenticado.");
+            return ResponseEntity.status(401).body(response);
+        }
+        try {
+            com.urbanactive.model.Actividad actividad = actividadService.obtenerPorId(actividadId);
+            if (actividad.getOrganizadorEmail() != null && !actividad.getOrganizadorEmail().trim().isEmpty() && !auth.getName().equals(actividad.getOrganizadorEmail())) {
+                response.put("exito", false);
+                response.put("mensaje", "No tienes permiso para eliminar esta actividad.");
+                return ResponseEntity.status(403).body(response);
+            }
+            actividadService.borrar(actividadId);
+            response.put("exito", true);
+            response.put("mensaje", "Actividad eliminada correctamente.");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            response.put("exito", false);
+            response.put("mensaje", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            response.put("exito", false);
+            response.put("mensaje", "Error al eliminar: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 }

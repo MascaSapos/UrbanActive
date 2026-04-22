@@ -1,7 +1,10 @@
 package com.urbanactive.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ActividadMapDto {
 
+    @JsonProperty("id")
     private String id;
     private double lat;
     private double lng;
@@ -12,6 +15,7 @@ public class ActividadMapDto {
     private int plazasOcupadas;
     private int plazasTotal;
     private String estado;
+    private String fechaHora;
 
     public ActividadMapDto() {
     }
@@ -151,5 +155,13 @@ public class ActividadMapDto {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public String getFechaHora() {
+        return fechaHora;
+    }
+
+    public void setFechaHora(String fechaHora) {
+        this.fechaHora = fechaHora;
     }
 }

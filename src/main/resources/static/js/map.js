@@ -499,6 +499,16 @@
   window.applyFrontendFilters = applyFrontendFilters;
 
   /* ═══════════════════════════════════════════════════════════
+     FULL-CAPACITY CARD STYLING
+  ═══════════════════════════════════════════════════════════ */
+  function updateFullCards() {
+    document.querySelectorAll('.activity-item').forEach(function (item) {
+      var libres = parseInt(item.getAttribute('data-libres'), 10);
+      item.classList.toggle('is-full', !isNaN(libres) && libres <= 0);
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      BOOT
   ═══════════════════════════════════════════════════════════ */
   var CACHE_KEY = 'urbanactive_activities_cache';
@@ -562,6 +572,7 @@
     if (cached && cached.length > 0) {
       // Instant init with cached data
       initMap(cached);
+      updateFullCards();
 
       // Then refresh in background
       fetchActivities()
@@ -581,11 +592,28 @@
         .then(function (activities) {
           setCachedActivities(activities);
           initMap(activities);
+          updateFullCards();
         })
         .catch(function (err) {
           console.warn('No se pudieron cargar actividades del servidor:', err.message);
           initMap([]);
         });
+    }
+
+    // ── URL PARAM CHECK ──────────────────────────────────────
+    var params = new URLSearchParams(window.location.search);
+    var targetId = params.get('actividadId');
+    if (targetId) {
+      setTimeout(function() {
+        if (activitiesData[targetId]) {
+          selectActivity(targetId, 'url');
+        } else {
+          // If not in data yet (async fetch), try again in a bit
+          setTimeout(function() {
+            if (activitiesData[targetId]) selectActivity(targetId, 'url');
+          }, 1000);
+        }
+      }, 600);
     }
   });
 
@@ -672,18 +700,31 @@
       .then(function (data) {
         if (data.exito) {
           showModal('✅', '¡Reserva exitosa!', data.mensaje);
+          reservedActivities[actividadId] = true;
 
           // Update occupancy locally
           if (activitiesData[actividadId]) {
             activitiesData[actividadId].plazasOcupadas = (activitiesData[actividadId].plazasOcupadas || 0) + 1;
+            
+            // Update the activity card in the left panel
+            var card = document.getElementById('act-' + actividadId);
+            if (card) {
+              var act = activitiesData[actividadId];
+              var libres = Math.max(0, (act.plazasTotal || 0) - (act.plazasOcupadas || 0));
+              card.setAttribute('data-libres', libres);
+              var plazasEl = card.querySelector('.activity-item__plazas');
+              if (plazasEl) plazasEl.textContent = libres + ' libres';
+              card.classList.toggle('is-full', libres <= 0);
+            }
           }
           setAforo(actividadId);
+          setBtnReservado(btn);
         } else {
           var msg = data.mensaje || data.message || data.error || (typeof data === 'string' ? data : "Error desconocido interno del servidor");
           showModal('❌', 'Error al reservar', msg);
+          btn.innerHTML = originalText;
+          btn.disabled = false;
         }
-        btn.innerHTML = originalText;
-        btn.disabled = false;
       })
       .catch(function (err) {
         btn.innerHTML = originalText;

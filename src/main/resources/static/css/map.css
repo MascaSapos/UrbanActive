@@ -459,6 +459,15 @@ input { font-family: inherit; font-size: inherit; outline: none; border: none; }
   border-left-color: var(--primary);
 }
 
+.activity-item.is-full {
+  background: linear-gradient(to right, rgba(239, 68, 68, .12), transparent 60%);
+  border-left-color: #ef4444;
+}
+.activity-item.is-full .activity-item__plazas {
+  background: rgba(239, 68, 68, .1);
+  color: #dc2626;
+}
+
 .activity-item__sport {
   font-size: .88rem;
   font-weight: 700;

@@ -14,8 +14,8 @@ import jakarta.persistence.Table;
 public class Actividad {
 
     @Id
-    @Column(name = "Id", length = 255, nullable = false, unique = true)
-    private String Id;
+    @Column(name = "id", length = 255, nullable = false, unique = true)
+    private String id;
 
     @Column(name = "tipoDeporte", length = 50, nullable = false)
     private String tipoDeporte;
@@ -29,6 +29,9 @@ public class Actividad {
     @Column(name = "estado", length = 20)
     private String estado = "ABIERTA";
 
+    @Column(name = "organizadorEmail", length = 255)
+    private String organizadorEmail;
+
     @ManyToOne
     @JoinColumn(name = "id_ubicacion", nullable = false)
     private Ubicacion id_ubicacion;
@@ -40,8 +43,8 @@ public class Actividad {
     public Actividad() {
     }
 
-    public Actividad(String Id, String tipoDeporte, LocalDateTime fechaHora, Integer plazasTotal, Ubicacion id_ubicacion) {
-        this.Id = Id;
+    public Actividad(String id, String tipoDeporte, LocalDateTime fechaHora, Integer plazasTotal, Ubicacion id_ubicacion) {
+        this.id = id;
         this.tipoDeporte = tipoDeporte;
         this.fechaHora = fechaHora;
         this.plazasTotal = plazasTotal;
@@ -49,11 +52,11 @@ public class Actividad {
     }
 
     public String getId() {
-        return Id;
+        return id;
     }
 
-    public void setId(String Id) {
-        this.Id = Id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTipoDeporte() {
@@ -86,6 +89,14 @@ public class Actividad {
 
     public void setId_ubicacion(Ubicacion id_ubicacion) {
         this.id_ubicacion = id_ubicacion;
+    }
+
+    public String getOrganizadorEmail() {
+        return organizadorEmail;
+    }
+
+    public void setOrganizadorEmail(String organizadorEmail) {
+        this.organizadorEmail = organizadorEmail;
     }
 
     public Usuario getOrganizador() {

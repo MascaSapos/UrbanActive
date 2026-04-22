@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import com.urbanactive.dto.ActividadMapDto;
 import com.urbanactive.model.Actividad;
@@ -66,7 +66,10 @@ public class ActividadService {
         return actividadRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
+    public List<Actividad> obtenerPorOrganizador(String email) {
+        return actividadRepository.findByOrganizadorEmailIncludeNulls(email);
+    }
+
     public List<ActividadMapDto> obtenerParaMapa() {
         return actividadRepository.findAll().stream()
                 .map(this::aMapDto)
@@ -157,9 +160,6 @@ public class ActividadService {
                 }
 
                 return weather;
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return null;
             } catch (Exception e) {
                 return null;
             }
@@ -214,10 +214,19 @@ public class ActividadService {
         return actividadRepository.save(existente);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void borrar(String id) {
         if (!actividadRepository.existsById(id)) {
             throw new IllegalArgumentException("Actividad no encontrada con id: " + id);
         }
+        
+        // 1. Borrar informe meteorológico (si existe)
+        informeMeteorologicoRepository.deleteByActividadId(id);
+        
+        // 2. Borrar reservas asociadas (FK child)
+        reservaRepository.deleteAllByActividadId(id);
+        
+        // 3. Borrar la actividad
         actividadRepository.deleteById(id);
     }
 }

@@ -18,8 +18,13 @@ public interface ReservaRepository extends JpaRepository<Reserva, String> {
     long countByActividad(Actividad actividad);
     
     List<Reserva> findByUsuario(Usuario usuario);
+    List<Reserva> findByActividad(Actividad actividad);
 
-    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.actividad.Id = :idActividad AND r.estado = 'CONFIRMADA'")
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("DELETE FROM Reserva r WHERE r.actividad.id = :actividadId")
+    void deleteAllByActividadId(@Param("actividadId") String actividadId);
+
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.actividad.id = :idActividad AND r.estado = 'CONFIRMADA'")
     int countActivasPorActividad(@Param("idActividad") String idActividad);
 
     // Novedades para DEPORTISTA: actividades canceladas en las que tiene plaza
