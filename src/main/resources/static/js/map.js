@@ -290,6 +290,7 @@
         '<div class="map-popup__badge">' + (a.badge || a.tipoDeporte || 'Actividad') + '</div>' +
         '<div class="map-popup__title">' + (a.title || '') + '</div>' +
         '<div class="map-popup__desc">' + (a.desc || '') + '</div>' +
+        '<div class="map-popup__meta" style="font-size:0.75rem; color: #666; margin-top: 4px;">' + (a.tipoEspacio ? '🏠 ' + a.tipoEspacio : '') + '</div>' +
         '</div>',
         { closeButton: false }
       );
