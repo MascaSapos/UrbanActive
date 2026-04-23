@@ -8,7 +8,26 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
   <style>
     /* Override profile-main max-width for 3-col layout */
-    .profile-main { max-width: 1400px; padding: 24px 24px 60px; }
+    .profile-main { max-width: 1400px; padding: 16px 24px 60px; }
+
+    /* ── NAVBAR 3-SECTION ── */
+    .navbar__left, .navbar__right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+    .navbar__right { justify-content: flex-end; }
+    .navbar__center {
+      flex: 1;
+      text-align: center;
+    }
+    .navbar__center h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.3px;
+      margin: 0;
+    }
 
     /* ── PAGE HEADER ── */
     .page-header {
@@ -202,17 +221,18 @@
 
   <!-- NAVBAR -->
   <header class="navbar">
-    <a th:href="@{/}" href="/" class="btn-back">← Atrás</a>
-    <span class="navbar__wordmark">UrbanActive</span>
-    <div class="navbar__actions"></div>
+    <div class="navbar__left">
+      <a th:href="@{/}" href="/" class="btn-back">← Atrás</a>
+    </div>
+    <div class="navbar__center">
+      <h1>Nueva Actividad</h1>
+    </div>
+    <div class="navbar__right">
+      <span class="navbar__wordmark">UrbanActive</span>
+    </div>
   </header>
 
   <main class="profile-main">
-    <div class="page-header">
-      <h1>Nueva Actividad</h1>
-      <p>Introduce los datos de tu nueva actividad</p>
-    </div>
-
     <form th:action="@{/actividades/nueva}" method="post" id="activity-form">
       <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
       <input type="hidden" id="lat" name="lat">
