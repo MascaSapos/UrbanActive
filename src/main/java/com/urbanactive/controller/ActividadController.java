@@ -13,10 +13,14 @@ public class ActividadController {
 
     private final ActividadService actividadService;
     private final com.urbanactive.service.ReservaService reservaService;
+    private final com.urbanactive.repository.UbicacionRepository ubicacionRepository;
 
-    public ActividadController(ActividadService actividadService, com.urbanactive.service.ReservaService reservaService) {
+    public ActividadController(ActividadService actividadService, 
+                               com.urbanactive.service.ReservaService reservaService,
+                               com.urbanactive.repository.UbicacionRepository ubicacionRepository) {
         this.actividadService = actividadService;
         this.reservaService = reservaService;
+        this.ubicacionRepository = ubicacionRepository;
     }
 
     @GetMapping("/actividades/mapa")
@@ -40,19 +44,38 @@ public class ActividadController {
 
     @GetMapping("/actividades/nueva")
     public String nuevaActividadForm(Model model) {
-        // model.addAttribute("actividad", new Actividad());
+        model.addAttribute("ubicaciones", ubicacionRepository.findAll());
         return "nueva-actividad";
     }
 
     @PostMapping("/actividades/nueva")
     public String guardarActividad(com.urbanactive.model.Actividad actividad, 
+                                   @org.springframework.web.bind.annotation.RequestParam("lat") Double lat,
+                                   @org.springframework.web.bind.annotation.RequestParam("lng") Double lng,
+                                   @org.springframework.web.bind.annotation.RequestParam("nombreUbicacion") String nombreUbicacion,
+                                   @org.springframework.web.bind.annotation.RequestParam(value = "tipoEspacio", defaultValue = "EXTERIOR") String tipoEspacio,
                                    @org.springframework.security.core.annotation.AuthenticationPrincipal com.urbanactive.security.CustomUserDetails userDetails) {
+        
+        // Crear nueva ubicación desde los datos del mapa
+        com.urbanactive.model.Ubicacion u = new com.urbanactive.model.Ubicacion();
+        u.setId("LOC-" + java.util.UUID.randomUUID().toString().substring(0, 5).toUpperCase());
+        u.setLatitud(java.math.BigDecimal.valueOf(lat));
+        u.setLongitud(java.math.BigDecimal.valueOf(lng));
+        u.setNombre(nombreUbicacion);
+        u.setTipoEspacio(tipoEspacio);
+        
+        ubicacionRepository.save(u);
+        actividad.setId_ubicacion(u);
+
         actividad.setId(java.util.UUID.randomUUID().toString().substring(0, 10));
+        actividad.setEstado("ABIERTA");
+        
         if (userDetails != null) {
             actividad.setOrganizador(userDetails.getUsuario());
             actividad.setOrganizadorEmail(userDetails.getUsuario().getEmail());
         }
+        
         actividadService.crear(actividad);
-        return "redirect:/";
+        return "redirect:/perfil-organizador";
     }
 }

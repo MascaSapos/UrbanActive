@@ -17,8 +17,17 @@ public class ActividadMapDto {
     private String estado;
     private String fechaHora;
     private String fechaCancelacion;
+    private String tipoEspacio;
 
     public ActividadMapDto() {
+    }
+
+    public String getTipoEspacio() {
+        return tipoEspacio;
+    }
+
+    public void setTipoEspacio(String tipoEspacio) {
+        this.tipoEspacio = tipoEspacio;
     }
 
     public String getId() {

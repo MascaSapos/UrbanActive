@@ -2,31 +2,321 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nueva Actividad - UrbanActive</title>
-  <link rel="stylesheet" th:href="@{/css/map.css}" href="../static/css/map.css">
+  <link rel="stylesheet" th:href="@{/css/profile-shared.css}" href="../static/css/profile-shared.css">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <style>
+    .form-container {
+      max-width: 700px;
+      margin: 2rem auto;
+      background: var(--surface);
+      padding: 2.5rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .form-container::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 5px;
+      background: var(--accent-grad);
+    }
+    .form-header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .form-header h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .form-header p {
+      color: var(--text-2);
+      font-size: 0.95rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-group--full {
+      grid-column: span 2;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      font-family: var(--font);
+      color: var(--text);
+      background-color: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      transition: all var(--t);
+    }
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      background-color: var(--surface);
+      box-shadow: 0 0 0 4px var(--primary-soft);
+    }
+    .btn-submit {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 1rem;
+    }
+    .input-icon {
+      position: relative;
+    }
+    .input-icon i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+    }
+    .input-icon .icon-span {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .input-icon input, .input-icon select {
+      padding-left: 2.5rem;
+    }
+
+    /* Map Picker Styles */
+    #map-picker {
+      height: 350px;
+      width: 100%;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      margin-top: 0.5rem;
+      z-index: 1;
+    }
+    .search-wrap {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 0.5rem;
+    }
+    .btn-search {
+      padding: 0 16px;
+      background: var(--surface-3);
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+      transition: all var(--t);
+    }
+    .btn-search:hover {
+      background: var(--surface-4);
+    }
+    
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-group--full {
+        grid-column: span 1;
+      }
+    }
+  </style>
 </head>
-<body style="padding: 2rem; font-family: sans-serif;">
-  <h2>Crear Nueva Actividad</h2>
-  <form th:action="@{/actividades/nueva}" method="post" style="display: flex; flex-direction: column; gap: 1rem; max-width: 400px; margin-top: 2rem;">
-    <div>
-        <label>Tipo de deporte:</label><br>
-        <input type="text" name="tipoDeporte" required style="width: 100%; padding: 8px;">
-    </div>
-    <div>
-        <label>Fecha y Hora:</label><br>
-        <input type="datetime-local" name="fechaHora" required style="width: 100%; padding: 8px;">
-    </div>
-    <div>
-        <label>Plazas Totales:</label><br>
-        <input type="number" name="plazasTotal" required min="1" style="width: 100%; padding: 8px;">
-    </div>
-    <div>
-        <label>ID Ubicación (Ej: U001):</label><br>
-        <input type="text" name="id_ubicacion.Id" required style="width: 100%; padding: 8px;" placeholder="U001">
-    </div>
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-    <button type="submit" class="btn-primary" style="padding: 10px; cursor: pointer;">Guardar Actividad</button>
-    <a th:href="@{/}" class="btn-secondary" style="padding: 10px; text-align: center; display: block; text-decoration: none;">Volver</a>
-  </form>
+<body>
+  <div class="page-wrapper">
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <a th:href="@{/}" href="/" class="btn-back">
+        ← Atrás
+      </a>
+      <span class="navbar__wordmark">UrbanActive</span>
+      <div class="navbar__actions">
+      </div>
+    </header>
+
+    <main class="profile-main">
+      <div class="form-container">
+        <div class="form-header">
+          <h2>Nueva Actividad</h2>
+          <p>Introduce los datos de tu nueva actividad</p>
+        </div>
+
+        <form th:action="@{/actividades/nueva}" method="post" id="activity-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="tipoDeporte">Tipo de deporte</label>
+              <div class="input-icon">
+                <span class="icon-span">🏆</span>
+                <input type="text" id="tipoDeporte" name="tipoDeporte" class="form-control" placeholder="Ej: Baloncesto, Running..." required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="fechaHora">Fecha y Hora</label>
+              <div class="input-icon">
+                <span class="icon-span">📅</span>
+                <input type="datetime-local" id="fechaHora" name="fechaHora" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="plazasTotal">Plazas Totales</label>
+              <div class="input-icon">
+                <span class="icon-span">👥</span>
+                <input type="number" id="plazasTotal" name="plazasTotal" class="form-control" min="1" placeholder="Participantes" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="tipoEspacio">Tipo de espacio</label>
+              <div class="input-icon">
+                <span class="icon-span">🌳</span>
+                <select id="tipoEspacio" name="tipoEspacio" class="form-control">
+                  <option value="EXTERIOR">Exterior (Parque, Plaza...)</option>
+                  <option value="INTERIOR">Interior (Polideportivo, Gym...)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- SELECCIÓN DE UBICACIÓN LIBRE -->
+            <div class="form-group form-group--full">
+              <label>Ubicación (Selecciona en el mapa o busca)</label>
+              <div class="search-wrap">
+                <input type="text" id="search-input" class="form-control" placeholder="Busca una calle, parque o plaza en Madrid...">
+                <button type="button" class="btn-search" onclick="searchLocation()">🔍 Buscar</button>
+              </div>
+              
+              <div id="map-picker"></div>
+              
+              <div class="input-icon" style="margin-top: 0.75rem;">
+                <span class="icon-span">📍</span>
+                <input type="text" id="nombreUbicacion" name="nombreUbicacion" class="form-control" placeholder="Nombre del lugar (se completa al marcar el mapa)" required readonly>
+              </div>
+              
+              <!-- Hidden coordinates -->
+              <input type="hidden" id="lat" name="lat">
+              <input type="hidden" id="lng" name="lng">
+            </div>
+          </div>
+
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          
+          <button type="submit" class="btn-primary btn-submit">
+            Guardar Actividad
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <script>
+    // Configuración del mapa centrado en Madrid
+    const map = L.map('map-picker').setView([40.4168, -3.7038], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker;
+
+    // Al hacer clic en el mapa
+    map.on('click', function(e) {
+      const { lat, lng } = e.latlng;
+      setMarker(lat, lng);
+      reverseGeocode(lat, lng);
+    });
+
+    function setMarker(lat, lng) {
+      if (marker) {
+        marker.setLatLng([lat, lng]);
+      } else {
+        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+        marker.on('dragend', function() {
+          const pos = marker.getLatLng();
+          reverseGeocode(pos.lat, pos.lng);
+        });
+      }
+      
+      document.getElementById('lat').value = lat;
+      document.getElementById('lng').value = lng;
+    }
+
+    // Buscar dirección usando Nominatim
+    async function searchLocation() {
+      const query = document.getElementById('search-input').value;
+      if (!query) return;
+
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Madrid')}&limit=1`);
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const { lat, lon, display_name } = data[0];
+          const latNum = parseFloat(lat);
+          const lonNum = parseFloat(lon);
+          
+          map.setView([latNum, lonNum], 16);
+          setMarker(latNum, lonNum);
+          
+          // Extraer un nombre corto para el lugar
+          const shortName = display_name.split(',')[0];
+          document.getElementById('nombreUbicacion').value = shortName;
+        } else {
+          alert('No se encontró la ubicación. Intenta ser más específico.');
+        }
+      } catch (error) {
+        console.error('Error searching location:', error);
+      }
+    }
+
+    // Obtener nombre del lugar a partir de coordenadas
+    async function reverseGeocode(lat, lng) {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const data = await response.json();
+        
+        if (data && data.display_name) {
+          // Tomamos la primera o segunda parte de la dirección (nombre del sitio o calle)
+          const parts = data.display_name.split(',');
+          const name = parts[0].trim();
+          document.getElementById('nombreUbicacion').value = name;
+        }
+      } catch (error) {
+        console.error('Error in reverse geocoding:', error);
+      }
+    }
+
+    // Validación antes de enviar
+    document.getElementById('activity-form').addEventListener('submit', function(e) {
+      const lat = document.getElementById('lat').value;
+      if (!lat) {
+        e.preventDefault();
+        alert('Por favor, selecciona una ubicación en el mapa.');
+      }
+    });
+  </script>
 </body>
 </html>

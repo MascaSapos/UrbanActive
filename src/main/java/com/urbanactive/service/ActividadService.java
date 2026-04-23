@@ -99,6 +99,7 @@ public class ActividadService {
         dto.setPlazasTotal(a.getPlazasTotal());
         dto.setPlazasOcupadas(reservaRepository.countActivasPorActividad(a.getId()));
         dto.setEstado(a.getEstado());
+        dto.setTipoEspacio(u.getTipoEspacio());
         return dto;
     }
 

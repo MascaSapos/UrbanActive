@@ -48,6 +48,10 @@
               <span class="info-label"><i class="fa-solid fa-location-dot"></i> Ubicación</span>
               <span class="info-value" th:text="${actividad.id_ubicacion != null ? actividad.id_ubicacion.nombre : 'Ubicación sin nombre'}">--</span>
             </div>
+            <div class="info-item">
+              <span class="info-label"><i class="fa-solid fa-tree"></i> Tipo de Espacio</span>
+              <span class="info-value" th:text="${actividad.id_ubicacion != null ? actividad.id_ubicacion.tipoEspacio : 'No especificado'}">Exterior</span>
+            </div>
           </div>
 
           <div class="info-description">
