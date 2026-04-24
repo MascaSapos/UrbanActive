@@ -76,6 +76,6 @@ public class ActividadController {
         }
         
         actividadService.crear(actividad);
-        return "redirect:/perfil-organizador";
+        return "redirect:/perfil-organizador?newActId=" + actividad.getId();
     }
 }

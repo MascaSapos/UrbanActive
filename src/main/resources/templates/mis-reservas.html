@@ -9,6 +9,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" th:href="@{/css/profile-shared.css}" href="../static/css/profile-shared.css">
+  <style>
+    @keyframes blinkHighlight {
+      0% { background-color: rgba(99, 102, 241, 0.3); box-shadow: 0 0 0 4px #6366f1; }
+      50% { background-color: rgba(99, 102, 241, 0.1); box-shadow: 0 0 0 2px #6366f1; }
+      100% { background-color: transparent; box-shadow: none; }
+    }
+    .highlight-blink-list {
+      animation: blinkHighlight 2.5s ease-in-out 2;
+      border-radius: 16px;
+      padding: 12px;
+      margin: -12px;
+      position: relative;
+      z-index: 10;
+    }
+  </style>
 </head>
 
 <body>
@@ -349,6 +364,8 @@
       const list = document.getElementById('reservas-list');
       const emptyState = document.getElementById('reservas-empty');
       
+      const prevScrollY = window.scrollY;
+
       // Limpiar lista antes de re-renderizar (evitar duplicados si ya se cargó de cache)
       list.innerHTML = '';
 
@@ -363,15 +380,30 @@
       list.style.display = 'flex';
       updateStats(reservas);
       reservas.forEach(r => list.appendChild(renderCard(r)));
+      
+      window.scrollTo(0, prevScrollY);
     }
 
-    // ── INIT: carga inmediata + auto-refresh cada 20 s ───
     async function refreshReservas() {
       await loadReservas();
     }
 
-    refreshReservas();
-    setInterval(refreshReservas, 20_000);
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshReservas().then(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('focus') === 'list') {
+          setTimeout(() => {
+            const listSection = document.getElementById('reservas-list');
+            if (listSection) {
+              listSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              listSection.classList.add('highlight-blink-list');
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          }, 300);
+        }
+      });
+      setInterval(refreshReservas, 60_000);
+    });
   </script>
 </body>
 </html>

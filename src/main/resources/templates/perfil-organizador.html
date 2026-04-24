@@ -9,6 +9,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" th:href="@{/css/profile-shared.css}" href="../static/css/profile-shared.css">
+  <style>
+    @keyframes blinkHighlight {
+      0% { background-color: rgba(99, 102, 241, 0.4); box-shadow: 0 0 0 2px #6366f1; }
+      50% { background-color: rgba(99, 102, 241, 0.1); box-shadow: 0 0 0 1px #6366f1; }
+      100% { background-color: transparent; box-shadow: none; }
+    }
+    .highlight-blink {
+      animation: blinkHighlight 2.5s ease-in-out 2;
+      border-radius: 12px;
+      position: relative;
+      z-index: 10;
+    }
+  </style>
 </head>
 
 <body>
@@ -437,6 +450,8 @@
         return;
       }
 
+      const prevScrollY = window.scrollY;
+
       emptyState.style.display = 'none';
       list.style.display = 'flex';
       list.innerHTML = ''; // Limpiar previo
@@ -451,6 +466,8 @@
       });
 
       sorted.forEach(act => list.appendChild(renderRow(act)));
+      
+      window.scrollTo(0, prevScrollY);
     }
 
     // ── DELETE ────────────────────────────────────────────────
@@ -523,12 +540,25 @@
 
     // ── INIT ───────────────────────────────────────────────
     async function refreshActividades() {
-      loadActividades();
+      await loadActividades();
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      refreshActividades();
-      setInterval(refreshActividades, 20_000);
+      refreshActividades().then(() => {
+        const params = new URLSearchParams(window.location.search);
+        const newActId = params.get('newActId');
+        if (newActId) {
+          setTimeout(() => {
+            const row = document.querySelector(`.activity-row[data-id="${newActId}"]`);
+            if (row) {
+              row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              row.classList.add('highlight-blink');
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          }, 300);
+        }
+      });
+      setInterval(refreshActividades, 60_000);
     });
 
     // Cerrar modal al hacer clic fuera

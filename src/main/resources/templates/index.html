@@ -64,11 +64,11 @@
       <span class="navbar__wordmark">UrbanActive</span>
       <div class="navbar__right" style="display: flex; gap: 15px; align-items: center; padding-right: 20px; flex: 1; justify-content: flex-end;">
         <!-- Botón Ver mis reservas: Deportista (Nuevo en la derecha) -->
-        <a th:href="@{/mis-reservas}"
+        <a th:href="@{/mis-reservas(focus='list')}"
            sec:authorize="hasAnyAuthority('DEPORTISTA', 'ROLE_DEPORTISTA', 'USER', 'ROLE_USER', 'USUARIO', 'ROLE_USUARIO')"
            class="btn-primary"
            id="btn-ver-reservas-right"
-           onclick="window.location.href='/mis-reservas'"
+           onclick="window.location.href='/mis-reservas?focus=list'; return false;"
            style="padding: 8px 16px; border-radius: 8px; text-decoration: none; position: relative; z-index: 10;">Ver mis reservas</a>
 
         <a th:href="@{/actividades/nueva}" sec:authorize="hasAnyAuthority('ORGANIZADOR', 'ROLE_ORGANIZADOR')" class="btn-primary"
