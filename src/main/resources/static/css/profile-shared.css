@@ -696,17 +696,32 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   justify-content: center;
   box-shadow: 0 0 0 3px rgba(239,68,68,.2);
   animation: pulse-dot 1.8s ease infinite;
-}
-.alert-dot__ring::after {
-  content: '!';
+  /* Icon styling moved here from ::after */
   font-size: .65rem;
   font-weight: 800;
   color: #fff;
   line-height: 1;
 }
+.alert-dot__ring::after {
+  /* Icons now handled in HTML for better compatibility */
+}
 @keyframes pulse-dot {
   0%, 100% { box-shadow: 0 0 0 3px rgba(239,68,68,.2); }
   50%       { box-shadow: 0 0 0 6px rgba(239,68,68,.05); }
+}
+
+/* Info dot (for missing data) */
+.alert-dot--info .alert-dot__ring {
+  background: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, .2);
+  animation: pulse-dot-info 1.8s ease infinite;
+}
+.alert-dot--info .alert-dot__ring::after {
+  /* Icon handled in HTML */
+}
+@keyframes pulse-dot-info {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(59, 130, 246, .2); }
+  50%       { box-shadow: 0 0 0 6px rgba(59, 130, 246, .05); }
 }
 
 /* ── OCCUPANCY BAR ────────────────────────────────── */

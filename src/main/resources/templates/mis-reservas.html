@@ -73,7 +73,7 @@
           </div>
           <div class="profile-stat">
             <span class="profile-stat__value" id="stat-confirmadas">—</span>
-            <span class="profile-stat__label">Confirmadas</span>
+            <span class="profile-stat__label">Abiertas</span>
           </div>
           <div class="profile-stat">
             <span class="profile-stat__value" id="stat-canceladas">—</span>
@@ -154,7 +154,7 @@
   <script th:inline="javascript">
     const AVATAR_INICIAL = /*[[${avatarInicial}]]*/ '?';
     const USER_EMAIL = /*[[${usuario != null ? usuario.email : ''}]]*/ '';
-    const CACHE_KEY_RESERVAS = 'ua_cache_reservas_' + USER_EMAIL;
+    const CACHE_KEY_RESERVAS = 'ua_cache_reservas_v3_' + USER_EMAIL;
     let lastRenderedJson = '';
     
     function openEditModal() {
@@ -289,7 +289,7 @@
 
       card.innerHTML = `
         ${isNew ? '<span class="new-dot" title="Nueva desde tu última visita"></span>' : ''}
-        ${act.alerta ? `<span class="alert-dot" title="${escapeHtml(act.alerta)}"><div class="alert-dot__ring"></div></span>` : ''}
+        ${act.alerta ? `<span class="${act.alerta.includes('Previsión') ? 'alert-dot alert-dot--info' : 'alert-dot'}" title="${escapeHtml(act.alerta)}"><div class="alert-dot__ring">${act.alerta.includes('Previsión') ? '?' : '!'}</div></span>` : ''}
         <div class="reserva-card__icon">${sportIcon(act.tipoDeporte)}</div>
         <div class="reserva-card__info">
           <div class="reserva-card__title">${escapeHtml(act.tipoDeporte || 'Actividad')}</div>
@@ -301,7 +301,7 @@
           </div>
         </div>
         <div class="reserva-card__right">
-          <span class="status-pill ${pillClass(reserva.estado)}">${escapeHtml(reserva.estado || '—')}</span>
+          <span class="status-pill ${pillClass(reserva.estado)}">${reserva.estado === 'CONFIRMADA' ? 'ABIERTA' : escapeHtml(reserva.estado || '—')}</span>
         </div>
         <span class="reserva-card__chevron">›</span>
       `;
@@ -337,7 +337,7 @@
       }
 
       try {
-        const res = await fetch('/api/reservas/mis-reservas', { credentials: 'same-origin' });
+        const res = await fetch('/api/reservas/mis-reservas?t=' + Date.now(), { credentials: 'same-origin' });
         if (!res.ok) throw new Error('Error del servidor (' + res.status + ')');
         const reservas = await res.json();
         const jsonStr = JSON.stringify(reservas);

@@ -18,6 +18,7 @@ public class ActividadMapDto {
     private String fechaHora;
     private String fechaCancelacion;
     private String tipoEspacio;
+    private String alerta;
 
     public ActividadMapDto() {
     }
@@ -181,5 +182,13 @@ public class ActividadMapDto {
 
     public void setFechaCancelacion(String fechaCancelacion) {
         this.fechaCancelacion = fechaCancelacion;
+    }
+
+    public String getAlerta() {
+        return alerta;
+    }
+
+    public void setAlerta(String alerta) {
+        this.alerta = alerta;
     }
 }

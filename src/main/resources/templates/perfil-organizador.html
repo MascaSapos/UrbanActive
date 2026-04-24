@@ -175,7 +175,7 @@
   <script th:inline="javascript">
     const AVATAR_INICIAL = /*[[${avatarInicial}]]*/ '?';
     const USER_EMAIL = /*[[${usuario != null ? usuario.email : ''}]]*/ '';
-    const CACHE_KEY_ACTIVIDADES = 'ua_cache_actividades_' + USER_EMAIL;
+    const CACHE_KEY_ACTIVIDADES = 'ua_cache_actividades_v3_' + USER_EMAIL;
     let lastRenderedJson = '';
     
     function openEditModal() {
@@ -294,9 +294,7 @@
 
     // ── ALERT DOT: actividades con cambios recientes (estado CERRADA/COMPLETA) ──
     function hasAlert(act) {
-      // Prioridad 1: Alerta explícita del backend (clima/aforo)
-      if (act.weather && act.weather.alerta) return true;
-      // Prioridad 2: Estado de la actividad
+      if (act.alerta) return true;
       return act.estado && act.estado.toUpperCase().includes('CERRADA');
     }
 
@@ -344,6 +342,8 @@
       row.dataset.id = act.id;
 
       row.innerHTML = `
+        ${act.alerta ? `<div class="${act.alerta.includes('Previsión') ? 'alert-dot alert-dot--info' : 'alert-dot'}" title="${escapeHtml(act.alerta)}"><div class="alert-dot__ring">${act.alerta.includes('Previsión') ? '?' : '!'}</div></div>` : ''}
+        ${(!act.alerta && alertFlag) ? `<div class="alert-dot" title="Actividad completa"><div class="alert-dot__ring">!</div></div>` : ''}
         <div class="activity-row__sport-icon" aria-hidden="true">${sportIcon(act.tipoDeporte)}</div>
         <div class="activity-row__info">
           <div class="activity-row__title">${escapeHtml(act.tipoDeporte || 'Actividad')}</div>
@@ -364,7 +364,6 @@
           <span class="occupancy-label">${act.plazasOcupadas}/${act.plazasTotal}</span>
         </div>
         <div class="activity-row__status">
-          ${alertFlag ? `<div class="alert-dot" title="${escapeHtml(act.weather?.alerta || 'Actividad completa')}"><div class="alert-dot__ring"></div></div>` : ''}
           <span class="status-pill ${isOpen ? 'status-pill--abierta' : (act.estado === 'CANCELADA' ? 'status-pill--cancelada' : 'status-pill--cerrada')}">
             ${(act.estado === 'CERRADA' || act.estado === 'CERRADA/COMPLETA' || act.estado === 'COMPLETA') ? 'COMPLETA' : escapeHtml(act.estado || '—')}
           </span>
@@ -415,7 +414,7 @@
       }
 
       try {
-        const res = await fetch('/api/actividades/mis-actividades', { credentials: 'same-origin' });
+        const res = await fetch('/api/actividades/mis-actividades?t=' + Date.now(), { credentials: 'same-origin' });
         if (!res.ok) throw new Error('No autorizado o error del servidor (' + res.status + ')');
         const actividades = await res.json();
         const jsonStr = JSON.stringify(actividades);

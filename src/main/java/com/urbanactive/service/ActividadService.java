@@ -101,6 +101,7 @@ public class ActividadService {
         dto.setPlazasOcupadas(reservaRepository.countActivasPorActividad(a.getId()));
         dto.setEstado(a.getEstado());
         dto.setTipoEspacio(u.getTipoEspacio());
+        dto.setAlerta(obtenerMensajeAlerta(a));
         return dto;
     }
 
@@ -171,8 +172,16 @@ public class ActividadService {
         
         // 1. Clima
         ActividadMapDto.WeatherDto w = aWeatherDto(a);
-        if (w != null && w.getAlerta() != null) {
-            return w.getAlerta();
+        if (w != null) {
+            if (w.getAlerta() != null) {
+                return w.getAlerta(); // "⚠️ Condiciones adversas"
+            }
+        } else {
+            // Si no hay datos (ej: actividad muy a futuro), devolvemos un aviso distinto
+            // pero solo si la actividad sigue abierta (si está cancelada, no importa el clima)
+            if (!"CANCELADA".equalsIgnoreCase(a.getEstado())) {
+                return "☁️ Previsión no disponible";
+            }
         }
 
         // 2. Aforo

@@ -35,7 +35,9 @@
         <section class="card info-card">
           <div class="info-header">
             <h1 class="actividad-nombre" th:text="${actividad.tipoDeporte}">Deporte</h1>
-            <span class="actividad-estado" th:text="${actividad.estado}">Estado</span>
+            <span class="actividad-estado" 
+                  th:text="${actividad.estado}"
+                  th:classappend="${actividad.estado == 'CERRADA' || actividad.estado == 'COMPLETA' || actividad.estado == 'CERRADA/COMPLETA' || actividad.estado == 'CANCELADA'} ? 'status-cerrada' : ''">Estado</span>
           </div>
           
           <div class="info-grid">
@@ -54,37 +56,45 @@
           </div>
         </section>
 
-        <!-- Informe Meteorológico (Si hay datos) -->
-        <section class="card weather-card-details" th:if="${weather != null}">
+        <!-- Informe Meteorológico -->
+        <section class="card weather-card-details">
           <div class="weather-title">
             <span class="weather-dot"></span>
             Informe Meteorológico
           </div>
-          <div class="weather-grid-details">
-            <div class="weather-item">
-              <span class="weather-label">Clima</span>
-              <span class="weather-icon" th:text="${weather.climaIcon}">☀️</span>
-              <span class="weather-val" th:text="${weather.clima}">Despejado</span>
+          
+          <div th:if="${weather != null}">
+            <div class="weather-grid-details">
+              <div class="weather-item">
+                <span class="weather-label">Clima</span>
+                <span class="weather-icon" th:text="${weather.climaIcon}">☀️</span>
+                <span class="weather-val" th:text="${weather.clima}">Despejado</span>
+              </div>
+              <div class="weather-item">
+                <span class="weather-label">Temperatura</span>
+                <span class="weather-icon">🌡️</span>
+                <span class="weather-val" th:text="${weather.temp}">22°C</span>
+              </div>
+              <div class="weather-item">
+                <span class="weather-label">Prob. Lluvia</span>
+                <span class="weather-icon">🌧️</span>
+                <span class="weather-val" th:text="${weather.lluvia}">0%</span>
+              </div>
+              <div class="weather-item">
+                <span class="weather-label">Calidad Aire</span>
+                <span class="weather-icon">💨</span>
+                <span class="weather-val" th:text="${weather.aire}">Buena</span>
+              </div>
             </div>
-            <div class="weather-item">
-              <span class="weather-label">Temperatura</span>
-              <span class="weather-icon">🌡️</span>
-              <span class="weather-val" th:text="${weather.temp}">22°C</span>
-            </div>
-            <div class="weather-item">
-              <span class="weather-label">Prob. Lluvia</span>
-              <span class="weather-icon">🌧️</span>
-              <span class="weather-val" th:text="${weather.lluvia}">0%</span>
-            </div>
-            <div class="weather-item">
-              <span class="weather-label">Calidad Aire</span>
-              <span class="weather-icon">💨</span>
-              <span class="weather-val" th:text="${weather.aire}">Buena</span>
+            <div class="weather-alert-details" th:if="${weather.alerta != null}">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span th:text="${weather.alerta}">Aviso Meteorológico</span>
             </div>
           </div>
-          <div class="weather-alert-details" th:if="${weather.alerta != null}">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span th:text="${weather.alerta}">Aviso Meteorológico</span>
+
+          <div th:unless="${weather != null}" class="weather-no-data">
+            <i class="fa-solid fa-cloud-sun"></i>
+            <p>Previsión meteorológica no disponible para esta fecha todavía.</p>
           </div>
         </section>
 
@@ -99,6 +109,9 @@
           <div class="organizer-details">
             <span class="organizer-role">Organizador</span>
             <h3 class="organizer-name" th:text="${actividad.organizador.nombre}">Nombre</h3>
+            <p class="organizer-bio" th:text="${actividad.organizador.descripcion != null && !actividad.organizador.descripcion.empty ? actividad.organizador.descripcion : 'Este organizador aún no ha añadido una descripción.'}">
+              Bio del organizador...
+            </p>
           </div>
         </section>
       </div>

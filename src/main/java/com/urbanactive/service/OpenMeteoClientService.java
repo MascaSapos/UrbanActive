@@ -85,7 +85,7 @@ public class OpenMeteoClientService {
         }
 
         if (indexWeather == -1 || weatherResponse == null || weatherResponse.getHourly() == null) {
-            return new WeatherDto(BigDecimal.ZERO, 0, "❓", "Desconocido", 0);
+            return null;
         }
 
         Double temp = weatherResponse.getHourly().getTemperature2m().get(indexWeather);

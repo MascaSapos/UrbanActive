@@ -50,8 +50,11 @@ public class NotificacionController {
             for (Actividad a : misActividades) {
                 String alerta = actividadService.obtenerMensajeAlerta(a);
                 if (alerta != null) {
-                    mensajes.add(alerta + " en '" + a.getTipoDeporte() + "'");
-                    pendiente = true;
+                    // El organizador solo ve avisos de clima o aforo (no de "No disponible" por cancelación propia)
+                    if (alerta.contains("Previsión") || alerta.contains("adversas") || alerta.contains("completo")) {
+                        mensajes.add(alerta + " en '" + a.getTipoDeporte() + "'");
+                        pendiente = true;
+                    }
                 }
             }
         } else {
@@ -61,9 +64,12 @@ public class NotificacionController {
             // 2. Alertas sincronizadas en sus reservas activas
             List<Reserva> misReservas = reservaRepository.findByUsuario(userDetails.getUsuario());
             for (Reserva r : misReservas) {
-                if ("CONFIRMADA".equals(r.getEstado()) || ("CANCELADA".equals(r.getEstado()) && "CANCELADA".equalsIgnoreCase(r.getActividad().getEstado()))) {
+                // Notificar si está confirmada y hay alerta, O si está cancelada pero la actividad también lo está (aviso de cancelación)
+                boolean esCancelacion = "CANCELADA".equalsIgnoreCase(r.getEstado()) && "CANCELADA".equalsIgnoreCase(r.getActividad().getEstado());
+                if ("CONFIRMADA".equalsIgnoreCase(r.getEstado()) || esCancelacion) {
                     String alerta = actividadService.obtenerMensajeAlerta(r.getActividad());
                     if (alerta != null) {
+                        // Para el deportista, "Actividad no disponible" es un aviso de cancelación
                         mensajes.add(alerta + " para '" + r.getActividad().getTipoDeporte() + "'");
                         pendiente = true;
                     }

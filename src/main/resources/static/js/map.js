@@ -526,7 +526,7 @@
   /* ═══════════════════════════════════════════════════════════
      BOOT
   ═══════════════════════════════════════════════════════════ */
-  var CACHE_KEY = 'urbanactive_activities_cache';
+  var CACHE_KEY = 'urbanactive_activities_cache_v3';
 
   function getCachedActivities() {
     try {
@@ -544,7 +544,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     function checkNotifications() {
-      fetch('/api/notificaciones/pendientes')
+      fetch('/api/notificaciones/pendientes?t=' + Date.now())
         .then(function (res) { return res.ok ? res.json() : null; })
         .then(function (data) {
           var dot = document.getElementById('bell-dot');

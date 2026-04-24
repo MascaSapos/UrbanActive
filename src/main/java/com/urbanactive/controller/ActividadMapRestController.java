@@ -117,7 +117,10 @@ public class ActividadMapRestController {
             ActividadMapDto.WeatherDto weather = actividadService.aWeatherDto(a);
             String alerta = actividadService.obtenerMensajeAlerta(a);
             if (weather == null) weather = new ActividadMapDto.WeatherDto();
-            if (alerta != null) weather.setAlerta(alerta);
+            if (alerta != null) {
+                weather.setAlerta(alerta);
+                dto.setAlerta(alerta); // Set at top level for JS consistency
+            }
             dto.setWeather(weather);
 
             if (a.getFechaCancelacion() != null) {
