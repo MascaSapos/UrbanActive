@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" th:href="@{/css/map.css}">
   <link rel="stylesheet" th:href="@{/css/detalles.css}">
 </head>
 <body class="detalles-body">
@@ -53,10 +52,39 @@
               <span class="info-value" th:text="${actividad.id_ubicacion != null ? actividad.id_ubicacion.tipoEspacio : 'No especificado'}">Exterior</span>
             </div>
           </div>
+        </section>
 
-          <div class="info-description">
-            <h3>Descripción</h3>
-            <p>Únete a esta emocionante actividad deportiva. Disfruta de un ambiente sano, haz ejercicio y conoce gente nueva. No olvides traer ropa cómoda, hidratación y muchas ganas de pasarlo bien. ¡Te esperamos para compartir nuestra pasión por el deporte en la mejor compañía!</p>
+        <!-- Informe Meteorológico (Si hay datos) -->
+        <section class="card weather-card-details" th:if="${weather != null}">
+          <div class="weather-title">
+            <span class="weather-dot"></span>
+            Informe Meteorológico
+          </div>
+          <div class="weather-grid-details">
+            <div class="weather-item">
+              <span class="weather-label">Clima</span>
+              <span class="weather-icon" th:text="${weather.climaIcon}">☀️</span>
+              <span class="weather-val" th:text="${weather.clima}">Despejado</span>
+            </div>
+            <div class="weather-item">
+              <span class="weather-label">Temperatura</span>
+              <span class="weather-icon">🌡️</span>
+              <span class="weather-val" th:text="${weather.temp}">22°C</span>
+            </div>
+            <div class="weather-item">
+              <span class="weather-label">Prob. Lluvia</span>
+              <span class="weather-icon">🌧️</span>
+              <span class="weather-val" th:text="${weather.lluvia}">0%</span>
+            </div>
+            <div class="weather-item">
+              <span class="weather-label">Calidad Aire</span>
+              <span class="weather-icon">💨</span>
+              <span class="weather-val" th:text="${weather.aire}">Buena</span>
+            </div>
+          </div>
+          <div class="weather-alert-details" th:if="${weather.alerta != null}">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span th:text="${weather.alerta}">Aviso Meteorológico</span>
           </div>
         </section>
 
@@ -71,9 +99,6 @@
           <div class="organizer-details">
             <span class="organizer-role">Organizador</span>
             <h3 class="organizer-name" th:text="${actividad.organizador.nombre}">Nombre</h3>
-            <p class="organizer-bio" th:text="${actividad.organizador.descripcion != null && !actividad.organizador.descripcion.empty ? actividad.organizador.descripcion : 'Este organizador aún no ha añadido una descripción.'}">
-              Bio del organizador...
-            </p>
           </div>
         </section>
       </div>
@@ -104,6 +129,20 @@
             </button>
           </div>
         </section>
+
+        <!-- Recordatorios (Dinámicos por deporte) -->
+        <section class="card tips-card">
+          <div class="tips-header">
+            <i class="fa-solid fa-bell"></i>
+            <h3>Recordatorios</h3>
+          </div>
+          <ul class="tips-list" id="smart-tips">
+            <!-- Rellenado por JS según el deporte -->
+            <li>Lleva siempre hidratación suficiente.</li>
+            <li>Usa ropa técnica adecuada para la actividad.</li>
+          </ul>
+        </section>
+
       </div>
 
     </main>
@@ -157,7 +196,6 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Incluimos el token CSRF
           'X-CSRF-TOKEN': /*[[${_csrf != null ? _csrf.token : ''}]]*/ ''
         }
       })
@@ -188,6 +226,24 @@
         btn.innerText = originalText;
       });
     }
+
+    // ── SMART TIPS LOGIC ──
+    const TIPS_DB = {
+      'baloncesto': ['No olvides traer tu propio balón.', 'Usa zapatillas con buen agarre.', 'Llega 10 min antes para calentar.'],
+      'running': ['Asegúrate de llevar calzado de running.', 'Lleva un cortavientos si hace frío.', 'Mantén un ritmo cómodo al inicio.'],
+      'futbol': ['Trae botas adecuadas para el terreno.', 'Usa espinilleras por seguridad.', 'Trae agua extra.'],
+      'ciclismo': ['El casco es obligatorio.', 'Revisa la presión de los neumáticos.', 'Trae un kit de herramientas básico.'],
+      'yoga': ['Trae tu propia esterilla si es posible.', 'Usa ropa elástica y cómoda.', 'Evita comer 2h antes de la clase.'],
+      'natacion': ['No olvides gorro y gafas.', 'Lleva chanclas para la zona de ducha.', 'Trae una toalla de secado rápido.']
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Populate Smart Tips
+      const sport = [[${actividad.tipoDeporte}]].toLowerCase();
+      const tipsList = document.getElementById('smart-tips');
+      const tips = TIPS_DB[sport] || ['Lleva ropa cómoda y agua.', 'Disfruta del ambiente y respeta a los demás.', 'Llega puntual a la cita.'];
+      tipsList.innerHTML = tips.map(t => `<li><i class="fa-solid fa-circle-info"></i> ${t}</li>`).join('');
+    });
   </script>
 </body>
 </html>

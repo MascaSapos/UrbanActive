@@ -34,6 +34,7 @@ public class ActividadController {
                                        Model model, 
                                        @org.springframework.security.core.annotation.AuthenticationPrincipal com.urbanactive.security.CustomUserDetails userDetails) {
         model.addAttribute("actividad", actividadService.obtenerConDetalles(id));
+        model.addAttribute("weather", actividadService.aWeatherDto(actividadService.obtenerPorId(id)));
         boolean yaInscrito = false;
         if (userDetails != null) {
             yaInscrito = reservaService.estaUsuarioInscrito(id, userDetails.getUsername());

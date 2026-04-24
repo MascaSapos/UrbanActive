@@ -284,7 +284,7 @@
       const isCancelled = (reserva.estado || '').toUpperCase() === 'CANCELADA';
       card.className = 'reserva-card' + (isCancelled ? ' reserva-card--cancelled' : (isNew ? ' reserva-card--new' : ''));
       card.setAttribute('role', 'listitem');
-      card.href = actId ? '/?actividadId=' + encodeURIComponent(actId) : '/';
+      card.href = actId ? '/actividades/' + encodeURIComponent(actId) : '/';
       card.id = 'reserva-' + escapeHtml(reserva.id || '');
 
       card.innerHTML = `
@@ -380,7 +380,19 @@
       emptyState.style.display = 'none';
       list.style.display = 'flex';
       updateStats(reservas);
-      reservas.forEach(r => list.appendChild(renderCard(r)));
+      // Ordenar: Activas arriba, Canceladas abajo
+      const sorted = [...reservas].sort((a, b) => {
+        const estA = (a.estado || '').toUpperCase();
+        const estB = (b.estado || '').toUpperCase();
+        if (estA === 'CANCELADA' && estB !== 'CANCELADA') return 1;
+        if (estA !== 'CANCELADA' && estB === 'CANCELADA') return -1;
+        
+        const dateA = new Date((a.actividad?.fechaHora || '0').replace('T', ' '));
+        const dateB = new Date((b.actividad?.fechaHora || '0').replace('T', ' '));
+        return dateB - dateA;
+      });
+
+      sorted.forEach(r => list.appendChild(renderCard(r)));
       
       window.scrollTo(0, prevScrollY);
     }

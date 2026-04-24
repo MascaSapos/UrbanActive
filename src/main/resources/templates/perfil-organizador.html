@@ -382,7 +382,7 @@
       // Click en la fila → navega al detalle (excepto si hace clic en Eliminar)
       row.addEventListener('click', function(e) {
         if (e.target.closest('.btn-danger')) return;
-        window.location.href = '/?actividadId=' + encodeURIComponent(act.id);
+        window.location.href = '/actividades/' + encodeURIComponent(act.id);
       });
 
       return row;
