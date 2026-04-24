@@ -15,6 +15,35 @@
       50% { background-color: rgba(99, 102, 241, 0.1); box-shadow: 0 0 0 2px #6366f1; }
       100% { background-color: transparent; box-shadow: none; }
     }
+    .reserva-card--cancelled:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: var(--border-2);
+    }
+
+    .btn-cancelar-reserva {
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--t);
+      margin-top: 4px;
+      box-shadow: 0 1px 2px rgba(220, 38, 38, 0.1);
+    }
+    .btn-cancelar-reserva:hover {
+      background: #fecaca;
+      border-color: #ef4444;
+      color: #991b1b;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px rgba(220, 38, 38, 0.15);
+    }
+    .btn-cancelar-reserva:active {
+      transform: scale(0.95);
+    }
     .highlight-blink-list {
       animation: blinkHighlight 2.5s ease-in-out 2;
       border-radius: 16px;
@@ -108,6 +137,19 @@
     </main>
   </div>
 
+  <!-- Modal de confirmación de anulación de reserva -->
+  <div class="modal-overlay" id="confirm-cancel-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-cancel-title">
+    <div class="modal-box">
+      <div class="modal-box__icon">⚠️</div>
+      <h3 class="modal-box__title" id="confirm-cancel-title">Anular reserva</h3>
+      <p class="modal-box__desc" id="confirm-cancel-desc">¿Estás seguro de que quieres anular tu reserva? Al hacerlo, liberarás tu plaza para otros deportistas y ya no aparecerás en la lista. Esta acción no se puede deshacer.</p>
+      <div class="modal-box__actions">
+        <button class="btn-secondary" onclick="closeConfirmCancelModal()">Volver atrás</button>
+        <button class="btn-danger" id="btn-confirm-cancel-ok" style="flex:1; justify-content:center;">Confirmar Anulación</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL EDITAR PERFIL -->
   <div class="modal-overlay" id="modal-edit-profile">
     <div class="modal-box">
@@ -154,7 +196,7 @@
   <script th:inline="javascript">
     const AVATAR_INICIAL = /*[[${avatarInicial}]]*/ '?';
     const USER_EMAIL = /*[[${usuario != null ? usuario.email : ''}]]*/ '';
-    const CACHE_KEY_RESERVAS = 'ua_cache_reservas_v3_' + USER_EMAIL;
+    const CACHE_KEY_RESERVAS = 'ua_cache_reservas_v4_' + USER_EMAIL;
     let lastRenderedJson = '';
     
     function openEditModal() {
@@ -241,6 +283,9 @@
     const lastVisit = parseInt(localStorage.getItem(LAST_VISIT_KEY) || '0', 10);
     localStorage.setItem(LAST_VISIT_KEY, Date.now().toString());
 
+    const CSRF_HEADER = document.getElementById('js-csrf-header').value;
+    const CSRF_TOKEN  = document.getElementById('js-csrf-token').value;
+
     function escapeHtml(str) {
       return String(str ?? '')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -280,11 +325,10 @@
       const fechaReservaMs = reserva.fechaReserva ? new Date(reserva.fechaReserva.replace('T', ' ')).getTime() : 0;
       const isNew = fechaReservaMs > lastVisit && lastVisit > 0;
 
-      const card = document.createElement('a');
+      const card = document.createElement('div');
       const isCancelled = (reserva.estado || '').toUpperCase() === 'CANCELADA';
       card.className = 'reserva-card' + (isCancelled ? ' reserva-card--cancelled' : (isNew ? ' reserva-card--new' : ''));
       card.setAttribute('role', 'listitem');
-      card.href = actId ? '/actividades/' + encodeURIComponent(actId) : '/';
       card.id = 'reserva-' + escapeHtml(reserva.id || '');
 
       card.innerHTML = `
@@ -302,9 +346,15 @@
         </div>
         <div class="reserva-card__right">
           <span class="status-pill ${pillClass(reserva.estado)}">${reserva.estado === 'CONFIRMADA' ? 'ABIERTA' : escapeHtml(reserva.estado || '—')}</span>
+          ${!isCancelled ? `<button class="btn-cancelar-reserva" onclick="event.stopPropagation(); anularReserva('${reserva.id}')">Anular</button>` : ''}
         </div>
         <span class="reserva-card__chevron">›</span>
       `;
+
+      card.addEventListener('click', () => {
+        if (actId) window.location.href = '/actividades/' + encodeURIComponent(actId);
+      });
+
       return card;
     }
 
@@ -397,6 +447,52 @@
       window.scrollTo(0, prevScrollY);
     }
 
+    let reservaIdParaAnular = null;
+
+    function closeConfirmCancelModal() {
+      document.getElementById('confirm-cancel-modal').classList.remove('is-open');
+      reservaIdParaAnular = null;
+    }
+
+    function anularReserva(reservaId) {
+      reservaIdParaAnular = reservaId;
+      document.getElementById('confirm-cancel-modal').classList.add('is-open');
+    }
+    window.anularReserva = anularReserva;
+
+    document.getElementById('btn-confirm-cancel-ok').addEventListener('click', async () => {
+      if (!reservaIdParaAnular) return;
+      const btn = document.getElementById('btn-confirm-cancel-ok');
+      const originalText = btn.innerText;
+      
+      btn.disabled = true;
+      btn.innerText = "Anulando...";
+
+      try {
+        const res = await fetch(`/api/reservas/${reservaIdParaAnular}/cancelar`, {
+          method: 'POST',
+          headers: { 
+            [CSRF_HEADER]: CSRF_TOKEN,
+            'Accept': 'application/json'
+          }
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          showToast("✅ " + data.mensaje, "ok");
+          closeConfirmCancelModal();
+          loadReservas();
+        } else {
+          showToast("❌ " + (data.mensaje || "Error al anular"), "err");
+        }
+      } catch (err) {
+        showToast("❌ Error de conexión con el servidor", "err");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    });
+
     async function refreshReservas() {
       await loadReservas();
     }
@@ -416,6 +512,11 @@
         }
       });
       setInterval(refreshReservas, 60_000);
+    });
+
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('confirm-cancel-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeConfirmCancelModal();
     });
   </script>
 </body>
