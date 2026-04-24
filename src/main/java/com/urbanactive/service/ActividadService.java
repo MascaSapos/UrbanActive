@@ -75,6 +75,7 @@ public class ActividadService {
         return actividadRepository.findAll().stream()
                 .map(this::aMapDto)
                 .filter(Objects::nonNull)
+                .filter(dto -> !"CANCELADA".equalsIgnoreCase(dto.getEstado()))
                 .collect(Collectors.toList());
     }
 
@@ -255,12 +256,20 @@ public class ActividadService {
     /**
      * Marca una actividad como CANCELADA e inicia el contador de 7 días.
      */
+    @org.springframework.transaction.annotation.Transactional
     public void cancelar(String id) {
         Actividad a = obtenerPorId(id);
         if (a != null) {
             a.setEstado("CANCELADA");
             a.setFechaCancelacion(LocalDateTime.now());
             actividadRepository.save(a);
+
+            // Cancelar también todas las reservas asociadas
+            List<com.urbanactive.model.Reserva> reservas = reservaRepository.findByActividad(a);
+            for (com.urbanactive.model.Reserva r : reservas) {
+                r.setEstado("CANCELADA");
+                reservaRepository.save(r);
+            }
         }
     }
 

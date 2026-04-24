@@ -56,17 +56,12 @@ public class NotificacionController {
             }
         } else {
             // Deportista / Usuario corriente
-            // 1. Actividad borrada/cancelada
-            long canceladas = reservaRepository.countActividadesCanceladasDeportista(userId);
-            if (canceladas > 0) {
-                mensajes.add("Tienes " + canceladas + " actividad(es) cancelada(s) recientemente.");
-                pendiente = true;
-            }
+
 
             // 2. Alertas sincronizadas en sus reservas activas
             List<Reserva> misReservas = reservaRepository.findByUsuario(userDetails.getUsuario());
             for (Reserva r : misReservas) {
-                if ("CONFIRMADA".equals(r.getEstado())) {
+                if ("CONFIRMADA".equals(r.getEstado()) || ("CANCELADA".equals(r.getEstado()) && "CANCELADA".equalsIgnoreCase(r.getActividad().getEstado()))) {
                     String alerta = actividadService.obtenerMensajeAlerta(r.getActividad());
                     if (alerta != null) {
                         mensajes.add(alerta + " para '" + r.getActividad().getTipoDeporte() + "'");

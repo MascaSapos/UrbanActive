@@ -281,7 +281,8 @@
       const isNew = fechaReservaMs > lastVisit && lastVisit > 0;
 
       const card = document.createElement('a');
-      card.className = 'reserva-card' + (isNew ? ' reserva-card--new' : '');
+      const isCancelled = (reserva.estado || '').toUpperCase() === 'CANCELADA';
+      card.className = 'reserva-card' + (isCancelled ? ' reserva-card--cancelled' : (isNew ? ' reserva-card--new' : ''));
       card.setAttribute('role', 'listitem');
       card.href = actId ? '/?actividadId=' + encodeURIComponent(actId) : '/';
       card.id = 'reserva-' + escapeHtml(reserva.id || '');

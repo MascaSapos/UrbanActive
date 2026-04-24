@@ -41,7 +41,9 @@ public class WebController {
 
     @GetMapping("/")
     public String showIndex(Model model) {
-        List<Actividad> actividades = actividadService.obtenerTodas();
+        List<Actividad> actividades = actividadService.obtenerTodas().stream()
+                .filter(a -> !"CANCELADA".equalsIgnoreCase(a.getEstado()))
+                .toList();
         for (Actividad a : actividades) {
             a.setPlazasOcupadas(reservaRepository.countActivasPorActividad(a.getId()));
         }

@@ -49,11 +49,18 @@ public class ReservaRestController {
 
             List<Map<String, Object>> result = reservas.stream().map(r -> {
                 Map<String, Object> dto = new HashMap<>();
+                String estadoReserva = r.getEstado();
+                Actividad act = r.getActividad();
+                
+                // Si la actividad está cancelada, la reserva se considera cancelada para el deportista
+                if (act != null && "CANCELADA".equalsIgnoreCase(act.getEstado())) {
+                    estadoReserva = "CANCELADA";
+                }
+                
                 dto.put("id", r.getId());
-                dto.put("estado", r.getEstado());
+                dto.put("estado", estadoReserva);
                 dto.put("fechaReserva", r.getFechaReserva() != null ? r.getFechaReserva().toString() : null);
 
-                Actividad act = r.getActividad();
                 if (act != null) {
                     Map<String, Object> actDto = new HashMap<>();
                     actDto.put("id", act.getId());

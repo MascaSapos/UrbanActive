@@ -582,6 +582,25 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   transform: translateX(3px);
   color: var(--success);
 }
+.reserva-card--cancelled {
+  opacity: 0.75;
+  background: var(--bg);
+  cursor: default;
+  border-style: dashed;
+  border-color: var(--border-2);
+}
+.reserva-card--cancelled .reserva-card__icon {
+  filter: grayscale(1);
+  background: var(--surface-3);
+  opacity: 0.6;
+}
+.reserva-card--cancelled::before {
+  display: none;
+}
+.reserva-card--cancelled:hover {
+  transform: none;
+  box-shadow: none;
+}
 
 /* New indicator dot */
 .new-dot {
